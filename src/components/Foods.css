@@ -1,0 +1,46 @@
+/* src/components/Foods.css */
+
+.foods-container {
+    padding: 20px;
+}
+
+.add-food-form,
+.edit-food-form {
+    margin-bottom: 20px;
+}
+
+.add-food-form input,
+.edit-food-form input {
+    margin-right: 10px;
+    padding: 5px;
+}
+
+.add-food-form button,
+.edit-food-form button {
+    padding: 5px 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+th {
+    background-color: #f4f4f4;
+}
+
+button {
+    margin-right: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #ddd;
+}
