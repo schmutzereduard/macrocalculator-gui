@@ -2,10 +2,10 @@ import axios from "axios";
 import axiosRetry from 'axios-retry';
 
 const instance = axios.create({
-    baseURL: window.properties.BACK_END_URL,
-    timeout: parseInt(window.properties.REQUEST_TIMEOUT, 10)
+    baseURL: "http://localhost:8080",
+    timeout: "30000"
 });
 
-axiosRetry(instance, {retries: parseInt(window.properties.AXIOS_RETRIES, 10)});
+axiosRetry(instance, { retries: 3});
 
 export default instance;

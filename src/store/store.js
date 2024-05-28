@@ -1,10 +1,11 @@
-import { createStore, combineReducers } from 'redux';
-import foodReducer from './reducers/foodReducer';
+import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
+import { thunk } from 'redux-thunk'; // Correct import
+import foodReducer from './reducers/foodReducer'; // Correct import
 
 const rootReducer = combineReducers({
-    foods: foodReducer,
+    foods: foodReducer
 });
 
-const store = createStore(rootReducer);
+const store = createStore(rootReducer, compose(applyMiddleware(thunk)));
 
 export default store;

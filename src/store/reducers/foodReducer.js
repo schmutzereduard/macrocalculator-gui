@@ -1,22 +1,31 @@
-import { ADD_FOOD, DELETE_FOOD, UPDATE_FOOD } from '../actions/foodActions';
+import * as actionTypes from '../actions/actionTypes';
 
 const initialState = {
-    food: [],
+    isLoading: false,
+    foods: [],
+    error: null
 };
 
 const foodReducer = (state = initialState, action) => {
     switch (action.type) {
-        case ADD_FOOD:
-            return { ...state, food: [...state.food, action.payload] };
-        case DELETE_FOOD:
-            return { ...state, food: state.food.filter(food => food.id !== action.payload) };
-        case UPDATE_FOOD:
+        case actionTypes.FETCH_FOODS_REQUEST:
             return {
                 ...state,
-                food: state.food.map(food =>
-                    food.id === action.payload.id ? action.payload : food
-                ),
+                isLoading: true
             };
+        case actionTypes.FETCH_FOODS_SUCCESS:
+            return {
+                ...state,
+                isLoading: false,
+                error: null,
+                foods: action.foods
+            };
+        case actionTypes.FETCH_FOODS_FAIL:
+            return {
+                ...state,
+                isLoading: false,
+                error: action.error
+            }
         default:
             return state;
     }

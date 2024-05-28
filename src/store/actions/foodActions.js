@@ -1,19 +1,28 @@
-// src/actions/foodActions.js
-export const ADD_FOOD = 'ADD_FOOD';
-export const DELETE_FOOD = 'DELETE_FOOD';
-export const UPDATE_FOOD = 'UPDATE_FOOD';
+import MacroCalculatorAPI from '../../api/MacroCalculatorAPI';
+import * as actionTypes from './actionTypes';
 
-export const addFood = (food) => ({
-    type: ADD_FOOD,
-    payload: food,
-});
+const fetchFoodsRequest = () => {
+    return { type: actionTypes.FETCH_FOODS_REQUEST };
+}
 
-export const deleteFood = (id) => ({
-    type: DELETE_FOOD,
-    payload: id,
-});
+const fetchFoodsSuccess = (foods) => {
+    return { type: actionTypes.FETCH_FOODS_SUCCESS, foods };
+}
 
-export const updateFood = (food) => ({
-    type: UPDATE_FOOD,
-    payload: food,
-});
+const fetchFoodsFail = (error) => {
+    return { type: actionTypes.FETCH_FOODS_FAIL, error };
+}
+
+export const fetchFoods = () => {
+    return dispatch => {
+        dispatch(fetchFoodsRequest());
+        MacroCalculatorAPI.getFoods()
+            .then(response => {
+                let foods = response.data;
+                dispatch(fetchFoodsSuccess(foods));
+            })
+            .catch(error => {
+                dispatch(fetchFoodsFail(error));
+            })
+    } 
+}

@@ -1,5 +1,5 @@
-window.properties = {
-    BACK_END_BASE_URL: '',
+window.env = {
+    BACK_END_URL: 'http://localhost:8080',
     REQUEST_TIMEOUT: '30000',
     AXIOS_RETRIES: '3'
 };
