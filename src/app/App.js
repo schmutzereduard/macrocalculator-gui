@@ -1,10 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Foods from './components/Foods';
-import Meals from './components/Meals';
-import Planner from './components/Planner';
-import Calculator from './components/Calculator';
+import Navbar from '../components/Navbar';
+import Foods from '../components/Foods';
+import Meals from '../components/Meals';
+import Planner from '../components/Planner';
+import Calculator from '../components/Calculator';
 import './App.css';
 
 const App = () => {
