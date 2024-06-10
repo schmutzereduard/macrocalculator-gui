@@ -1,6 +1,4 @@
-// actions/foodActions.js
-
-import MacroCalculatorAPI from '../../api/MacroCalculatorAPI';
+import MacroCalculatorApi from '../../api/MacroCalculatorApi';
 import * as actionTypes from './actionTypes';
 
 const fetchFoodsRequest = () => ({ type: actionTypes.FETCH_FOODS_REQUEST });
@@ -10,13 +8,31 @@ const fetchFoodsFail = (error) => ({ type: actionTypes.FETCH_FOODS_FAIL, error }
 export const fetchFoods = () => {
     return dispatch => {
         dispatch(fetchFoodsRequest());
-        MacroCalculatorAPI.getFoods()
+        MacroCalculatorApi.getFoods()
             .then(response => {
                 const foods = response.data;
                 dispatch(fetchFoodsSuccess(foods));
             })
             .catch(error => {
                 dispatch(fetchFoodsFail(error));
+            });
+    };
+};
+
+const fetchFoodRequest = () => ({ type: actionTypes.FETCH_FOODS_REQUEST });
+const fetchFoodSuccess = (id) => ({ type: actionTypes.FETCH_FOODS_SUCCESS, id });
+const fetchFoodFail = (error) => ({ type: actionTypes.FETCH_FOODS_FAIL, error });
+
+export const fetchFood = (id) => {
+    return dispatch => {
+        dispatch(fetchFoodRequest());
+        MacroCalculatorApi.getFood(id)
+            .then(response => {
+                const food = response.data;
+                dispatch(fetchFoodSuccess(food));
+            })
+            .catch(error => {
+                dispatch(fetchFoodFail(error));
             });
     };
 };
@@ -28,7 +44,7 @@ const fetchFoodTypesFail = (error) => ({ type: actionTypes.FETCH_FOOD_TYPES_FAIL
 export const fetchFoodTypes = () => {
     return dispatch => {
         dispatch(fetchFoodTypesRequest());
-        MacroCalculatorAPI.getFoodTypes()
+        MacroCalculatorApi.getFoodTypes()
             .then(response => {
                 const types = response.data;
                 dispatch(fetchFoodTypesSuccess(types));
@@ -46,7 +62,7 @@ const addFoodFail = (error) => ({ type: actionTypes.ADD_FOOD_FAIL, error });
 export const addFood = (food) => {
     return dispatch => {
         dispatch(addFoodRequest());
-        MacroCalculatorAPI.addFood(food)
+        MacroCalculatorApi.addFood(food)
             .then(response => {
                 const newFood = response.data;
                 dispatch(addFoodSuccess(newFood));
@@ -64,7 +80,7 @@ const updateFoodFail = (error) => ({ type: actionTypes.UPDATE_FOOD_FAIL, error }
 export const updateFood = (food) => {
     return dispatch => {
         dispatch(updateFoodRequest());
-        MacroCalculatorAPI.updateFood(food)
+        MacroCalculatorApi.updateFood(food)
             .then(response => {
                 const updatedFood = response.data;
                 dispatch(updateFoodSuccess(updatedFood));
@@ -82,7 +98,7 @@ const deleteFoodFail = (error) => ({ type: actionTypes.DELETE_FOOD_FAIL, error }
 export const deleteFood = (id) => {
     return dispatch => {
         dispatch(deleteFoodRequest());
-        MacroCalculatorAPI.deleteFood(id)
+        MacroCalculatorApi.deleteFood(id)
             .then(() => {
                 dispatch(deleteFoodSuccess(id));
             })

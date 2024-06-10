@@ -1,8 +1,7 @@
-// reducers/foodReducer.js
-
 import * as actionTypes from '../actions/actionTypes';
 
 const initialState = {
+    food: null,
     foods: [],
     foodTypes: [],
     loading: false,
@@ -12,6 +11,7 @@ const initialState = {
 const foodReducer = (state = initialState, action) => {
     switch (action.type) {
         case actionTypes.FETCH_FOODS_REQUEST:
+        case actionTypes.FETCH_FOOD_SUCCESS:
         case actionTypes.ADD_FOOD_REQUEST:
         case actionTypes.UPDATE_FOOD_REQUEST:
         case actionTypes.DELETE_FOOD_REQUEST:
@@ -21,6 +21,9 @@ const foodReducer = (state = initialState, action) => {
         case actionTypes.FETCH_FOODS_SUCCESS:
             return { ...state, foods: action.foods, loading: false };
         
+        case actionTypes.FETCH_FOOD_SUCCESS:
+            return { ...state, food: action.food, loading: false };
+
         case actionTypes.ADD_FOOD_SUCCESS:
             return { ...state, foods: [...state.foods, action.food], loading: false };
         
@@ -44,6 +47,7 @@ const foodReducer = (state = initialState, action) => {
             return { ...state, foodTypes: action.types, loading: false };
 
         case actionTypes.FETCH_FOODS_FAIL:
+        case actionTypes.FETCH_FOOD_FAIL:
         case actionTypes.ADD_FOOD_FAIL:
         case actionTypes.UPDATE_FOOD_FAIL:
         case actionTypes.DELETE_FOOD_FAIL:

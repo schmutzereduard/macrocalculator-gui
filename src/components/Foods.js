@@ -1,160 +1,116 @@
 import React, { useEffect, useState } from 'react';
-import { connect } from 'react-redux';
-import { fetchFoods, fetchFoodTypes, addFood, updateFood, deleteFood } from '../store/actions/foodActions';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchFoods, fetchFoodTypes, addFood, deleteFood } from '../store/actions/foodActions';
+import Modal from 'react-modal';
 
-const Foods = ({ foods, foodTypes, fetchFoods, fetchFoodTypes, addFood, updateFood, deleteFood, loading, error }) => {
-    const [newFood, setNewFood] = useState({
-        name: '',
-        carbs: '',
-        calories: '',
-        type: ''
-    });
-
-    const [editingFood, setEditingFood] = useState(null);
+const Foods = () => {
+    const dispatch = useDispatch();
+    const foods = useSelector(state => state.foods.foods);
+    const foodTypes = useSelector(state => state.foods.foodTypes);
+    const loading = useSelector(state => state.foods.loading);
+    const [search, setSearch] = useState('');
+    const [isAddFoodOpen, setAddFoodOpen] = useState(false);
+    const [newFood, setNewFood] = useState({ name: '', carbs: '', calories: '', type: '' });
 
     useEffect(() => {
-        fetchFoods();
-        fetchFoodTypes();
-    }, [fetchFoods, fetchFoodTypes]);
+        dispatch(fetchFoods());
+        dispatch(fetchFoodTypes());
+    }, [dispatch]);
+
+    const handleSearchChange = (e) => {
+        setSearch(e.target.value);
+    };
+
+    const filteredFoods = foods.filter(food => food.name.toLowerCase().includes(search.toLowerCase()));
+
+    const handleAddFood = () => {
+        dispatch(addFood(newFood));
+        setAddFoodOpen(false);
+        setNewFood({ name: '', carbs: '', calories: '', type: '' });
+    };
+
+    const handleDeleteFood = (id) => {
+        dispatch(deleteFood(id));
+    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setNewFood({ ...newFood, [name]: value });
     };
 
-    const handleEditInputChange = (e) => {
-        const { name, value } = e.target;
-        setEditingFood({ ...editingFood, [name]: value });
-    };
-
-    const handleAddFood = () => {
-        addFood(newFood);
-        setNewFood({ name: '', carbs: '', calories: '', type: '' });
-    };
-
-    const handleDeleteFood = (id) => {
-        deleteFood(id);
-    };
-
-    const handleEditFood = (food) => {
-        setEditingFood(food);
-    };
-
-    const handleUpdateFood = () => {
-        updateFood(editingFood);
-        setEditingFood(null);
-    };
-
     return (
         <div>
-            <h1>Foods</h1>
-            {loading && <p>Loading...</p>}
-            {error && <p>Error: {error.message}</p>}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Carbs</th>
-                        <th>Calories</th>
-                        <th>Type</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {(Array.isArray(foods) ? foods : []).map(food => (
-                        <tr key={food.id}>
-                            <td>{food.name}</td>
-                            <td>{food.carbs}</td>
-                            <td>{food.calories}</td>
-                            <td>{food.type}</td>
-                            <td>
-                                <button onClick={() => handleEditFood(food)}>Edit</button>
-                                <button onClick={() => handleDeleteFood(food.id)}>Delete</button>
-                            </td>
+            <div className="food-header">
+                <input
+                    type="text"
+                    placeholder="Search for foods..."
+                    value={search}
+                    onChange={handleSearchChange}
+                />
+                <button onClick={() => setAddFoodOpen(true)}>Add Food</button>
+            </div>
+            {loading ? (
+                <p>Loading...</p>
+            ) : (
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Carbs</th>
+                            <th>Calories</th>
+                            <th>Type</th>
+                            <th>Actions</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
-            <h2>Add Food</h2>
-            <input
-                type="text"
-                name="name"
-                value={newFood.name}
-                onChange={handleInputChange}
-                placeholder="Name"
-            />
-            <input
-                type="number"
-                name="carbs"
-                value={newFood.carbs}
-                onChange={handleInputChange}
-                placeholder="Carbs"
-            />
-            <input
-                type="number"
-                name="calories"
-                value={newFood.calories}
-                onChange={handleInputChange}
-                placeholder="Calories"
-            />
-            <select name="type" value={newFood.type} onChange={handleInputChange}>
-                <option value="">Select Type</option>
-                {foodTypes.map(type => (
-                    <option key={type} value={type}>{type}</option>
-                ))}
-            </select>
-            <button onClick={handleAddFood}>Add</button>
-
-            {editingFood && (
-                <div>
-                    <h2>Edit Food</h2>
-                    <input
-                        type="text"
-                        name="name"
-                        value={editingFood.name}
-                        onChange={handleEditInputChange}
-                        placeholder="Name"
-                    />
-                    <input
-                        type="number"
-                        name="carbs"
-                        value={editingFood.carbs}
-                        onChange={handleEditInputChange}
-                        placeholder="Carbs"
-                    />
-                    <input
-                        type="number"
-                        name="calories"
-                        value={editingFood.calories}
-                        onChange={handleEditInputChange}
-                        placeholder="Calories"
-                    />
-                    <select name="type" value={editingFood.type} onChange={handleEditInputChange}>
-                        <option value="">Select Type</option>
-                        {foodTypes.map(type => (
-                            <option key={type} value={type}>{type}</option>
+                    </thead>
+                    <tbody>
+                        {filteredFoods.map(food => (
+                            <tr key={food.id}>
+                                <td>{food.name}</td>
+                                <td>{food.carbs}</td>
+                                <td>{food.calories}</td>
+                                <td>{food.type}</td>
+                                <td>
+                                    <button onClick={() => handleDeleteFood(food.id)}>Delete</button>
+                                </td>
+                            </tr>
                         ))}
-                    </select>
-                    <button onClick={handleUpdateFood}>Update</button>
-                </div>
+                    </tbody>
+                </table>
             )}
+            <Modal isOpen={isAddFoodOpen} onRequestClose={() => setAddFoodOpen(false)}>
+                <h2>Add Food</h2>
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Name"
+                    value={newFood.name}
+                    onChange={handleInputChange}
+                />
+                <input
+                    type="number"
+                    name="carbs"
+                    placeholder="Carbs"
+                    value={newFood.carbs}
+                    onChange={handleInputChange}
+                />
+                <input
+                    type="number"
+                    name="calories"
+                    placeholder="Calories"
+                    value={newFood.calories}
+                    onChange={handleInputChange}
+                />
+                <select name="type" value={newFood.type} onChange={handleInputChange}>
+                    <option value="">Select Type</option>
+                    {foodTypes.map(type => (
+                        <option key={type} value={type}>{type}</option>
+                    ))}
+                </select>
+                <button onClick={handleAddFood}>Add Food</button>
+                <button onClick={() => setAddFoodOpen(false)}>Close</button>
+            </Modal>
         </div>
     );
 };
 
-const mapStateToProps = (state) => ({
-    foods: state.foods.foods,
-    foodTypes: state.foods.foodTypes,
-    loading: state.foods.loading,
-    error: state.foods.error
-});
-
-const mapDispatchToProps = {
-    fetchFoods,
-    fetchFoodTypes,
-    addFood,
-    updateFood,
-    deleteFood
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Foods);
+export default Foods;
