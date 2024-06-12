@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchMeals, addMeal, deleteMeal } from '../store/actions/mealActions';
+import { fetchMeals, addMeal, updateMeal, deleteMeal } from '../store/actions/mealActions';
 import { fetchFoods } from '../store/actions/foodActions';
 import Modal from 'react-modal';
 
@@ -16,6 +16,9 @@ const Meals = () => {
     const [selectedFoods, setSelectedFoods] = useState([]);
     const [isDeleteMealOpen, setDeleteMealOpen] = useState(false);
     const [deletingMeal, setDeletingMeal] = useState(null);
+    const [isAddFoodOpen, setAddFoodOpen] = useState(false);
+    const [isDeleteFoodOpen, setDeleteFoodOpen] = useState(false);
+    const [deletingFood, setDeletingFood] = useState(null);
 
     useEffect(() => {
         dispatch(fetchMeals());
@@ -55,14 +58,32 @@ const Meals = () => {
     };
 
     const handleAddFoodToMeal = (food) => {
-        setSelectedFoods([...selectedFoods, food]);
+        const updatedMeal = {
+            ...viewMeal,
+            foods: [...viewMeal.foods, food]
+        };
+        dispatch(updateMeal(updatedMeal));
+        setViewMeal(updatedMeal);
+        setAddFoodOpen(false);
     };
 
     const handleRemoveFoodFromMeal = (foodId) => {
-        setSelectedFoods(selectedFoods.filter(food => food.id !== foodId));
+        setDeletingFood(foodId);
+        setDeleteFoodOpen(true);
     };
 
-    const availableFoods = foods.filter(food => !selectedFoods.some(selectedFood => selectedFood.id === food.id));
+    const confirmDeleteFoodFromMeal = () => {
+        const updatedMeal = {
+            ...viewMeal,
+            foods: viewMeal.foods.filter(food => food.id !== deletingFood)
+        };
+        dispatch(updateMeal(updatedMeal));
+        setViewMeal(updatedMeal);
+        setDeleteFoodOpen(false);
+        setDeletingFood(null);
+    };
+
+    const availableFoods = foods.filter(food => !viewMeal?.foods.some(mealFood => mealFood.id === food.id));
 
     return (
         <div>
@@ -115,7 +136,7 @@ const Meals = () => {
                             </li>
                         ))}
                     </ul>
-                    <button>Add Food</button> {/* Implement add food to meal */}
+                    <button onClick={() => setAddFoodOpen(true)}>Add Food</button>
                     <button onClick={() => setViewMeal(null)}>Close</button>
                 </Modal>
             )}
@@ -154,6 +175,28 @@ const Meals = () => {
                     <p>Are you sure you want to delete this meal?</p>
                     <button onClick={confirmDeleteMeal}>Delete</button>
                     <button onClick={() => setDeleteMealOpen(false)}>Cancel</button>
+                </Modal>
+            )}
+            {viewMeal && (
+                <Modal isOpen={isAddFoodOpen} onRequestClose={() => setAddFoodOpen(false)}>
+                    <h2>Add Food to {viewMeal.name}</h2>
+                    <ul>
+                        {availableFoods.map(food => (
+                            <li key={food.id}>
+                                {food.name} - Carbs: {food.carbs} - Calories: {food.calories}
+                                <button onClick={() => handleAddFoodToMeal(food)}>Add</button>
+                            </li>
+                        ))}
+                    </ul>
+                    <button onClick={() => setAddFoodOpen(false)}>Close</button>
+                </Modal>
+            )}
+            {deletingFood && (
+                <Modal isOpen={isDeleteFoodOpen} onRequestClose={() => setDeleteFoodOpen(false)}>
+                    <h2>Confirm Delete Food</h2>
+                    <p>Are you sure you want to delete this food from the meal?</p>
+                    <button onClick={confirmDeleteFoodFromMeal}>Delete</button>
+                    <button onClick={() => setDeleteFoodOpen(false)}>Cancel</button>
                 </Modal>
             )}
         </div>

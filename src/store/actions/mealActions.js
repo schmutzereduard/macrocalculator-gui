@@ -37,6 +37,24 @@ export const addMeal = (meal) => {
     };
 };
 
+const updateMealRequest = () => ({ type: actionTypes.UPDATE_MEAL_REQUEST });
+const updateMealSuccess = (meal) => ({ type: actionTypes.UPDATE_MEAL_SUCCESS, meal });
+const updateMealFail = (error) => ({ type: actionTypes.UPDATE_MEAL_FAIL, error });
+
+export const updateMeal = (meal) => {
+    return dispatch => {
+        dispatch(updateMealRequest());
+        MacroCalculatorApi.updateMeal(meal)
+            .then(response => {
+                const updatedMeal = response.data;
+                dispatch(updateMealSuccess(updatedMeal));
+            })
+            .catch(error => {
+                dispatch(updateMealFail(error));
+            });
+    };
+};
+
 const deleteMealRequest = () => ({ type: actionTypes.DELETE_MEAL_REQUEST });
 const deleteMealSuccess = (id) => ({ type: actionTypes.DELETE_MEAL_SUCCESS, id });
 const deleteMealFail = (error) => ({ type: actionTypes.DELETE_MEAL_FAIL, error });
