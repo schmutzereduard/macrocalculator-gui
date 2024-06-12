@@ -14,6 +14,8 @@ const Meals = () => {
     const [isAddMealOpen, setAddMealOpen] = useState(false);
     const [newMealName, setNewMealName] = useState('');
     const [selectedFoods, setSelectedFoods] = useState([]);
+    const [isDeleteMealOpen, setDeleteMealOpen] = useState(false);
+    const [deletingMeal, setDeletingMeal] = useState(null);
 
     useEffect(() => {
         dispatch(fetchMeals());
@@ -30,8 +32,15 @@ const Meals = () => {
         setViewMeal(viewMeal ? null : meal);
     };
 
-    const handleDeleteMeal = (id) => {
-        dispatch(deleteMeal(id));
+    const handleDeleteMeal = (meal) => {
+        setDeletingMeal(meal);
+        setDeleteMealOpen(true);
+    };
+
+    const confirmDeleteMeal = () => {
+        dispatch(deleteMeal(deletingMeal.id));
+        setDeleteMealOpen(false);
+        setDeletingMeal(null);
     };
 
     const handleAddMeal = () => {
@@ -88,7 +97,7 @@ const Meals = () => {
                                     <button onClick={() => toggleViewMeal(meal)}>
                                         {viewMeal && viewMeal.id === meal.id ? 'Close' : 'View'}
                                     </button>
-                                    <button onClick={() => handleDeleteMeal(meal.id)}>Delete</button>
+                                    <button onClick={() => handleDeleteMeal(meal)}>Delete</button>
                                 </td>
                             </tr>
                         ))}
@@ -139,6 +148,14 @@ const Meals = () => {
                     ))}
                 </ul>
             </Modal>
+            {deletingMeal && (
+                <Modal isOpen={isDeleteMealOpen} onRequestClose={() => setDeleteMealOpen(false)}>
+                    <h2>Confirm Delete</h2>
+                    <p>Are you sure you want to delete this meal?</p>
+                    <button onClick={confirmDeleteMeal}>Delete</button>
+                    <button onClick={() => setDeleteMealOpen(false)}>Cancel</button>
+                </Modal>
+            )}
         </div>
     );
 };
