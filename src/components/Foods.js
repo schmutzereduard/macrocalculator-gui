@@ -1,22 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchFoods, fetchFoodTypes, addFood, updateFood, deleteFood } from '../store/actions/foodActions';
+import { fetchMeals, deleteMeal } from '../store/actions/mealActions';
 import Modal from 'react-modal';
 
 const Foods = () => {
     const dispatch = useDispatch();
     const foods = useSelector(state => state.foods.foods);
     const foodTypes = useSelector(state => state.foods.foodTypes);
+    const meals = useSelector(state => state.meals.meals);
     const loading = useSelector(state => state.foods.loading);
     const [search, setSearch] = useState('');
     const [isAddFoodOpen, setAddFoodOpen] = useState(false);
     const [isEditFoodOpen, setEditFoodOpen] = useState(false);
+    const [isDeleteFoodOpen, setDeleteFoodOpen] = useState(false);
     const [newFood, setNewFood] = useState({ name: '', carbs: '', calories: '', type: '' });
     const [editingFood, setEditingFood] = useState(null);
+    const [deletingFood, setDeletingFood] = useState(null);
+    const [associatedMeals, setAssociatedMeals] = useState([]);
 
     useEffect(() => {
         dispatch(fetchFoods());
         dispatch(fetchFoodTypes());
+        dispatch(fetchMeals());
     }, [dispatch]);
 
     const handleSearchChange = (e) => {
@@ -32,9 +38,25 @@ const Foods = () => {
     };
 
     const handleDeleteFood = (id) => {
-        if (window.confirm('Are you sure you want to delete this food?')) {
-            dispatch(deleteFood(id));
-        }
+        const mealsWithFood = meals.filter(meal => meal.foods.some(food => food.id === id));
+        setAssociatedMeals(mealsWithFood);
+        setDeletingFood(id);
+        setDeleteFoodOpen(true);
+    };
+
+    const confirmDeleteFood = () => {
+        dispatch(deleteFood(deletingFood));
+        setDeleteFoodOpen(false);
+        setDeletingFood(null);
+    };
+
+    const confirmDeleteFoodAndMeals = () => {
+        associatedMeals.forEach(meal => {
+            dispatch(deleteMeal(meal.id));
+        });
+        dispatch(deleteFood(deletingFood));
+        setDeleteFoodOpen(false);
+        setDeletingFood(null);
     };
 
     const handleInputChange = (e) => {
@@ -162,6 +184,23 @@ const Foods = () => {
                     </select>
                     <button onClick={handleUpdateFood}>Save</button>
                     <button onClick={() => setEditFoodOpen(false)}>Cancel</button>
+                </Modal>
+            )}
+            {deletingFood !== null && (
+                <Modal isOpen={isDeleteFoodOpen} onRequestClose={() => setDeleteFoodOpen(false)}>
+                    <h2>Confirm Delete</h2>
+                    {associatedMeals.length > 0 ? (
+                        <>
+                            <p>This food is a component of one or more meals. Do you want to delete the food and the associated meal(s)?</p>
+                            <button onClick={confirmDeleteFoodAndMeals}>Delete Food and Meals</button>
+                        </>
+                    ) : (
+                        <>
+                            <p>Are you sure you want to delete this food?</p>
+                            <button onClick={confirmDeleteFood}>Delete</button>
+                        </>
+                    )}
+                    <button onClick={() => setDeleteFoodOpen(false)}>Cancel</button>
                 </Modal>
             )}
         </div>
