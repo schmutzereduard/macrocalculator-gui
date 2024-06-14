@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchFoods, fetchFoodTypes, addFood, updateFood, deleteFood } from '../store/actions/foodActions';
-import { fetchRecipes, deleteRecipe } from '../store/actions/recipeActions';
+import { fetchRecipes, updateRecipe } from '../store/actions/recipeActions';
 import Modal from 'react-modal';
 
 const Foods = () => {
@@ -45,14 +45,12 @@ const Foods = () => {
     };
 
     const confirmDeleteFood = () => {
-        dispatch(deleteFood(deletingFood));
-        setDeleteFoodOpen(false);
-        setDeletingFood(null);
-    };
-
-    const confirmDeleteFoodAndRecipes = () => {
         associatedRecipes.forEach(recipe => {
-            dispatch(deleteRecipe(recipe.id));
+            const updatedRecipe = {
+                ...recipe,
+                foods: recipe.foods.filter(food => food.id !== deletingFood)
+            };
+            dispatch(updateRecipe(updatedRecipe));
         });
         dispatch(deleteFood(deletingFood));
         setDeleteFoodOpen(false);
@@ -189,17 +187,8 @@ const Foods = () => {
             {deletingFood !== null && (
                 <Modal isOpen={isDeleteFoodOpen} onRequestClose={() => setDeleteFoodOpen(false)}>
                     <h2>Confirm Delete</h2>
-                    {associatedRecipes.length > 0 ? (
-                        <>
-                            <p>This food is a component of one or more recipes. Do you want to delete the food and the associated recipe(s)?</p>
-                            <button onClick={confirmDeleteFoodAndRecipes}>Delete Food and Recipes</button>
-                        </>
-                    ) : (
-                        <>
-                            <p>Are you sure you want to delete this food?</p>
-                            <button onClick={confirmDeleteFood}>Delete</button>
-                        </>
-                    )}
+                    <p>Are you sure you want to delete this food?</p>
+                    <button onClick={confirmDeleteFood}>Delete</button>
                     <button onClick={() => setDeleteFoodOpen(false)}>Cancel</button>
                 </Modal>
             )}
