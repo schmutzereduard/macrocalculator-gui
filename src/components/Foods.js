@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchFoods, fetchFoodTypes, addFood, updateFood, deleteFood } from '../store/actions/foodActions';
-import { fetchMeals, deleteMeal } from '../store/actions/mealActions';
+import { fetchRecipes, deleteRecipe } from '../store/actions/recipeActions';
 import Modal from 'react-modal';
 
 const Foods = () => {
     const dispatch = useDispatch();
     const foods = useSelector(state => state.foods.foods);
     const foodTypes = useSelector(state => state.foods.foodTypes);
-    const meals = useSelector(state => state.meals.meals);
+    const recipes = useSelector(state => state.recipes.recipes);
     const loading = useSelector(state => state.foods.loading);
     const [search, setSearch] = useState('');
     const [isAddFoodOpen, setAddFoodOpen] = useState(false);
@@ -17,12 +17,12 @@ const Foods = () => {
     const [newFood, setNewFood] = useState({ name: '', carbs: '', calories: '', type: '' });
     const [editingFood, setEditingFood] = useState(null);
     const [deletingFood, setDeletingFood] = useState(null);
-    const [associatedMeals, setAssociatedMeals] = useState([]);
+    const [associatedRecipes, setAssociatedRecipes] = useState([]);
 
     useEffect(() => {
         dispatch(fetchFoods());
         dispatch(fetchFoodTypes());
-        dispatch(fetchMeals());
+        dispatch(fetchRecipes());
     }, [dispatch]);
 
     const handleSearchChange = (e) => {
@@ -38,8 +38,8 @@ const Foods = () => {
     };
 
     const handleDeleteFood = (id) => {
-        const mealsWithFood = meals.filter(meal => meal.foods.some(food => food.id === id));
-        setAssociatedMeals(mealsWithFood);
+        const recipesWithFood = recipes.filter(recipe => recipe.foods.some(food => food.id === id));
+        setAssociatedRecipes(recipesWithFood);
         setDeletingFood(id);
         setDeleteFoodOpen(true);
     };
@@ -50,9 +50,9 @@ const Foods = () => {
         setDeletingFood(null);
     };
 
-    const confirmDeleteFoodAndMeals = () => {
-        associatedMeals.forEach(meal => {
-            dispatch(deleteMeal(meal.id));
+    const confirmDeleteFoodAndRecipes = () => {
+        associatedRecipes.forEach(recipe => {
+            dispatch(deleteRecipe(recipe.id));
         });
         dispatch(deleteFood(deletingFood));
         setDeleteFoodOpen(false);
@@ -189,10 +189,10 @@ const Foods = () => {
             {deletingFood !== null && (
                 <Modal isOpen={isDeleteFoodOpen} onRequestClose={() => setDeleteFoodOpen(false)}>
                     <h2>Confirm Delete</h2>
-                    {associatedMeals.length > 0 ? (
+                    {associatedRecipes.length > 0 ? (
                         <>
-                            <p>This food is a component of one or more meals. Do you want to delete the food and the associated meal(s)?</p>
-                            <button onClick={confirmDeleteFoodAndMeals}>Delete Food and Meals</button>
+                            <p>This food is a component of one or more recipes. Do you want to delete the food and the associated recipe(s)?</p>
+                            <button onClick={confirmDeleteFoodAndRecipes}>Delete Food and Recipes</button>
                         </>
                     ) : (
                         <>

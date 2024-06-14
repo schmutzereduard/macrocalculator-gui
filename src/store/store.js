@@ -1,11 +1,11 @@
 import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
 import { thunk } from 'redux-thunk';
 import foodReducer from './reducers/foodReducer';
-import mealReducer from './reducers/mealReducer';
+import recipeReducer from './reducers/recipeReducer';
 
 const rootReducer = combineReducers({
     foods: foodReducer,
-    meals: mealReducer
+    recipes: recipeReducer
 });
 
 const store = createStore(rootReducer, compose(applyMiddleware(thunk)));

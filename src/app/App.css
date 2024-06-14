@@ -63,21 +63,21 @@ th {
     background-color: #45a049;
 }
 
-/* Meal Header styles */
-.meal-header {
+/* Recipe Header styles */
+.recipe-header {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
 }
 
-.meal-header input {
+.recipe-header input {
     flex-grow: 1;
     padding: 10px;
     font-size: 16px;
     margin-right: 10px;
 }
 
-.meal-header button {
+.recipe-header button {
     padding: 10px 20px;
     font-size: 16px;
     background-color: #4CAF50;
@@ -87,7 +87,7 @@ th {
     cursor: pointer;
 }
 
-.meal-header button:hover {
+.recipe-header button:hover {
     background-color: #45a049;
 }
 

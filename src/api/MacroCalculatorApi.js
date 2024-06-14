@@ -25,24 +25,24 @@ class MacroCalculatorApi {
         return instance.get('/food-types');
     }
 
-    static getAllMeals() {
-        return instance.get('/meals');
+    static getAllRecipes() {
+        return instance.get('/recipes');
     }
 
-    static getMeal(id) {
-        return instance.get(`/meals/${id}`);
+    static getRecipe(id) {
+        return instance.get(`/recipes/${id}`);
     }
 
-    static addMeal(meal) {
-        return instance.post('/meals', meal);
+    static addRecipe(recipe) {
+        return instance.post('/recipes', recipe);
     }
 
-    static updateMeal(meal) {
-        return instance.put('/meals', meal);
+    static updateRecipe(recipe) {
+        return instance.put('/recipes', recipe);
     }
 
-    static deleteMeal(id) {
-        return instance.delete(`/meals/${id}`);
+    static deleteRecipe(id) {
+        return instance.delete(`/recipes/${id}`);
     }
 }
 
