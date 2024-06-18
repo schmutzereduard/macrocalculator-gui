@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchRecipes, addRecipe, updateRecipe, deleteRecipe } from '../store/actions/recipeActions';
-import { fetchFoods } from '../store/actions/foodActions';
+import { fetchRecipes, addRecipe, updateRecipe, deleteRecipe } from '../../store/actions/recipeActions';
+import { fetchFoods } from '../../store/actions/foodActions';
 import Modal from 'react-modal';
 
 const Recipes = () => {

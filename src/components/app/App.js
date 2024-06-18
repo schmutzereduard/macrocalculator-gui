@@ -1,11 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from '../components/Home';
-import Navbar from '../components/Navbar';
-import Foods from '../components/Foods';
-import Recipes from '../components/Recipes';
-import Planner from '../components/Planner';
-import Calculator from '../components/Calculator';
+import Home from '../pages/Home';
+import Navbar from '../pages/Navbar';
+import Foods from '../pages/Foods';
+import Recipes from '../pages/Recipes';
+import Planner from '../pages/Planner';
+import Calculator from '../pages/Calculator';
 import './App.css';
 
 const App = () => {

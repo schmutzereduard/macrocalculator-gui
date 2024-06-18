@@ -44,6 +44,30 @@ class MacroCalculatorApi {
     static deleteRecipe(id) {
         return instance.delete(`/recipes/${id}`);
     }
+
+    static getPlans() {
+        return instance.get('/plans');
+    }
+
+    static addPlan(plan) {
+        return instance.post('/plans', plan);
+    }
+
+    static updatePlan(plan) {
+        return instance.put(`/plans/${plan.id}`, plan);
+    }
+
+    static deletePlan(id) {
+        return instance.delete(`/plans/${id}`);
+    }
+
+    static addRecipeToPlan(planId, recipeId, mealType) {
+        return instance.post(`/plans/${planId}/recipes/${recipeId}/${mealType}`);
+    }
+
+    static removeRecipeFromPlan(planId, recipeId, mealType) {
+        return instance.delete(`/plans/${planId}/recipes/${recipeId}/${mealType}`);
+    }
 }
 
 export default MacroCalculatorApi;
