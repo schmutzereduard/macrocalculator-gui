@@ -1,7 +1,7 @@
 import * as actionTypes from '../../actions/actionTypes';
 
 const initialState = {
-    showDeleteFoodModal: false,
+    isDeleteFoodModalOpen: false,
     showDeleteRecipeModal: false
 };
 
@@ -11,12 +11,12 @@ const reducer = (state = initialState, action) => {
         case actionTypes.SHOW_DELETE_FOOD_MODAL:
             return {
                 ...state,
-                showDeleteFoodModal: true
+                isDeleteFoodModalOpen: true
             };
         case actionTypes.HIDE_DELETE_FOOD_MODAL:
             return {
                 ...state,
-                showDeleteFoddModal: false
+                isDeleteFoodModalOpen: false
             };
         case actionTypes.SHOW_DELETE_RECIPE_MODAL:
             return {

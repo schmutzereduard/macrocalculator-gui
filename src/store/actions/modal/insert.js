@@ -1,17 +1,17 @@
 import * as actionTypes from '../actionTypes';
 
-export const showInsertFoodModal = () => {
-    return actionTypes.SHOW_INSERT_FOOD_MODAL;
-}
+export const showInsertFoodModal = () => ({
+    type:  actionTypes.SHOW_INSERT_FOOD_MODAL
+});
 
-export const hideInsertFoodModal = () => {
-    return actionTypes.HIDE_INSERT_FOOD_MODAL;
-}
+export const hideInsertFoodModal = () => ({
+    type:  actionTypes.HIDE_INSERT_FOOD_MODAL
+});
 
-export const showInsertRecipeModal = () => {
-    return actionTypes.SHOW_INSERT_RECIPE_MODAL;
-}
+export const showInsertRecipeModal = () => ({
+    type:  actionTypes.SHOW_INSERT_RECIPE_MODAL
+});
 
-export const hideInsertRecipeModal = () => {
-    return actionTypes.HIDE_INSERT_RECIPE_MODAL;
-}
+export const hideInsertRecipeModal = () => ({
+    type:  actionTypes.HIDE_INSERT_RECIPE_MODAL
+});

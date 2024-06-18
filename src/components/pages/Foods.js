@@ -1,28 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchFoods, fetchFoodTypes, addFood, updateFood, deleteFood } from '../../store/actions/foodActions';
-import { fetchRecipes, updateRecipe } from '../../store/actions/recipeActions';
-import Modal from 'react-modal';
+import { connect, useDispatch, useSelector } from 'react-redux';
+import { fetchFoods, fetchFoodTypes } from '../../store/actions/foodActions';
+import { showInsertFoodModal, hideInsertFoodModal } from '../../store/actions/modal/insert';
+import { showEditFoodModal, hideEditFoodModal } from '../../store/actions/modal/edit';
+import { showDeleteFoodModal, hideDeleteFoodModal } from '../../store/actions/modal/delete';
+import InsertFoodModal from '../modal/InsertFoodModal';
+import EditFoodModal from '../modal/EditFoodModal';
+import DeleteFoodModal from '../modal/DeleteFoodModal';
 
-const Foods = () => {
+const Foods = ({
+    onAddFood, onCancelAddFood,
+    onEditFood, onCancelEditFood,
+    onDeleteFood, onCancelDeleteFood
+}) => {
+
     const dispatch = useDispatch();
     const foods = useSelector(state => state.foods.foods);
-    const foodTypes = useSelector(state => state.foods.foodTypes);
-    const recipes = useSelector(state => state.recipes.recipes);
     const loading = useSelector(state => state.foods.loading);
+    const isInsertFoodModalOpen = useSelector(state => state.insertModal.isInsertFoodModalOpen);
+    const isEditFoodModalOpen = useSelector(state => state.editModal.isEditFoodModalOpen);
+    const isDeleteFoodModalOpen = useSelector(state => state.deleteModal.isDeleteFoodModalOpen);
+
     const [search, setSearch] = useState('');
-    const [isAddFoodOpen, setAddFoodOpen] = useState(false);
-    const [isEditFoodOpen, setEditFoodOpen] = useState(false);
-    const [isDeleteFoodOpen, setDeleteFoodOpen] = useState(false);
-    const [newFood, setNewFood] = useState({ name: '', carbs: '', calories: '', type: '' });
     const [editingFood, setEditingFood] = useState(null);
     const [deletingFood, setDeletingFood] = useState(null);
-    const [associatedRecipes, setAssociatedRecipes] = useState([]);
 
     useEffect(() => {
         dispatch(fetchFoods());
         dispatch(fetchFoodTypes());
-        dispatch(fetchRecipes());
     }, [dispatch]);
 
     const handleSearchChange = (e) => {
@@ -32,50 +37,17 @@ const Foods = () => {
     const filteredFoods = foods.filter(food => food.name.toLowerCase().includes(search.toLowerCase()));
 
     const handleAddFood = () => {
-        dispatch(addFood(newFood));
-        setAddFoodOpen(false);
-        setNewFood({ name: '', carbs: '', calories: '', type: '' });
+        onAddFood();
     };
 
     const handleDeleteFood = (id) => {
-        const recipesWithFood = recipes.filter(recipe => recipe.foods.some(food => food.id === id));
-        setAssociatedRecipes(recipesWithFood);
         setDeletingFood(id);
-        setDeleteFoodOpen(true);
+        onDeleteFood();
     };
 
-    const confirmDeleteFood = () => {
-        associatedRecipes.forEach(recipe => {
-            const updatedRecipe = {
-                ...recipe,
-                foods: recipe.foods.filter(food => food.id !== deletingFood)
-            };
-            dispatch(updateRecipe(updatedRecipe));
-        });
-        dispatch(deleteFood(deletingFood));
-        setDeleteFoodOpen(false);
-        setDeletingFood(null);
-    };
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setNewFood({ ...newFood, [name]: value });
-    };
-
-    const handleEditInputChange = (e) => {
-        const { name, value } = e.target;
-        setEditingFood({ ...editingFood, [name]: value });
-    };
-
-    const openEditModal = (food) => {
+    const handleEditFood = (food) => {
         setEditingFood(food);
-        setEditFoodOpen(true);
-    };
-
-    const handleUpdateFood = () => {
-        dispatch(updateFood(editingFood));
-        setEditFoodOpen(false);
-        setEditingFood(null);
+        onEditFood();
     };
 
     return (
@@ -87,7 +59,7 @@ const Foods = () => {
                     value={search}
                     onChange={handleSearchChange}
                 />
-                <button onClick={() => setAddFoodOpen(true)}>Add Food</button>
+                <button onClick={handleAddFood}>Add Food</button>
             </div>
             {loading ? (
                 <p>Loading...</p>
@@ -110,7 +82,7 @@ const Foods = () => {
                                 <td>{food.calories}</td>
                                 <td>{food.type}</td>
                                 <td>
-                                    <button onClick={() => openEditModal(food)}>Edit</button>
+                                    <button onClick={() => handleEditFood(food)}>Edit</button>
                                     <button onClick={() => handleDeleteFood(food.id)}>Delete</button>
                                 </td>
                             </tr>
@@ -118,82 +90,31 @@ const Foods = () => {
                     </tbody>
                 </table>
             )}
-            <Modal isOpen={isAddFoodOpen} onRequestClose={() => setAddFoodOpen(false)}>
-                <h2>Add Food</h2>
-                <input
-                    type="text"
-                    name="name"
-                    placeholder="Name"
-                    value={newFood.name}
-                    onChange={handleInputChange}
-                />
-                <input
-                    type="number"
-                    name="carbs"
-                    placeholder="Carbs"
-                    value={newFood.carbs}
-                    onChange={handleInputChange}
-                />
-                <input
-                    type="number"
-                    name="calories"
-                    placeholder="Calories"
-                    value={newFood.calories}
-                    onChange={handleInputChange}
-                />
-                <select name="type" value={newFood.type} onChange={handleInputChange}>
-                    <option value="">Select Type</option>
-                    {foodTypes.map(type => (
-                        <option key={type} value={type}>{type}</option>
-                    ))}
-                </select>
-                <button onClick={handleAddFood}>Add Food</button>
-                <button onClick={() => setAddFoodOpen(false)}>Cancel</button>
-            </Modal>
-            {editingFood && (
-                <Modal isOpen={isEditFoodOpen} onRequestClose={() => setEditFoodOpen(false)}>
-                    <h2>Edit Food</h2>
-                    <input
-                        type="text"
-                        name="name"
-                        placeholder="Name"
-                        value={editingFood.name}
-                        onChange={handleEditInputChange}
-                    />
-                    <input
-                        type="number"
-                        name="carbs"
-                        placeholder="Carbs"
-                        value={editingFood.carbs}
-                        onChange={handleEditInputChange}
-                    />
-                    <input
-                        type="number"
-                        name="calories"
-                        placeholder="Calories"
-                        value={editingFood.calories}
-                        onChange={handleEditInputChange}
-                    />
-                    <select name="type" value={editingFood.type} onChange={handleEditInputChange}>
-                        <option value="">Select Type</option>
-                        {foodTypes.map(type => (
-                            <option key={type} value={type}>{type}</option>
-                        ))}
-                    </select>
-                    <button onClick={handleUpdateFood}>Save</button>
-                    <button onClick={() => setEditFoodOpen(false)}>Cancel</button>
-                </Modal>
-            )}
-            {deletingFood !== null && (
-                <Modal isOpen={isDeleteFoodOpen} onRequestClose={() => setDeleteFoodOpen(false)}>
-                    <h2>Confirm Delete</h2>
-                    <p>Are you sure you want to delete this food?</p>
-                    <button onClick={confirmDeleteFood}>Delete</button>
-                    <button onClick={() => setDeleteFoodOpen(false)}>Cancel</button>
-                </Modal>
-            )}
+            <InsertFoodModal 
+                isOpen={isInsertFoodModalOpen} 
+                onRequestClose={onCancelAddFood} 
+            />
+            <EditFoodModal 
+                isOpen={isEditFoodModalOpen} 
+                onRequestClose={onCancelEditFood} 
+                food={editingFood}
+            />
+            <DeleteFoodModal 
+                isOpen={isDeleteFoodModalOpen} 
+                onRequestClose={onCancelDeleteFood} 
+                foodId={deletingFood}
+            />
         </div>
     );
 };
 
-export default Foods;
+const mapDispatchToProps = (dispatch) => ({
+    onAddFood: () => dispatch(showInsertFoodModal()),
+    onCancelAddFood: () => dispatch(hideInsertFoodModal()),
+    onEditFood: () => dispatch(showEditFoodModal()),
+    onCancelEditFood: () => dispatch(hideEditFoodModal()),
+    onDeleteFood: () => dispatch(showDeleteFoodModal()),
+    onCancelDeleteFood: () => dispatch(hideDeleteFoodModal())
+});
+
+export default connect(null, mapDispatchToProps)(Foods);
