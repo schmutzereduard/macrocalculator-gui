@@ -19,6 +19,24 @@ export const fetchRecipes = () => {
     };
 };
 
+const fetchRecipeRequest = () => ({ type: actionTypes.FETCH_RECIPE_REQUEST });
+const fetchRecipeSuccess = (recipe) => ({ type: actionTypes.FETCH_RECIPE_SUCCESS, recipe: recipe });
+const fetchRecipeFail = (error) => ({ type: actionTypes.FETCH_RECIPE_FAIL, error });
+
+export const fetchRecipe = (id) => {
+    return dispatch => {
+        dispatch(fetchRecipeRequest());
+        MacroCalculatorApi.getRecipe(id)
+            .then(response => {
+                const recipe = response.data;
+                dispatch(fetchRecipeSuccess(recipe));
+            })
+            .catch(error => {
+                dispatch(fetchRecipeFail(error));
+            });
+    };
+};
+
 const addRecipeRequest = () => ({ type: actionTypes.ADD_RECIPE_REQUEST });
 const addRecipeSuccess = (recipe) => ({ type: actionTypes.ADD_RECIPE_SUCCESS, recipe });
 const addRecipeFail = (error) => ({ type: actionTypes.ADD_RECIPE_FAIL, error });

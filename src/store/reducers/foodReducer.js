@@ -11,7 +11,7 @@ const initialState = {
 const foodReducer = (state = initialState, action) => {
     switch (action.type) {
         case actionTypes.FETCH_FOODS_REQUEST:
-        case actionTypes.FETCH_FOOD_SUCCESS:
+        case actionTypes.FETCH_FOOD_REQUEST:
         case actionTypes.ADD_FOOD_REQUEST:
         case actionTypes.UPDATE_FOOD_REQUEST:
         case actionTypes.DELETE_FOOD_REQUEST:

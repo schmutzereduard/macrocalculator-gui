@@ -19,9 +19,9 @@ export const fetchFoods = () => {
     };
 };
 
-const fetchFoodRequest = () => ({ type: actionTypes.FETCH_FOODS_REQUEST });
-const fetchFoodSuccess = (id) => ({ type: actionTypes.FETCH_FOODS_SUCCESS, id });
-const fetchFoodFail = (error) => ({ type: actionTypes.FETCH_FOODS_FAIL, error });
+const fetchFoodRequest = () => ({ type: actionTypes.FETCH_FOOD_REQUEST });
+const fetchFoodSuccess = (food) => ({ type: actionTypes.FETCH_FOOD_SUCCESS, food: food });
+const fetchFoodFail = (error) => ({ type: actionTypes.FETCH_FOOD_FAIL, error });
 
 export const fetchFood = (id) => {
     return dispatch => {

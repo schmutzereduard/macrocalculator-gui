@@ -2,7 +2,7 @@ import * as actionTypes from '../../actions/actionTypes';
 
 const initialState = {
     isInsertFoodModalOpen: false,
-    showInsertRecipeModal: false
+    isInsertRecipeModalOpen: false
 };
 
 const reducer = (state = initialState, action) => {
@@ -21,12 +21,12 @@ const reducer = (state = initialState, action) => {
         case actionTypes.SHOW_INSERT_RECIPE_MODAL:
             return {
                 ...state,
-                showInsertRecipeModal: true
+                isInsertRecipeModalOpen: true
             };
         case actionTypes.HIDE_INSERT_RECIPE_MODAL:
             return {
                 ...state,
-                showInsertRecipeModal: false
+                isInsertRecipeModalOpen: false
             };
         default: return state;
     }
