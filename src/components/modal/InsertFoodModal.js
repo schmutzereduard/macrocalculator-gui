@@ -40,14 +40,14 @@ class InsertFoodModal extends Component {
                 <input
                     type="number"
                     name="carbs"
-                    placeholder="Carbs"
+                    placeholder="Carbs per 100g"
                     value={newFood.carbs}
                     onChange={this.handleInputChange}
                 />
                 <input
                     type="number"
                     name="calories"
-                    placeholder="Calories"
+                    placeholder="Calories per 100g"
                     value={newFood.calories}
                     onChange={this.handleInputChange}
                 />

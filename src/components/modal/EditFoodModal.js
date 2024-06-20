@@ -47,14 +47,14 @@ class EditFoodModal extends Component {
                 <input
                     type="number"
                     name="carbs"
-                    placeholder="Carbs"
+                    placeholder="Carbs per 100g"
                     value={editingFood.carbs}
                     onChange={this.handleInputChange}
                 />
                 <input
                     type="number"
                     name="calories"
-                    placeholder="Calories"
+                    placeholder="Calories per 100g"
                     value={editingFood.calories}
                     onChange={this.handleInputChange}
                 />

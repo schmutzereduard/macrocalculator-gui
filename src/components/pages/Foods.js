@@ -68,8 +68,8 @@ const Foods = ({
                     <thead>
                         <tr>
                             <th>Name</th>
-                            <th>Carbs</th>
-                            <th>Calories</th>
+                            <th>Carbs (<i>per 100g</i>)</th>
+                            <th>Calories (<i>per 100g</i>)</th>
                             <th>Type</th>
                             <th>Actions</th>
                         </tr>
