@@ -8,7 +8,7 @@ class EditFoodModal extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            editingFood: props.food || { name: '', carbs: '', calories: '', type: '' }
+            editingFood: props.food || { name: '', carbs: '', calories: '', type: '', comments: '' }
         };
     }
 
@@ -35,37 +35,79 @@ class EditFoodModal extends Component {
         const { editingFood } = this.state;
 
         return (
-            <Modal isOpen={isOpen} onRequestClose={onRequestClose}>
+            <Modal
+                isOpen={isOpen}
+                onRequestClose={onRequestClose}
+                contentLabel="Edit Food"
+                style={{
+                    content: {
+                        top: '50%',
+                        left: '50%',
+                        right: 'auto',
+                        bottom: 'auto',
+                        marginRight: '-50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '300px', // Adjust the width as needed
+                        padding: '20px'
+                    }
+                }}
+            >
                 <h2>Edit Food</h2>
-                <input
-                    type="text"
-                    name="name"
-                    placeholder="Name"
-                    value={editingFood.name}
-                    onChange={this.handleInputChange}
-                />
-                <input
-                    type="number"
-                    name="carbs"
-                    placeholder="Carbs per 100g"
-                    value={editingFood.carbs}
-                    onChange={this.handleInputChange}
-                />
-                <input
-                    type="number"
-                    name="calories"
-                    placeholder="Calories per 100g"
-                    value={editingFood.calories}
-                    onChange={this.handleInputChange}
-                />
-                <select name="type" value={editingFood.type} onChange={this.handleInputChange}>
-                    <option value="">Select Type</option>
-                    {foodTypes.map(type => (
-                        <option key={type} value={type}>{type}</option>
-                    ))}
-                </select>
-                <button onClick={this.handleUpdateFood}>Save</button>
-                <button onClick={onRequestClose}>Cancel</button>
+                <div className="modal-form">
+                    <label>
+                        Name:
+                        <input
+                            type="text"
+                            name="name"
+                            placeholder="Name"
+                            value={editingFood.name}
+                            onChange={this.handleInputChange}
+                        />
+                    </label>
+                    <label>
+                        Carbs per 100g:
+                        <input
+                            type="text"
+                            name="carbs"
+                            placeholder="Carbs per 100g"
+                            value={editingFood.carbs}
+                            onChange={this.handleInputChange}
+                        />
+                    </label>
+                    <label>
+                        Calories per 100g:
+                        <input
+                            type="text"
+                            name="calories"
+                            placeholder="Calories per 100g"
+                            value={editingFood.calories}
+                            onChange={this.handleInputChange}
+                        />
+                    </label>
+                    <label>
+                        Type:
+                        <select name="type" value={editingFood.type} onChange={this.handleInputChange}>
+                            <option value="">Select Type</option>
+                            {foodTypes.map(type => (
+                                <option key={type} value={type}>{type}</option>
+                            ))}
+                        </select>
+                    </label>
+                    <label>
+                        Comments:
+                        <input
+                            type="text"
+                            name="comments"
+                            placeholder="Comments"
+                            value={editingFood.comments}
+                            onChange={this.handleInputChange}
+                        />
+                    </label>
+                </div>
+                <div className="modal-buttons">
+                    <button onClick={this.handleUpdateFood}>Save</button>
+                    <button onClick={onRequestClose}>Cancel</button>
+                </div>
             </Modal>
         );
     }
