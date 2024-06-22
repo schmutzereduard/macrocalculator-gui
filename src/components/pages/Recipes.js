@@ -1,24 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { connect, useDispatch, useSelector } from 'react-redux';
 import Modal from 'react-modal';
-import { fetchRecipes } from '../../store/actions/recipeActions';
+import { fetchRecipes, addRecipe } from '../../store/actions/recipeActions';
 import { showEditRecipeModal, hideEditRecipeModal } from '../../store/actions/modal/edit';
-import { showInsertRecipeModal, hideInsertRecipeModal } from '../../store/actions/modal/insert';
 import { showDeleteRecipeModal, hideDeleteRecipeModal } from '../../store/actions/modal/delete';
-import InsertRecipeModal from '../modal/InsertRecipeModal';
 import ViewRecipeModal from '../modal/EditRecipeModal';
 import DeleteRecipeModal from '../modal/DeleteRecipeModal';
 
 const Recipes = ({
     onEditRecipe, onCancelEditRecipe,
-    onAddRecipe, onCancelAddRecipe,
     onDeleteRecipe, onCancelDeleteRecipe
 }) => {
     const dispatch = useDispatch();
     const recipes = useSelector(state => state.recipes.recipes);
     const loading = useSelector(state => state.recipes.loading);
     const isEditRecipeModalOpen = useSelector(state => state.editModal.isEditRecipeModalOpen);
-    const isInsertRecipeModalOpen = useSelector(state => state.insertModal.isInsertRecipeModalOpen);
     const isDeleteRecipeModalOpen = useSelector(state => state.deleteModal.isDeleteRecipeModalOpen);
 
     const [search, setSearch] = useState('');
@@ -71,7 +67,10 @@ const Recipes = ({
     const paginatedRecipes = filteredRecipes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     const handleAddRecipe = () => {
-        onAddRecipe();
+        if (search && !recipes.some(recipe => recipe.name.toLowerCase() === search.toLowerCase())) {
+            dispatch(addRecipe({ name: search, description: '', recipeFoods: [] }));
+            setSearch('');
+        }
     };
 
     const handleDeleteRecipe = (id) => {
@@ -110,7 +109,7 @@ const Recipes = ({
             <div className="recipe-header header">
                 <input
                     type="text"
-                    placeholder="Search for recipes..."
+                    placeholder="Search for recipes or enter a new recipe name..."
                     value={search}
                     onChange={handleSearchChange}
                 />
@@ -174,10 +173,6 @@ const Recipes = ({
                     </button>
                 ))}
             </div>
-            <InsertRecipeModal
-                isOpen={isInsertRecipeModalOpen}
-                onRequestClose={onCancelAddRecipe}
-            />
             {viewingRecipe && (
                 <ViewRecipeModal
                     isOpen={isEditRecipeModalOpen}
@@ -221,8 +216,6 @@ const Recipes = ({
 const mapDispatchToProps = (dispatch) => ({
     onEditRecipe: () => dispatch(showEditRecipeModal()),
     onCancelEditRecipe: () => dispatch(hideEditRecipeModal()),
-    onAddRecipe: () => dispatch(showInsertRecipeModal()),
-    onCancelAddRecipe: () => dispatch(hideInsertRecipeModal()),
     onDeleteRecipe: () => dispatch(showDeleteRecipeModal()),
     onCancelDeleteRecipe: () => dispatch(hideDeleteRecipeModal())
 });
