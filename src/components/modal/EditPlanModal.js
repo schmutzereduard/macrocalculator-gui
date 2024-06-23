@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import Modal from 'react-modal';
 import { fetchRecipes } from '../../store/actions/recipeActions';
 import { addPlan, updatePlan, fetchDayPlan } from '../../store/actions/planActions';
+import ConfirmationModal from '../modal/ConfirmationModal';
 
 class EditPlanModal extends Component {
     constructor(props) {
@@ -11,7 +12,11 @@ class EditPlanModal extends Component {
             search: '',
             filteredRecipes: [],
             notes: props.plan ? props.plan.notes : '',
-            recipes: props.plan ? props.plan.recipes : []
+            recipes: props.plan ? props.plan.recipes : [],
+            showRemoveConfirmModal: false,
+            recipeToRemove: null,
+            showSaveConfirmModal: false,
+            changesMade: false
         };
     }
 
@@ -25,7 +30,8 @@ class EditPlanModal extends Component {
         if (prevProps.plan !== this.props.plan) {
             this.setState({
                 notes: this.props.plan ? this.props.plan.notes : '',
-                recipes: this.props.plan ? this.props.plan.recipes : []
+                recipes: this.props.plan ? this.props.plan.recipes : [],
+                changesMade: false
             });
         }
     }
@@ -33,37 +39,64 @@ class EditPlanModal extends Component {
     handleSearchChange = (e) => {
         const search = e.target.value;
         const searchLower = search.toLowerCase();
-        const filtered = this.props.allRecipes.filter(recipe => recipe.name.toLowerCase().includes(searchLower));
+        const filtered = this.props.allRecipes.filter(
+            recipe => recipe.name.toLowerCase().includes(searchLower) && !this.state.recipes.some(r => r.id === recipe.id)
+        );
         this.setState({ search, filteredRecipes: filtered });
     };
 
     handleAddRecipe = (recipe) => {
         const updatedRecipes = [...this.state.recipes, recipe];
-        const updatedPlan = { ...this.props.plan, recipes: updatedRecipes };
-        this.props.updatePlan(updatedPlan);
-        this.setState({ search: '', filteredRecipes: [] });
-        this.props.fetchDayPlan(...this.props.plan.date.split('-'));
+        this.setState({
+            recipes: updatedRecipes,
+            search: '',
+            filteredRecipes: [],
+            changesMade: true
+        });
     };
 
     handleRemoveRecipe = (recipeId) => {
-        const updatedRecipes = this.state.recipes.filter(recipe => recipe.id !== recipeId);
-        const updatedPlan = { ...this.props.plan, recipes: updatedRecipes };
-        this.props.updatePlan(updatedPlan);
-        this.props.fetchDayPlan(...this.props.plan.date.split('-'));
+        this.setState({
+            showRemoveConfirmModal: true,
+            recipeToRemove: recipeId
+        });
+    };
+
+    confirmRemoveRecipe = () => {
+        const updatedRecipes = this.state.recipes.filter(recipe => recipe.id !== this.state.recipeToRemove);
+        this.setState({
+            recipes: updatedRecipes,
+            showRemoveConfirmModal: false,
+            recipeToRemove: null,
+            changesMade: true
+        });
     };
 
     handleNotesChange = (e) => {
-        this.setState({ notes: e.target.value });
+        this.setState({ notes: e.target.value, changesMade: true });
     };
 
     handleSaveNotes = () => {
-        const updatedPlan = { ...this.props.plan, notes: this.state.notes };
+        const updatedPlan = { ...this.props.plan, notes: this.state.notes, recipes: this.state.recipes };
         this.props.updatePlan(updatedPlan);
+    };
+
+    handleModalClose = () => {
+        if (this.state.changesMade) {
+            this.setState({ showSaveConfirmModal: true });
+        } else {
+            this.props.onRequestClose();
+        }
+    };
+
+    confirmSaveChanges = () => {
+        this.handleSaveNotes();
+        this.props.onRequestClose();
     };
 
     render() {
         const { isOpen, onRequestClose, plan } = this.props;
-        const { search, filteredRecipes, notes, recipes } = this.state;
+        const { search, filteredRecipes, notes, recipes, showRemoveConfirmModal, showSaveConfirmModal } = this.state;
 
         if (!plan) {
             return null;
@@ -75,7 +108,7 @@ class EditPlanModal extends Component {
         return (
             <Modal
                 isOpen={isOpen}
-                onRequestClose={onRequestClose}
+                onRequestClose={this.handleModalClose}
                 contentLabel="Edit Plan"
                 style={{
                     content: {
@@ -90,17 +123,18 @@ class EditPlanModal extends Component {
                     }
                 }}
             >
-                <h2>Plan for {plan.date}</h2>
-                <div>
-                    <div>Total Carbs: {totalCarbs}g</div>
-                    <div>Total Calories: {totalCalories}kcal</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h2>Plan for {plan.date}</h2>
+                    <div>
+                        <span>Total Carbs: {totalCarbs}g</span>
+                        <span style={{ marginLeft: '10px' }}>Total Calories: {totalCalories}kcal</span>
+                    </div>
                 </div>
                 <div>
                     <label>Notes:</label>
                     <textarea
                         value={notes}
                         onChange={this.handleNotesChange}
-                        onBlur={this.handleSaveNotes}
                         rows="4"
                         style={{ width: '100%', marginBottom: '10px' }}
                     />
@@ -142,14 +176,31 @@ class EditPlanModal extends Component {
                                 <td>{recipe.description}</td>
                                 <td>
                                     <button onClick={() => this.handleRemoveRecipe(recipe.id)}>Delete</button>
+                                    <button>View</button>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
                 <div className="modal-buttons">
-                    <button onClick={onRequestClose}>Close</button>
+                    <button onClick={this.handleModalClose}>Close</button>
                 </div>
+                {showRemoveConfirmModal && (
+                    <ConfirmationModal
+                        isOpen={showRemoveConfirmModal}
+                        onRequestClose={() => this.setState({ showRemoveConfirmModal: false, recipeToRemove: null })}
+                        onConfirm={this.confirmRemoveRecipe}
+                        message="Are you sure you want to remove this recipe from the plan?"
+                    />
+                )}
+                {showSaveConfirmModal && (
+                    <ConfirmationModal
+                        isOpen={showSaveConfirmModal}
+                        onRequestClose={() => this.setState({ showSaveConfirmModal: false })}
+                        onConfirm={this.confirmSaveChanges}
+                        message="Save changes before exiting?"
+                    />
+                )}
             </Modal>
         );
     }

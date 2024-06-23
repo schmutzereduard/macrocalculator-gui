@@ -63,7 +63,7 @@ class MacroCalculatorApi {
     }
 
     static updatePlan(plan) {
-        return instance.put(`/plans/${plan.id}`, plan);
+        return instance.put(`/plans`, plan);
     }
 
     static deletePlan(id) {
