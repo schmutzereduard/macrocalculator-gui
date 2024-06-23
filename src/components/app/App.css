@@ -105,7 +105,102 @@ th {
     background-color: #45a049;
 }
 
-/* Calendar styles */
+/* Food and Recipe styles */
+.list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px; /* Adjust the gap as needed */
+    list-style-type: none;
+    padding: 0;
+}
+
+.list-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.add-food-form input {
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.add-food-form button {
+    margin-bottom: 10px;
+}
+
+/* Modal form styles */
+.modal-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-form label {
+    margin-bottom: 10px;
+}
+
+/* Pagination styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.pagination button {
+    padding: 5px 10px;
+    margin: 0 2px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+
+.pagination button.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+/* Table column widths */
+th, td {
+    width: 20%;
+}
+
+th.description, td.description {
+    width: 40%;
+}
+
+/* Modal buttons */
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Adjusting modal sizes */
+.ReactModal__Content {
+    max-width: 600px;
+    margin: auto;
+}
+
+/* Planner styles */
+.header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.header select {
+    margin: 0 10px;
+    padding: 5px;
+    font-size: 16px;
+}
+
 .calendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);

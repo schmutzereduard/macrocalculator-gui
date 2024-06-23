@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { connect, useDispatch, useSelector } from 'react-redux';
 import { fetchDayPlan, fetchMonthPlans } from '../../store/actions/planActions';
-import { showEditPlanModal } from '../../store/actions/modal/edit';
+import { showEditPlanModal, hideEditPlanModal } from '../../store/actions/modal/edit';
 import EditPlanModal from '../modal/EditPlanModal';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday } from 'date-fns';
 
-const Planner = ({ onEditPlan }) => {
+const Planner = ({ onEditPlan, onCancelEditPlan }) => {
     const dispatch = useDispatch();
-    const plans = useSelector(state => state.plans.monthPlans);
+    const plans = useSelector(state => state.plans.plans);
+    const selectedPlan = useSelector(state => state.plans.plan);
+    const isEditPlanModalOpen = useSelector(state => state.editModal.isEditPlanModalOpen);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(new Date());
     const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
@@ -37,7 +39,7 @@ const Planner = ({ onEditPlan }) => {
         const day = format(date, 'dd');
         setSelectedDate(date);
         dispatch(fetchDayPlan(year, month, day));
-        onEditPlan();
+        dispatch(showEditPlanModal());
     };
 
     const daysInMonth = eachDayOfInterval({
@@ -74,17 +76,20 @@ const Planner = ({ onEditPlan }) => {
                     </div>
                 ))}
             </div>
-            {/* <EditPlanModal 
-                isOpen={true} // Update this based on modal state
-                onRequestClose={() => {}} // Update this based on modal state
-                plan={null} // Fetch and pass the correct plan data here
-            /> */}
+            {isEditPlanModalOpen && (
+                <EditPlanModal 
+                    isOpen={isEditPlanModalOpen}
+                    onRequestClose={onCancelEditPlan}
+                    plan={selectedPlan}
+                />
+            )}
         </div>
     );
 };
 
 const mapDispatchToProps = (dispatch) => ({
-    onEditPlan: () => dispatch(showEditPlanModal())
+    onEditPlan: () => dispatch(showEditPlanModal()),
+    onCancelEditPlan: () => dispatch(hideEditPlanModal())
 });
 
 export default connect(null, mapDispatchToProps)(Planner);
