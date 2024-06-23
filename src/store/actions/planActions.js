@@ -1,23 +1,44 @@
 import MacroCalculatorApi from '../../api/MacroCalculatorApi';
 import * as actionTypes from './actionTypes';
 
-const fetchPlansRequest = () => ({ type: actionTypes.FETCH_PLANS_REQUEST });
-const fetchPlansSuccess = (plans) => ({ type: actionTypes.FETCH_PLANS_SUCCESS, plans });
-const fetchPlansFail = (error) => ({ type: actionTypes.FETCH_PLANS_FAIL, error });
+const fetchDayPlanRequest = () => ({ type: actionTypes.FETCH_DAY_PLAN_REQUEST });
+const fetchDayPlanSuccess = (plan) => ({ type: actionTypes.FETCH_DAY_PLAN_SUCCESS, plan });
+const fetchDayPlanFail = (error) => ({ type: actionTypes.FETCH_DAY_PLAN_FAIL, error });
 
-export const fetchPlans = () => {
+
+export const fetchDayPlan = (year, month, day) => {
     return dispatch => {
-        dispatch(fetchPlansRequest());
-        MacroCalculatorApi.getPlans()
+        dispatch(fetchDayPlanRequest());
+        MacroCalculatorApi.getDayPlan(year, month, day)
             .then(response => {
-                const plans = response.data;
-                dispatch(fetchPlansSuccess(plans));
+                const plan = response.data;
+                dispatch(fetchDayPlanSuccess(plan));
             })
             .catch(error => {
-                dispatch(fetchPlansFail(error));
+                dispatch(fetchDayPlanFail(error));
             });
     };
 };
+
+const fetchMonthPlansRequest = () => ({ type: actionTypes.FETCH_MONTH_PLANS_REQUEST });
+const fetchMonthPlansSuccess = (plans) => ({ type: actionTypes.FETCH_MONTH_PLANS_SUCCESS, plans });
+const fetchMonthPlansFail = (error) => ({ type: actionTypes.FETCH_MONTH_PLANS_FAIL, error });
+
+
+export const fetchMonthPlans = (year, month) => {
+    return dispatch => {
+        dispatch(fetchMonthPlansRequest());
+        MacroCalculatorApi.getMonthPlans(year, month)
+            .then(response => {
+                const plans = response.data;
+                dispatch(fetchMonthPlansSuccess(plans));
+            })
+            .catch(error => {
+                dispatch(fetchMonthPlansFail(error));
+            });
+    };
+};
+
 
 const addPlanRequest = () => ({ type: actionTypes.ADD_PLAN_REQUEST });
 const addPlanSuccess = (plan) => ({ type: actionTypes.ADD_PLAN_SUCCESS, plan });

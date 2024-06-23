@@ -49,6 +49,15 @@ class MacroCalculatorApi {
         return instance.get('/plans');
     }
 
+
+    static getMonthPlans(year, month) {
+        return instance.get(`/plans/month?date=${year}-${month}`);
+    }    
+
+    static getDayPlan(year,month, day) {
+        return instance.get(`/plans/day?date=${year}-${month}-${day}`);
+    }    
+
     static addPlan(plan) {
         return instance.post('/plans', plan);
     }
