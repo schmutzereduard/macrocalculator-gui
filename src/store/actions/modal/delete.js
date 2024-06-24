@@ -15,3 +15,11 @@ export const showDeleteRecipeModal = () => ({
 export const hideDeleteRecipeModal = () => ({
     type:  actionTypes.HIDE_DELETE_RECIPE_MODAL
 });
+
+export const showDeletePlanModal = () => ({
+    type:  actionTypes.SHOW_DELETE_PLAN_MODAL
+});
+
+export const hideDeletePlaneModal = () => ({
+    type:  actionTypes.HIDE_DELETE_PLAN_MODAL
+});

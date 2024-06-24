@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import Modal from 'react-modal';
 import { fetchFoods } from '../../store/actions/foodActions';
-import { updateRecipe, fetchRecipe } from '../../store/actions/recipeActions';
+import { updateRecipe } from '../../store/actions/recipeActions';
+import { showSaveRecipeChangesModal, hideSaveRecipeChangesModal } from '../../store/actions/modal/insert';
+import ConfirmSaveModal from '../modal/ConfirmSaveModal';
 
 class EditRecipeModal extends Component {
     state = {
@@ -15,7 +17,9 @@ class EditRecipeModal extends Component {
         name: '',
         search: '',
         itemsPerPage: 10,
-        currentPage: 1
+        currentPage: 1,
+        changesMade: false,
+        initialRecipe: null // To store the initial state of the recipe
     };
 
     componentDidMount() {
@@ -25,7 +29,9 @@ class EditRecipeModal extends Component {
             this.setState({
                 recipeFoodsVisual: recipe.recipeFoods || [],
                 description: recipe.description || '',
-                name: recipe.name || ''
+                name: recipe.name || '',
+                initialRecipe: recipe, // Store the initial state of the recipe
+                changesMade: false // Reset changesMade when the component mounts
             });
         }
     }
@@ -36,7 +42,9 @@ class EditRecipeModal extends Component {
                 foodQuantities: {},
                 recipeFoodsVisual: this.props.recipe?.recipeFoods || [],
                 description: this.props.recipe?.description || '',
-                name: this.props.recipe?.name || ''
+                name: this.props.recipe?.name || '',
+                initialRecipe: this.props.recipe, // Store the initial state of the recipe
+                changesMade: false // Reset changesMade when a new recipe is loaded
             });
         }
     }
@@ -44,7 +52,8 @@ class EditRecipeModal extends Component {
     handleRemoveFood = (foodId) => {
         this.setState({
             foodToRemove: foodId,
-            showRemoveConfirmModal: true
+            showRemoveConfirmModal: true,
+            changesMade: true
         });
     };
 
@@ -60,7 +69,8 @@ class EditRecipeModal extends Component {
 
     handleQuantityChange = (foodId, quantity) => {
         this.setState({
-            foodQuantities: { ...this.state.foodQuantities, [foodId]: quantity }
+            foodQuantities: { ...this.state.foodQuantities, [foodId]: quantity },
+            changesMade: true
         });
     };
 
@@ -78,16 +88,17 @@ class EditRecipeModal extends Component {
         this.setState({
             selectedFoods: [],
             foodQuantities: {},
-            recipeFoodsVisual: updatedRecipeFoods
+            recipeFoodsVisual: updatedRecipeFoods,
+            changesMade: true
         });
     };
 
     handleDescriptionChange = (e) => {
-        this.setState({ description: e.target.value });
+        this.setState({ description: e.target.value, changesMade: true });
     };
 
     handleNameChange = (e) => {
-        this.setState({ name: e.target.value });
+        this.setState({ name: e.target.value, changesMade: true });
     };
 
     handleSearchChange = (e) => {
@@ -111,10 +122,27 @@ class EditRecipeModal extends Component {
             recipeFoods: this.state.recipeFoodsVisual
         };
         this.props.updateRecipe(updatedRecipe);
+        this.setState({ initialRecipe: updatedRecipe, changesMade: false }); // Update the initial state and reset changesMade
     };
 
     handleModalClose = () => {
-        this.handleUpdateRecipe();
+        const { initialRecipe, recipeFoodsVisual, description, name } = this.state;
+        const isChanged = JSON.stringify(initialRecipe.recipeFoods) !== JSON.stringify(recipeFoodsVisual) ||
+                          initialRecipe.description !== description ||
+                          initialRecipe.name !== name;
+
+        if (isChanged) {
+            this.props.showSaveChangesModal();
+        } else {
+            this.props.onRequestClose();
+        }
+    };
+
+    confirmSaveChanges = (saveChanges) => {
+        if (saveChanges) {
+            this.handleUpdateRecipe();
+        }
+        this.props.hideSaveChangesModal();
         this.props.onRequestClose();
     };
 
@@ -197,7 +225,7 @@ class EditRecipeModal extends Component {
     };
 
     render() {
-        const { isOpen } = this.props;
+        const { isOpen, isSaveChangesRecipeModalOpen } = this.props;
         const { foodQuantities, showRemoveConfirmModal, recipeFoodsVisual, description, name, search, itemsPerPage } = this.state;
         const availableFoods = this.getPaginatedFoods();
 
@@ -278,19 +306,29 @@ class EditRecipeModal extends Component {
                         <button onClick={() => this.setState({ showRemoveConfirmModal: false })}>No</button>
                     </Modal>
                 )}
+                {isSaveChangesRecipeModalOpen && (
+                    <ConfirmSaveModal
+                        isOpen={isSaveChangesRecipeModalOpen}
+                        onRequestClose={this.props.hideSaveChangesModal}
+                        onConfirm={this.confirmSaveChanges}
+                        message="Save changes before exiting?"
+                    />
+                )}
             </Modal>
         );
     }
 }
 
 const mapStateToProps = (state) => ({
-    foods: state.foods.foods
+    foods: state.foods.foods,
+    isSaveChangesRecipeModalOpen: state.insertModal.isSaveRecipeChangesModalOpen
 });
 
 const mapDispatchToProps = (dispatch) => ({
     fetchFoods: () => dispatch(fetchFoods()),
     updateRecipe: (recipe) => dispatch(updateRecipe(recipe)),
-    fetchRecipe: (id) => dispatch(fetchRecipe(id))
+    showSaveChangesModal: () => dispatch(showSaveRecipeChangesModal()),
+    hideSaveChangesModal: () => dispatch(hideSaveRecipeChangesModal())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(EditRecipeModal);

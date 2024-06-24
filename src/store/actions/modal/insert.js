@@ -1,17 +1,25 @@
 import * as actionTypes from '../actionTypes';
 
-export const showInsertFoodModal = () => ({
-    type:  actionTypes.SHOW_INSERT_FOOD_MODAL
+export const showSaveFoodChangesModal = () => ({
+    type:  actionTypes.SHOW_SAVE_FOOD_CHANGES_MODAL
 });
 
-export const hideInsertFoodModal = () => ({
-    type:  actionTypes.HIDE_INSERT_FOOD_MODAL
+export const hideSaveFoodChangesModal = () => ({
+    type:  actionTypes.HIDE_SAVE_FOOD_CHANGES_MODAL
 });
 
-export const showInsertRecipeModal = () => ({
-    type:  actionTypes.SHOW_INSERT_RECIPE_MODAL
+export const showSaveRecipeChangesModal = () => ({
+    type:  actionTypes.SHOW_SAVE_RECIPE_CHANGES_MODAL
 });
 
-export const hideInsertRecipeModal = () => ({
-    type:  actionTypes.HIDE_INSERT_RECIPE_MODAL
+export const hideSaveRecipeChangesModal = () => ({
+    type:  actionTypes.HIDE_SAVE_RECIPE_CHANGES_MODAL
+});
+
+export const showSavePlanChangesModal = () => ({
+    type: actionTypes.SHOW_SAVE_PLAN_CHANGES_MODAL
+});
+
+export const hideEditPlanChangesModal = () => ({
+    type: actionTypes.HIDE_SAVE_PLAN_CHANGES_MODAL
 });

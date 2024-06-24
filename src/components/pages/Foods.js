@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { connect, useDispatch, useSelector } from 'react-redux';
-import { fetchFoods, fetchFoodTypes, addFood } from '../../store/actions/foodActions';
+import { fetchFoods, fetchFoodTypes, addFood, deleteFood } from '../../store/actions/foodActions';
 import { showEditFoodModal, hideEditFoodModal } from '../../store/actions/modal/edit';
 import { showDeleteFoodModal, hideDeleteFoodModal } from '../../store/actions/modal/delete';
 import EditFoodModal from '../modal/EditFoodModal';
-import DeleteFoodModal from '../modal/DeleteFoodModal';
+import ConfirmDeleteModal from '../modal/ConfirmDeleteModal';
 
 const Foods = ({
     onEditFood, onCancelEditFood,
@@ -84,7 +84,7 @@ const Foods = ({
             );
             if (!foodExists) {
                 dispatch(addFood(newFood));
-                setNewFood({ name: '', carbs: '', calories: '', type: '', comments: '' });
+                setNewFood({ name: newFood.name, carbs: '', calories: '', type: '', comments: '' });
             }
         }
     };
@@ -106,6 +106,11 @@ const Foods = ({
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
+    };
+
+    const confirmDeleteFood = () => {
+        dispatch(deleteFood(deletingFood));
+        onCancelDeleteFood();
     };
 
     const totalPages = Math.ceil(filteredFoods.length / itemsPerPage);
@@ -201,10 +206,11 @@ const Foods = ({
                 onRequestClose={onCancelEditFood}
                 food={editingFood}
             />
-            <DeleteFoodModal
+            <ConfirmDeleteModal
                 isOpen={isDeleteFoodModalOpen}
                 onRequestClose={onCancelDeleteFood}
-                foodId={deletingFood}
+                onConfirm={confirmDeleteFood}
+                message="Are you sure you want to delete this food?"
             />
         </div>
     );

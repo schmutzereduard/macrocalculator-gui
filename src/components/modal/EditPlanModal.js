@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import Modal from 'react-modal';
 import { fetchRecipes } from '../../store/actions/recipeActions';
 import { addPlan, updatePlan, fetchDayPlan } from '../../store/actions/planActions';
+import ConfirmSaveModal from '../modal/ConfirmSaveModal';
 import ConfirmationModal from '../modal/ConfirmationModal';
 
 class EditPlanModal extends Component {
@@ -89,9 +90,13 @@ class EditPlanModal extends Component {
         }
     };
 
-    confirmSaveChanges = () => {
-        this.handleSaveNotes();
-        this.props.onRequestClose();
+    confirmSaveChanges = (saveChanges) => {
+        if (saveChanges) {
+            this.handleSaveNotes();
+        } else {
+            this.props.onRequestClose();
+        }
+        this.setState({ showSaveConfirmModal: false });
     };
 
     render() {
@@ -194,7 +199,7 @@ class EditPlanModal extends Component {
                     />
                 )}
                 {showSaveConfirmModal && (
-                    <ConfirmationModal
+                    <ConfirmSaveModal
                         isOpen={showSaveConfirmModal}
                         onRequestClose={() => this.setState({ showSaveConfirmModal: false })}
                         onConfirm={this.confirmSaveChanges}

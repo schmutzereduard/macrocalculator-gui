@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { connect, useDispatch, useSelector } from 'react-redux';
 import Modal from 'react-modal';
-import { fetchRecipes, addRecipe } from '../../store/actions/recipeActions';
+import { fetchRecipes, addRecipe, deleteRecipe } from '../../store/actions/recipeActions';
 import { showEditRecipeModal, hideEditRecipeModal } from '../../store/actions/modal/edit';
 import { showDeleteRecipeModal, hideDeleteRecipeModal } from '../../store/actions/modal/delete';
 import ViewRecipeModal from '../modal/EditRecipeModal';
-import DeleteRecipeModal from '../modal/DeleteRecipeModal';
+import ConfirmDeleteModal from '../modal/ConfirmDeleteModal';
 
 const Recipes = ({
     onEditRecipe, onCancelEditRecipe,
@@ -102,6 +102,11 @@ const Recipes = ({
         setCurrentPage(page);
     };
 
+    const confirmDeleteRecipe = () => {
+        dispatch(deleteRecipe(deletingRecipe));
+        onCancelDeleteRecipe();
+    };
+
     const totalPages = Math.ceil(filteredRecipes.length / itemsPerPage);
 
     return (
@@ -181,11 +186,12 @@ const Recipes = ({
                 />
             )}
             {deletingRecipe && (
-                <DeleteRecipeModal
-                    isOpen={isDeleteRecipeModalOpen}
-                    onRequestClose={onCancelDeleteRecipe}
-                    recipeId={deletingRecipe}
-                />
+                <ConfirmDeleteModal
+                isOpen={isDeleteRecipeModalOpen}
+                onRequestClose={onCancelDeleteRecipe}
+                onConfirm={confirmDeleteRecipe}
+                message="Are you sure you want to delete this recipe?"
+            />
             )}
 
             <Modal
