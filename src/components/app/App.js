@@ -5,7 +5,7 @@ import Navbar from '../pages/Navbar';
 import Foods from '../pages/Foods';
 import Recipes from '../pages/Recipes';
 import Planner from '../pages/Planner';
-import Calculator from '../pages/Calculator';
+import Journal from '../pages/Journal';
 import './App.css';
 
 const App = () => {
@@ -18,7 +18,7 @@ const App = () => {
                     <Route path="/foods" element={<Foods />} />
                     <Route path="/recipes" element={<Recipes />} />
                     <Route path="/planner" element={<Planner />} />
-                    <Route path="/calculator" element={<Calculator />} />
+                    <Route path="/journal" element={<Journal />} />
                 </Routes>
             </div>
         </Router>

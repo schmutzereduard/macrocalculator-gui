@@ -20,6 +20,6 @@ export const showSavePlanChangesModal = () => ({
     type: actionTypes.SHOW_SAVE_PLAN_CHANGES_MODAL
 });
 
-export const hideEditPlanChangesModal = () => ({
+export const hideSavePlanChangesModal = () => ({
     type: actionTypes.HIDE_SAVE_PLAN_CHANGES_MODAL
 });

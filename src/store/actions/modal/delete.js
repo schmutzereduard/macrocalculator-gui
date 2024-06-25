@@ -20,6 +20,6 @@ export const showDeletePlanModal = () => ({
     type:  actionTypes.SHOW_DELETE_PLAN_MODAL
 });
 
-export const hideDeletePlaneModal = () => ({
+export const hideDeletePlanModal = () => ({
     type:  actionTypes.HIDE_DELETE_PLAN_MODAL
 });

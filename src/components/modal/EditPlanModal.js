@@ -2,22 +2,36 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import Modal from 'react-modal';
 import { fetchRecipes } from '../../store/actions/recipeActions';
-import { addPlan, updatePlan, fetchDayPlan } from '../../store/actions/planActions';
+import { addPlan, updatePlan, deletePlan } from '../../store/actions/planActions';
+import ConfirmDeleteModal from '../modal/ConfirmDeleteModal';
 import ConfirmSaveModal from '../modal/ConfirmSaveModal';
-import ConfirmationModal from '../modal/ConfirmationModal';
+import EditRecipeModal from '../modal/EditRecipeModal';
+import {
+    showSavePlanChangesModal,
+    hideSavePlanChangesModal
+} from '../../store/actions/modal/insert';
+import {
+    showDeleteRecipeModal,
+    hideDeleteRecipeModal,
+    showDeletePlanModal,
+    hideDeletePlanModal
+} from '../../store/actions/modal/delete';
+import {
+    hideEditPlanModal,
+    showEditRecipeModal,
+    hideEditRecipeModal
+} from '../../store/actions/modal/edit';
 
 class EditPlanModal extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            editingPlan: props.plan || { date: '', notes: '', recipes: [] },
             search: '',
             filteredRecipes: [],
-            notes: props.plan ? props.plan.notes : '',
-            recipes: props.plan ? props.plan.recipes : [],
-            showRemoveConfirmModal: false,
             recipeToRemove: null,
-            showSaveConfirmModal: false,
-            changesMade: false
+            changesMade: false,
+            recipeToEdit: null,
         };
     }
 
@@ -30,61 +44,78 @@ class EditPlanModal extends Component {
     componentDidUpdate(prevProps) {
         if (prevProps.plan !== this.props.plan) {
             this.setState({
-                notes: this.props.plan ? this.props.plan.notes : '',
-                recipes: this.props.plan ? this.props.plan.recipes : [],
-                changesMade: false
+                editingPlan: this.props.plan || { date: '', notes: '', recipes: [] },
+                changesMade: false,
             });
+        }
+        
+        if (prevProps.allRecipes !== this.props.allRecipes) {
+            this.updateRecipeInfo();
         }
     }
 
+    updateRecipeInfo = () => {
+        const updatedRecipes = this.state.editingPlan.recipes.map(recipe => {
+            const updatedRecipe = this.props.allRecipes.find(r => r.id === recipe.id);
+            return updatedRecipe ? { ...recipe, ...updatedRecipe } : recipe;
+        });
+
+        this.setState({
+            editingPlan: { ...this.state.editingPlan, recipes: updatedRecipes },
+        });
+    };
+
     handleSearchChange = (e) => {
-        const search = e.target.value;
-        const searchLower = search.toLowerCase();
+        const search = e.target.value.toLowerCase();
         const filtered = this.props.allRecipes.filter(
-            recipe => recipe.name.toLowerCase().includes(searchLower) && !this.state.recipes.some(r => r.id === recipe.id)
+            recipe => recipe.name.toLowerCase().includes(search) && !this.state.editingPlan.recipes.some(r => r.id === recipe.id)
         );
         this.setState({ search, filteredRecipes: filtered });
     };
 
     handleAddRecipe = (recipe) => {
-        const updatedRecipes = [...this.state.recipes, recipe];
+        const updatedRecipes = [...this.state.editingPlan.recipes, recipe];
         this.setState({
-            recipes: updatedRecipes,
+            editingPlan: { ...this.state.editingPlan, recipes: updatedRecipes },
             search: '',
             filteredRecipes: [],
-            changesMade: true
+            changesMade: true,
         });
     };
 
     handleRemoveRecipe = (recipeId) => {
-        this.setState({
-            showRemoveConfirmModal: true,
-            recipeToRemove: recipeId
-        });
+        this.setState({ recipeToRemove: recipeId });
+        this.props.showDeleteRecipeModal();
     };
 
     confirmRemoveRecipe = () => {
-        const updatedRecipes = this.state.recipes.filter(recipe => recipe.id !== this.state.recipeToRemove);
+        const updatedRecipes = this.state.editingPlan.recipes.filter(recipe => recipe.id !== this.state.recipeToRemove);
         this.setState({
-            recipes: updatedRecipes,
-            showRemoveConfirmModal: false,
+            editingPlan: { ...this.state.editingPlan, recipes: updatedRecipes },
             recipeToRemove: null,
-            changesMade: true
+            changesMade: true,
         });
+        this.props.hideDeleteRecipeModal();
     };
 
     handleNotesChange = (e) => {
-        this.setState({ notes: e.target.value, changesMade: true });
+        this.setState({ editingPlan: { ...this.state.editingPlan, notes: e.target.value }, changesMade: true });
     };
 
-    handleSaveNotes = () => {
-        const updatedPlan = { ...this.props.plan, notes: this.state.notes, recipes: this.state.recipes };
-        this.props.updatePlan(updatedPlan);
+    handleUpdatePlan = () => {
+        const { editingPlan } = this.state;
+        if (this.props.plan.id) {
+            this.props.updatePlan(editingPlan);
+        } else {
+            this.props.addPlan(editingPlan);
+        }
+        this.props.hideSavePlanChangesModal();
+        this.props.onRequestClose();
     };
 
     handleModalClose = () => {
         if (this.state.changesMade) {
-            this.setState({ showSaveConfirmModal: true });
+            this.props.showSavePlanChangesModal();
         } else {
             this.props.onRequestClose();
         }
@@ -92,23 +123,39 @@ class EditPlanModal extends Component {
 
     confirmSaveChanges = (saveChanges) => {
         if (saveChanges) {
-            this.handleSaveNotes();
+            this.handleUpdatePlan();
         } else {
+            this.setState({ changesMade: false });
+            this.props.hideSavePlanChangesModal();
             this.props.onRequestClose();
         }
-        this.setState({ showSaveConfirmModal: false });
+    };
+
+    handleDeletePlan = () => {
+        this.props.showDeletePlanModal();
+    };
+
+    confirmDeletePlan = () => {
+        this.props.deletePlan(this.state.editingPlan.id);
+        this.props.hideDeletePlanModal();
+        this.props.onRequestClose();
+    };
+
+    handleEditRecipe = (recipe) => {
+        this.setState({ recipeToEdit: recipe });
+        this.props.showEditRecipeModal();
     };
 
     render() {
-        const { isOpen, onRequestClose, plan } = this.props;
-        const { search, filteredRecipes, notes, recipes, showRemoveConfirmModal, showSaveConfirmModal } = this.state;
+        const { isOpen, isSavePlanChangesModalOpen, isDeleteRecipeModalOpen, isDeletePlanModalOpen, isEditRecipeModalOpen } = this.props;
+        const { search, filteredRecipes, editingPlan, recipeToEdit } = this.state;
 
-        if (!plan) {
+        if (!editingPlan) {
             return null;
         }
 
-        const totalCarbs = recipes.reduce((acc, recipe) => acc + recipe.totalCarbs, 0);
-        const totalCalories = recipes.reduce((acc, recipe) => acc + recipe.totalCalories, 0);
+        const totalCarbs = editingPlan.recipes.reduce((acc, recipe) => acc + recipe.totalCarbs, 0);
+        const totalCalories = editingPlan.recipes.reduce((acc, recipe) => acc + recipe.totalCalories, 0);
 
         return (
             <Modal
@@ -124,12 +171,12 @@ class EditPlanModal extends Component {
                         marginRight: '-50%',
                         transform: 'translate(-50%, -50%)',
                         width: '80%',
-                        padding: '20px'
-                    }
+                        padding: '20px',
+                    },
                 }}
             >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h2>Plan for {plan.date}</h2>
+                    <h2>Plan for {editingPlan.date}</h2>
                     <div>
                         <span>Total Carbs: {totalCarbs}g</span>
                         <span style={{ marginLeft: '10px' }}>Total Calories: {totalCalories}kcal</span>
@@ -138,7 +185,7 @@ class EditPlanModal extends Component {
                 <div>
                     <label>Notes:</label>
                     <textarea
-                        value={notes}
+                        value={editingPlan.notes}
                         onChange={this.handleNotesChange}
                         rows="4"
                         style={{ width: '100%', marginBottom: '10px' }}
@@ -173,7 +220,7 @@ class EditPlanModal extends Component {
                         </tr>
                     </thead>
                     <tbody>
-                        {recipes.map(recipe => (
+                        {editingPlan.recipes.map(recipe => (
                             <tr key={recipe.id}>
                                 <td>{recipe.name}</td>
                                 <td>{recipe.totalCarbs}</td>
@@ -181,7 +228,7 @@ class EditPlanModal extends Component {
                                 <td>{recipe.description}</td>
                                 <td>
                                     <button onClick={() => this.handleRemoveRecipe(recipe.id)}>Delete</button>
-                                    <button>View</button>
+                                    <button onClick={() => this.handleEditRecipe(recipe)}>Edit</button>
                                 </td>
                             </tr>
                         ))}
@@ -189,21 +236,37 @@ class EditPlanModal extends Component {
                 </table>
                 <div className="modal-buttons">
                     <button onClick={this.handleModalClose}>Close</button>
+                    <button onClick={this.handleDeletePlan}>Delete Plan</button>
                 </div>
-                {showRemoveConfirmModal && (
-                    <ConfirmationModal
-                        isOpen={showRemoveConfirmModal}
-                        onRequestClose={() => this.setState({ showRemoveConfirmModal: false, recipeToRemove: null })}
+                {isDeleteRecipeModalOpen && (
+                    <ConfirmDeleteModal
+                        isOpen={isDeleteRecipeModalOpen}
+                        onRequestClose={this.props.hideDeleteRecipeModal}
                         onConfirm={this.confirmRemoveRecipe}
                         message="Are you sure you want to remove this recipe from the plan?"
                     />
                 )}
-                {showSaveConfirmModal && (
+                {isSavePlanChangesModalOpen && (
                     <ConfirmSaveModal
-                        isOpen={showSaveConfirmModal}
-                        onRequestClose={() => this.setState({ showSaveConfirmModal: false })}
+                        isOpen={isSavePlanChangesModalOpen}
+                        onRequestClose={this.props.hideSavePlanChangesModal}
                         onConfirm={this.confirmSaveChanges}
                         message="Save changes before exiting?"
+                    />
+                )}
+                {isDeletePlanModalOpen && (
+                    <ConfirmDeleteModal
+                        isOpen={isDeletePlanModalOpen}
+                        onRequestClose={this.props.hideDeletePlanModal}
+                        onConfirm={this.confirmDeletePlan}
+                        message="Are you sure you want to delete this plan?"
+                    />
+                )}
+                {isEditRecipeModalOpen && (
+                    <EditRecipeModal
+                        isOpen={isEditRecipeModalOpen}
+                        recipe={recipeToEdit}
+                        onRequestClose={this.props.hideEditRecipeModal}
                     />
                 )}
             </Modal>
@@ -212,13 +275,28 @@ class EditPlanModal extends Component {
 }
 
 const mapStateToProps = (state) => ({
-    allRecipes: state.recipes.recipes
+    allRecipes: state.recipes.recipes,
+    isOpen: state.editModal.isEditPlanModalOpen,
+    isSavePlanChangesModalOpen: state.insertModal.isSavePlanChangesModalOpen,
+    isDeleteRecipeModalOpen: state.deleteModal.isDeleteRecipeModalOpen,
+    isDeletePlanModalOpen: state.deleteModal.isDeletePlanModalOpen,
+    isEditRecipeModalOpen: state.editModal.isEditRecipeModalOpen,
 });
 
 const mapDispatchToProps = (dispatch) => ({
     fetchRecipes: () => dispatch(fetchRecipes()),
+    addPlan: (plan) => dispatch(addPlan(plan)),
     updatePlan: (plan) => dispatch(updatePlan(plan)),
-    fetchDayPlan: (year, month, day) => dispatch(fetchDayPlan(year, month, day))
+    deletePlan: (planId) => dispatch(deletePlan(planId)),
+    onRequestClose: () => dispatch(hideEditPlanModal()),
+    showSavePlanChangesModal: () => dispatch(showSavePlanChangesModal()),
+    hideSavePlanChangesModal: () => dispatch(hideSavePlanChangesModal()),
+    showDeleteRecipeModal: () => dispatch(showDeleteRecipeModal()),
+    hideDeleteRecipeModal: () => dispatch(hideDeleteRecipeModal()),
+    showDeletePlanModal: () => dispatch(showDeletePlanModal()),
+    hideDeletePlanModal: () => dispatch(hideDeletePlanModal()),
+    showEditRecipeModal: () => dispatch(showEditRecipeModal()),
+    hideEditRecipeModal: () => dispatch(hideEditRecipeModal()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(EditPlanModal);
