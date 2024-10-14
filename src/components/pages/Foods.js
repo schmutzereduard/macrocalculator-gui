@@ -1,22 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { connect, useDispatch, useSelector } from 'react-redux';
-import { fetchFoods, fetchFoodTypes, addFood, deleteFood } from '../../store/actions/foodActions';
-import { showEditFoodModal, hideEditFoodModal } from '../../store/actions/modal/edit';
-import { showDeleteFoodModal, hideDeleteFoodModal } from '../../store/actions/modal/delete';
-import EditFoodModal from '../modal/EditFoodModal';
-import ConfirmDeleteModal from '../modal/ConfirmDeleteModal';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchFoods, fetchFoodTypes, addFood } from '../../features/foodsSlice';
 
-const Foods = ({
-    onEditFood, onCancelEditFood,
-    onDeleteFood, onCancelDeleteFood
-}) => {
+function Foods () {
 
     const dispatch = useDispatch();
-    const foods = useSelector(state => state.foods.foods);
-    const foodTypes = useSelector(state => state.foods.foodTypes);
-    const loading = useSelector(state => state.foods.loading);
-    const isEditFoodModalOpen = useSelector(state => state.editModal.isEditFoodModalOpen);
-    const isDeleteFoodModalOpen = useSelector(state => state.deleteModal.isDeleteFoodModalOpen);
+    const { items, itemTypes, loading } = useSelector(state => state.foods);
 
     const [editingFood, setEditingFood] = useState(null);
     const [deletingFood, setDeletingFood] = useState(null);
@@ -42,7 +31,7 @@ const Foods = ({
         setSortConfig({ key, direction });
     };
 
-    const sortedFoods = [...foods].sort((a, b) => {
+    const sortedFoods = [...items].sort((a, b) => {
         if (sortConfig.key) {
             if (sortConfig.direction === 'ascending') {
                 return a[sortConfig.key] > b[sortConfig.key] ? 1 : -1;
@@ -75,7 +64,7 @@ const Foods = ({
 
     const handleAddFood = () => {
         if (newFood.name && newFood.carbs && newFood.calories && newFood.type) {
-            const foodExists = foods.some(food =>
+            const foodExists = items.some(food =>
                 food.name.toLowerCase() === newFood.name.toLowerCase() &&
                 (!newFood.type || food.type.toLowerCase() === newFood.type.toLowerCase()) &&
                 (!newFood.comments || food.comments.toLowerCase() === newFood.comments.toLowerCase()) &&
@@ -89,16 +78,6 @@ const Foods = ({
         }
     };
 
-    const handleDeleteFood = (id) => {
-        setDeletingFood(id);
-        onDeleteFood();
-    };
-
-    const handleEditFood = (food) => {
-        setEditingFood(food);
-        onEditFood();
-    };
-
     const handleItemsPerPageChange = (e) => {
         setItemsPerPage(Number(e.target.value));
         setCurrentPage(1);  // Reset to the first page
@@ -106,11 +85,6 @@ const Foods = ({
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
-    };
-
-    const confirmDeleteFood = () => {
-        dispatch(deleteFood(deletingFood));
-        onCancelDeleteFood();
     };
 
     const totalPages = Math.ceil(filteredFoods.length / itemsPerPage);
@@ -138,7 +112,7 @@ const Foods = ({
                 />
                 <select name="type" value={newFood.type} onChange={(e) => setNewFood({ ...newFood, type: e.target.value })}>
                     <option value="">Any</option>
-                    {foodTypes.map(type => (
+                    {itemTypes.map(type => (
                         <option key={type} value={type}>{type}</option>
                     ))}
                 </select>
@@ -182,8 +156,8 @@ const Foods = ({
                                 <td>{food.type}</td>
                                 <td>{food.comments}</td>
                                 <td>
-                                    <button onClick={() => handleEditFood(food)}>Edit</button>
-                                    <button onClick={() => handleDeleteFood(food.id)}>Delete</button>
+                                    <button>Edit</button>
+                                    <button>Delete</button>
                                 </td>
                             </tr>
                         ))}
@@ -201,26 +175,8 @@ const Foods = ({
                     </button>
                 ))}
             </div>
-            <EditFoodModal
-                isOpen={isEditFoodModalOpen}
-                onRequestClose={onCancelEditFood}
-                food={editingFood}
-            />
-            <ConfirmDeleteModal
-                isOpen={isDeleteFoodModalOpen}
-                onRequestClose={onCancelDeleteFood}
-                onConfirm={confirmDeleteFood}
-                message="Are you sure you want to delete this food?"
-            />
         </div>
     );
 };
 
-const mapDispatchToProps = (dispatch) => ({
-    onEditFood: () => dispatch(showEditFoodModal()),
-    onCancelEditFood: () => dispatch(hideEditFoodModal()),
-    onDeleteFood: () => dispatch(showDeleteFoodModal()),
-    onCancelDeleteFood: () => dispatch(hideDeleteFoodModal())
-});
-
-export default connect(null, mapDispatchToProps)(Foods);
+export default Foods;
