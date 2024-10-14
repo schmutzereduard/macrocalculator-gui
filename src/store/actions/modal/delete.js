@@ -16,10 +16,10 @@ export const hideDeleteRecipeModal = () => ({
     type:  actionTypes.HIDE_DELETE_RECIPE_MODAL
 });
 
-export const showDeletePlanModal = () => ({
-    type:  actionTypes.SHOW_DELETE_PLAN_MODAL
+export const showDeleteJournalModal = () => ({
+    type:  actionTypes.SHOW_DELETE_JOURNAL_MODAL
 });
 
-export const hideDeletePlanModal = () => ({
-    type:  actionTypes.HIDE_DELETE_PLAN_MODAL
+export const hideDeleteJournalModal = () => ({
+    type:  actionTypes.HIDE_DELETE_JOURNAL_MODAL
 });

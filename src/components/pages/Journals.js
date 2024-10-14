@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { connect, useDispatch, useSelector } from 'react-redux';
-import { fetchDayPlan, fetchMonthPlans } from '../../store/actions/planActions';
-import { showEditPlanModal, hideEditPlanModal } from '../../store/actions/modal/edit';
-import EditPlanModal from '../modal/EditPlanModal';
+import { fetchDayJournal, fetchMonthJournals } from '../../store/actions/journalActions';
+import { showEditJournalModal, hideEditJournalModal } from '../../store/actions/modal/edit';
+import EditJournalModal from '../modal/EditJournalModal';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday } from 'date-fns';
 
-const Planner = ({ onEditPlan, onCancelEditPlan }) => {
+const Journals = ({ onEditJournal, onCancelEditJournal }) => {
     const dispatch = useDispatch();
-    const plans = useSelector(state => state.plans.plans);
-    const selectedPlan = useSelector(state => state.plans.plan);
-    const isEditPlanModalOpen = useSelector(state => state.editModal.isEditPlanModalOpen);
+    const journals = useSelector(state => state.journals.journals);
+    const selectedJournal = useSelector(state => state.journals.journal);
+    const isEditJournalModalOpen = useSelector(state => state.editModal.isEditJournalModalOpen);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(new Date());
     const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
@@ -18,7 +18,7 @@ const Planner = ({ onEditPlan, onCancelEditPlan }) => {
     useEffect(() => {
         const year = format(currentDate, 'yyyy');
         const month = format(currentDate, 'MM');
-        dispatch(fetchMonthPlans(year, month));
+        dispatch(fetchMonthJournals(year, month));
     }, [dispatch, currentDate]);
 
     const handleYearChange = (event) => {
@@ -38,8 +38,8 @@ const Planner = ({ onEditPlan, onCancelEditPlan }) => {
         const month = format(date, 'MM');
         const day = format(date, 'dd');
         setSelectedDate(date);
-        dispatch(fetchDayPlan(year, month, day));
-        dispatch(showEditPlanModal());
+        dispatch(fetchDayJournal(year, month, day));
+        dispatch(showEditJournalModal());
     };
 
     const daysInMonth = eachDayOfInterval({
@@ -47,8 +47,8 @@ const Planner = ({ onEditPlan, onCancelEditPlan }) => {
         end: endOfMonth(currentDate)
     });
 
-    const isPlanAvailable = (date) => {
-        return plans.some(plan => plan.date === format(date, 'yyyy-MM-dd'));
+    const isJournalAvailable = (date) => {
+        return journals.some(journal => journal.date === format(date, 'yyyy-MM-dd'));
     };
 
     return (
@@ -69,18 +69,18 @@ const Planner = ({ onEditPlan, onCancelEditPlan }) => {
                 {daysInMonth.map(day => (
                     <div 
                         key={day} 
-                        className={`day ${isSameMonth(day, currentDate) ? '' : 'disabled'} ${isToday(day) ? 'today' : ''} ${isPlanAvailable(day) ? 'plan-available' : ''}`}
+                        className={`day ${isSameMonth(day, currentDate) ? '' : 'disabled'} ${isToday(day) ? 'today' : ''} ${isJournalAvailable(day) ? 'journal-available' : ''}`}
                         onClick={() => handleDayClick(day)}
                     >
                         {format(day, 'd')}
                     </div>
                 ))}
             </div>
-            {isEditPlanModalOpen && (
-                <EditPlanModal 
-                    isOpen={isEditPlanModalOpen}
-                    onRequestClose={onCancelEditPlan}
-                    plan={selectedPlan}
+            {isEditJournalModalOpen && (
+                <EditJournalModal 
+                    isOpen={isEditJournalModalOpen}
+                    onRequestClose={onCancelEditJournal}
+                    journal={selectedJournal}
                 />
             )}
         </div>
@@ -88,8 +88,8 @@ const Planner = ({ onEditPlan, onCancelEditPlan }) => {
 };
 
 const mapDispatchToProps = (dispatch) => ({
-    onEditPlan: () => dispatch(showEditPlanModal()),
-    onCancelEditPlan: () => dispatch(hideEditPlanModal())
+    onEditJournal: () => dispatch(showEditJournalModal()),
+    onCancelEditJournal: () => dispatch(hideEditJournalModal())
 });
 
-export default connect(null, mapDispatchToProps)(Planner);
+export default connect(null, mapDispatchToProps)(Journals);

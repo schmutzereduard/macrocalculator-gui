@@ -3,7 +3,7 @@ import * as actionTypes from '../../actions/actionTypes';
 const initialState = {
     isEditFoodModalOpen: false,
     isEditRecipeModalOpen: false,
-    isEditPlanModalOpen: false
+    isEditJournalModalOpen: false
 };
 
 const reducer = (state = initialState, action) => {
@@ -30,15 +30,15 @@ const reducer = (state = initialState, action) => {
                 ...state,
                 isEditRecipeModalOpen: false
             };
-        case actionTypes.SHOW_EDIT_PLAN_MODAL:
+        case actionTypes.SHOW_EDIT_JOURNAL_MODAL:
             return {
                 ...state,
-                isEditPlanModalOpen: true
+                isEditJournalModalOpen: true
             };
-        case actionTypes.HIDE_EDIT_PLAN_MODAL:
+        case actionTypes.HIDE_EDIT_JOURNAL_MODAL:
             return {
                 ...state,
-                isEditPlanModalOpen: false
+                isEditJournalModalOpen: false
             };
         default: return state;
     }

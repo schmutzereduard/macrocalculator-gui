@@ -16,10 +16,10 @@ export const hideEditRecipeModal = () => ({
     type:  actionTypes.HIDE_EDIT_RECIPE_MODAL
 });
 
-export const showEditPlanModal = () => ({
-    type: actionTypes.SHOW_EDIT_PLAN_MODAL
+export const showEditJournalModal = () => ({
+    type: actionTypes.SHOW_EDIT_JOURNAL_MODAL
 });
 
-export const hideEditPlanModal = () => ({
-    type: actionTypes.HIDE_EDIT_PLAN_MODAL
+export const hideEditJournalModal = () => ({
+    type: actionTypes.HIDE_EDIT_JOURNAL_MODAL
 });

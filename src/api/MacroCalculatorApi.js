@@ -45,29 +45,29 @@ class MacroCalculatorApi {
         return instance.delete(`/recipes/${id}`);
     }
 
-    static getPlans() {
-        return instance.get('/plans');
+    static getJournals() {
+        return instance.get('/journals');
     }
 
 
-    static getMonthPlans(year, month) {
-        return instance.get(`/plans/month?date=${year}-${month}`);
+    static getMonthJournals(year, month) {
+        return instance.get(`/journals/month?date=${year}-${month}`);
     }    
 
-    static getDayPlan(year,month, day) {
-        return instance.get(`/plans/day?date=${year}-${month}-${day}`);
+    static getDayJournal(year,month, day) {
+        return instance.get(`/journals/day?date=${year}-${month}-${day}`);
     }    
 
-    static addPlan(plan) {
-        return instance.post('/plans', plan);
+    static addJournal(journal) {
+        return instance.post('/journals', journal);
     }
 
-    static updatePlan(plan) {
-        return instance.put(`/plans`, plan);
+    static updateJournal(journal) {
+        return instance.put(`/journals`, journal);
     }
 
-    static deletePlan(id) {
-        return instance.delete(`/plans/${id}`);
+    static deleteJournal(id) {
+        return instance.delete(`/journals/${id}`);
     }
 }
 

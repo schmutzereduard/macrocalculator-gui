@@ -4,8 +4,7 @@ import Home from '../pages/Home';
 import Navbar from '../pages/Navbar';
 import Foods from '../pages/Foods';
 import Recipes from '../pages/Recipes';
-import Planner from '../pages/Planner';
-import Journal from '../pages/Journal';
+import Journals from '../pages/Journals';
 import './App.css';
 
 const App = () => {
@@ -17,8 +16,7 @@ const App = () => {
                     <Route path='/' element={<Home />}></Route>
                     <Route path="/foods" element={<Foods />} />
                     <Route path="/recipes" element={<Recipes />} />
-                    <Route path="/planner" element={<Planner />} />
-                    <Route path="/journal" element={<Journal />} />
+                    <Route path="/journals" element={<Journals />} />
                 </Routes>
             </div>
         </Router>

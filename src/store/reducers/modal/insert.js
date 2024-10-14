@@ -4,7 +4,7 @@ const initialState = {
 
     isSaveFoodChangesModalOpen: false,
     isSaveRecipeChangesModalOpen: false,
-    isSavePlanChangesModalOpen: false
+    isSaveJournalChangesModalOpen: false
 };
 
 const reducer = (state = initialState, action) => {
@@ -30,15 +30,15 @@ const reducer = (state = initialState, action) => {
                 ...state,
                 isSaveRecipeChangesModalOpen: false
             };
-        case actionTypes.SHOW_SAVE_PLAN_CHANGES_MODAL:
+        case actionTypes.SHOW_SAVE_JOURNAL_CHANGES_MODAL:
             return {
                 ...state,
-                isSavePlanChangesModalOpen: true
+                isSaveJournalChangesModalOpen: true
             };
-        case actionTypes.HIDE_SAVE_PLAN_CHANGES_MODAL:
+        case actionTypes.HIDE_SAVE_JOURNAL_CHANGES_MODAL:
             return {
                 ...state,
-                isSavePlanChangesModalOpen: false
+                isSaveJournalChangesModalOpen: false
             };
         default: return state;
     }

@@ -16,10 +16,10 @@ export const hideSaveRecipeChangesModal = () => ({
     type:  actionTypes.HIDE_SAVE_RECIPE_CHANGES_MODAL
 });
 
-export const showSavePlanChangesModal = () => ({
-    type: actionTypes.SHOW_SAVE_PLAN_CHANGES_MODAL
+export const showSaveJournalChangesModal = () => ({
+    type: actionTypes.SHOW_SAVE_JOURNAL_CHANGES_MODAL
 });
 
-export const hideSavePlanChangesModal = () => ({
-    type: actionTypes.HIDE_SAVE_PLAN_CHANGES_MODAL
+export const hideSaveJournalChangesModal = () => ({
+    type: actionTypes.HIDE_SAVE_JOURNAL_CHANGES_MODAL
 });

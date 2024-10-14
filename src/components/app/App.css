@@ -188,7 +188,7 @@ th.description, td.description {
     margin: auto;
 }
 
-/* Planner styles */
+/* Journalner styles */
 .header {
     display: flex;
     justify-content: center;
@@ -223,7 +223,7 @@ th.description, td.description {
     background-color: #ffeb3b;
 }
 
-.day.plan-available {
+.day.journal-available {
     background-color: #a5d6a7;
 }
 
