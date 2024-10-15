@@ -55,11 +55,14 @@ th {
 }
 
 .nav-button {
+    width: 100px;
+    height: 30px;
+    padding: 10px;
+
     display: inline-block;
-    padding: 20px;
     margin: 0 10px;
-    background-color: #4CAF50;
-    color: white;
+    background-color: white;
+    color: black;
     text-align: center;
     text-decoration: none;
     font-size: 20px;
@@ -67,7 +70,8 @@ th {
 }
 
 .nav-button:hover {
-    background-color: #45a049;
+    background-color: red;
+    transition: 1s ease;
 }
 
 /* Header styles */
@@ -75,6 +79,7 @@ th {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
+    width: 100%;
 }
 
 .header input {
@@ -85,9 +90,10 @@ th {
 }
 
 .header button {
+    height: 43.4px;
     padding: 10px 20px;
     font-size: 16px;
-    background-color: #4CAF50;
+    background-color: white;
     color: white;
     border: none;
     border-radius: 5px;
@@ -95,6 +101,8 @@ th {
 }
 
 .header select {
+    display: inline-flex;
+    height: 43.4px;
     padding: 10px;
     font-size: 16px;
     margin-left: 10px;
@@ -102,7 +110,7 @@ th {
 }
 
 .header button:hover {
-    background-color: #45a049;
+    background-color: red;
 }
 
 /* Food and Recipe styles */
@@ -125,13 +133,17 @@ th {
     background-color: #f9f9f9;
 }
 
-.add-food-form input {
-    margin-right: 10px;
-    margin-bottom: 10px;
+.add-food-form {
+    display: flex;
+    flex-grow: 2; /* Add flexibility to the form */
+    margin-right: 20px; /* Adjust right margin for spacing */
 }
 
-.add-food-form button {
-    margin-bottom: 10px;
+add-food-form input, .add-food-form select, .add-food-form button {
+    margin-right: 10px;
+    height: 43.4px; /* Ensure inputs and select elements have the same height */
+    padding: 10px;
+    font-size: 16px;
 }
 
 /* Modal form styles */
@@ -145,6 +157,14 @@ th {
 }
 
 /* Pagination styles */
+
+.per-page {
+    margin-left: 10px;
+    height: 43.4px; /* Matching height with input fields */
+    padding: 10px;
+    font-size: 16px;
+}
+
 .pagination {
     display: flex;
     justify-content: center;
