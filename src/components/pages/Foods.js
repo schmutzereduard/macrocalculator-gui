@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchFoods, fetchFoodTypes, addFood } from '../../features/foodsSlice';
+import ReactModal from 'react-modal';
+import { fetchFoods, fetchFoodTypes, fetchFood, addFood } from '../../features/foodsSlice';
+import Food from '../modal/Food';
 
 function Foods() {
     const dispatch = useDispatch();
@@ -10,6 +12,8 @@ function Foods() {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [searchFilters, setSearchFilters] = useState({});
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
 
     useEffect(() => {
         dispatch(fetchFoods());
@@ -76,6 +80,15 @@ function Foods() {
         setCurrentPage(1); // Reset to the first page
     };
 
+    const openEditModal = (foodId) => {
+        dispatch(fetchFood(foodId));
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
+
     return (
         <div>
             {loading ? (
@@ -94,12 +107,16 @@ function Foods() {
                         foods={paginatedFoods}
                         sortConfig={sortConfig}
                         handleSort={handleSort}
+                        onEdit={openEditModal}
                     />
                     <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
                         onPageChange={setCurrentPage}
                     />
+                    <ReactModal isOpen={isModalOpen} onRequestClose={closeModal}>
+                        <Food onClose={closeModal} />
+                    </ReactModal>
                 </div>
             )}
         </div>
@@ -183,7 +200,7 @@ function AddFood({ items, itemTypes, onSearch }) {
     );
 }
 
-function FoodsTable({ foods, sortConfig, handleSort }) {
+function FoodsTable({ foods, sortConfig, handleSort, onEdit }) {
     return (
         <table>
             <thead>
@@ -209,7 +226,7 @@ function FoodsTable({ foods, sortConfig, handleSort }) {
                         <td>{food.type}</td>
                         <td>{food.comments}</td>
                         <td>
-                            <button>Edit</button>
+                            <button onClick={() => onEdit(food.id)}>Edit</button>
                             <button>Delete</button>
                         </td>
                     </tr>
