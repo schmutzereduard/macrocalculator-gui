@@ -1,8 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import MacroCalculatorApi from "../api/MacroCalculatorApi";
 
-// Thunks for Recipes
-
 export const fetchRecipes = createAsyncThunk(
   "recipes/fetchRecipes",
   async () => {

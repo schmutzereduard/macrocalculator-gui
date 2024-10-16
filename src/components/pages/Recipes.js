@@ -1,229 +1,219 @@
-// import React, { useEffect, useState } from 'react';
-// import { connect, useDispatch, useSelector } from 'react-redux';
-// import Modal from 'react-modal';
-// import { fetchRecipes, addRecipe, deleteRecipe } from '../../store/actions/recipeActions';
-// import { showEditRecipeModal, hideEditRecipeModal } from '../../store/actions/modal/edit';
-// import { showDeleteRecipeModal, hideDeleteRecipeModal } from '../../store/actions/modal/delete';
-// import ViewRecipeModal from '../modal/EditRecipeModal';
-// import ConfirmDeleteModal from '../modal/ConfirmDeleteModal';
+import React, { useEffect, useState } from 'react';
+import ReactModal from 'react-modal';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchRecipes, fetchRecipe, addRecipe, deleteRecipe } from '../../features/recipesSlice';
+import Recipe from '../modal/Recipe';
 
-// const Recipes = ({
-//     onEditRecipe, onCancelEditRecipe,
-//     onDeleteRecipe, onCancelDeleteRecipe
-// }) => {
-//     const dispatch = useDispatch();
-//     const recipes = useSelector(state => state.recipes.recipes);
-//     const loading = useSelector(state => state.recipes.loading);
-//     const isEditRecipeModalOpen = useSelector(state => state.editModal.isEditRecipeModalOpen);
-//     const isDeleteRecipeModalOpen = useSelector(state => state.deleteModal.isDeleteRecipeModalOpen);
+function Recipes() {
+    const dispatch = useDispatch();
+    const { items, loading } = useSelector(state => state.recipes);
 
-//     const [search, setSearch] = useState('');
-//     const [viewingRecipe, setViewingRecipe] = useState(null);
-//     const [deletingRecipe, setDeletingRecipe] = useState(null);
-//     const [descriptionModalIsOpen, setDescriptionModalIsOpen] = useState(false);
-//     const [descriptionToView, setDescriptionToView] = useState('');
-//     const [sortConfig, setSortConfig] = useState({ key: '', direction: '' });
-//     const [currentPage, setCurrentPage] = useState(1);
-//     const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [search, setSearch] = useState('');
+    const [sortConfig, setSortConfig] = useState({ key: '', direction: '' });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
-//     useEffect(() => {
-//         dispatch(fetchRecipes());
-//     }, [dispatch]);
+    const [isRecipeModalOpen, setRecipeModalOpen] = useState(false);
+    const [isDeleteRecipeModalOpen, setDeleteRecipeModalOpen] = useState(false);
+    const [recipeToDelete, setRecipeToDelete] = useState({ id: null, name: '' });
 
-//     const handleSearchChange = (e) => {
-//         setSearch(e.target.value);
-//         setCurrentPage(1);  // Reset to the first page on search
-//     };
+    useEffect(() => {
+        dispatch(fetchRecipes());
+    }, [dispatch]);
 
-//     const handleSort = (key) => {
-//         let direction = 'ascending';
-//         if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-//             direction = 'descending';
-//         } else if (sortConfig.key === key && sortConfig.direction === 'descending') {
-//             direction = '';
-//         } else {
-//             direction = 'ascending';
-//         }
-//         setSortConfig({ key, direction });
-//     };
+    const handleSearchChange = (e) => {
+        setSearch(e.target.value);
+        setCurrentPage(1);
+    };
 
-//     const sortedRecipes = [...recipes].sort((a, b) => {
-//         if (sortConfig.key) {
-//             if (sortConfig.direction === 'ascending') {
-//                 return a[sortConfig.key] > b[sortConfig.key] ? 1 : -1;
-//             } else if (sortConfig.direction === 'descending') {
-//                 return a[sortConfig.key] < b[sortConfig.key] ? 1 : -1;
-//             }
-//         }
-//         return 0;
-//     });
+    const handleSort = (key) => {
+        let direction = 'ascending';
+        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+            direction = 'descending';
+        } else if (sortConfig.key === key && sortConfig.direction === 'descending') {
+            direction = '';
+        } else {
+            direction = 'ascending';
+        }
+        setSortConfig({ key, direction });
+    };
 
-//     const filteredRecipes = sortedRecipes.filter(recipe => {
-//         const searchLower = search.toLowerCase();
-//         return recipe.name.toLowerCase().includes(searchLower) ||
-//             recipe.recipeFoods.some(rf => rf.food.name.toLowerCase().includes(searchLower));
-//     });
+    const sortedRecipes = [...items].sort((a, b) => {
+        if (sortConfig.key) {
+            if (sortConfig.direction === 'ascending') {
+                return a[sortConfig.key] > b[sortConfig.key] ? 1 : -1;
+            } else if (sortConfig.direction === 'descending') {
+                return a[sortConfig.key] < b[sortConfig.key] ? 1 : -1;
+            }
+        }
+        return 0;
+    });
 
-//     const paginatedRecipes = filteredRecipes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+    const filteredRecipes = sortedRecipes.filter(recipe => {
+        const searchLower = search.toLowerCase();
+        return recipe.name.toLowerCase().includes(searchLower) ||
+            recipe.recipeFoods.some(rf => rf.food.name.toLowerCase().includes(searchLower));
+    });
 
-//     const handleAddRecipe = () => {
-//         if (search && !recipes.some(recipe => recipe.name.toLowerCase() === search.toLowerCase())) {
-//             dispatch(addRecipe({ name: search, description: '', recipeFoods: [] }));
-//             setSearch('');
-//         }
-//     };
+    const paginatedRecipes = filteredRecipes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-//     const handleDeleteRecipe = (id) => {
-//         setDeletingRecipe(id);
-//         onDeleteRecipe();
-//     };
+    const handleAddRecipe = (recipeName) => {
+        if (recipeName && !items.some(recipe => recipe.name.toLowerCase() === recipeName.toLowerCase())) {
+            dispatch(addRecipe({ name: recipeName, description: '', recipeFoods: [] }));
+        }
+    };
 
-//     const handleEditRecipe = (recipe) => {
-//         setViewingRecipe(recipe);
-//         onEditRecipe();
-//     };
+    const handleItemsPerPageChange = (itemsPerPage) => {
+        setItemsPerPage(itemsPerPage);
+        setCurrentPage(1);  // Reset to the first page
+    };
 
-//     const openDescriptionModal = (description) => {
-//         setDescriptionToView(description);
-//         setDescriptionModalIsOpen(true);
-//     };
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
 
-//     const closeDescriptionModal = () => {
-//         setDescriptionModalIsOpen(false);
-//         setDescriptionToView('');
-//     };
+    const totalPages = Math.ceil(filteredRecipes.length / itemsPerPage);
 
-//     const handleItemsPerPageChange = (e) => {
-//         setItemsPerPage(Number(e.target.value));
-//         setCurrentPage(1);  // Reset to the first page
-//     };
+    const openRecipeModal = (recipeId) => {
+        dispatch(fetchRecipe(recipeId));
+        setRecipeModalOpen(true);
+    };
 
-//     const handlePageChange = (page) => {
-//         setCurrentPage(page);
-//     };
+    const closeRecipeModal = () => {
+        setRecipeModalOpen(false);
+    };
 
-//     const confirmDeleteRecipe = () => {
-//         dispatch(deleteRecipe(deletingRecipe));
-//         onCancelDeleteRecipe();
-//     };
+    const openDeleteRecipeModal = (recipeId, recipeName) => {
+        setRecipeToDelete({ id: recipeId, name: recipeName });
+        setDeleteRecipeModalOpen(true);
+    };
 
-//     const totalPages = Math.ceil(filteredRecipes.length / itemsPerPage);
+    const closeDeleteRecipeModal = () => {
+        setDeleteRecipeModalOpen(false);
+    };
 
-//     return (
-//         <div>
-//             <div className="recipe-header header">
-//                 <input
-//                     type="text"
-//                     placeholder="Search for recipes or enter a new recipe name..."
-//                     value={search}
-//                     onChange={handleSearchChange}
-//                 />
-//                 <button onClick={handleAddRecipe}>Add Recipe</button>
-//                 <select value={itemsPerPage} onChange={handleItemsPerPageChange}>
-//                     <option value={5}>5</option>
-//                     <option value={10}>10</option>
-//                     <option value={20}>20</option>
-//                 </select>
-//             </div>
-//             {loading ? (
-//                 <p>Loading...</p>
-//             ) : (
-//                 <table>
-//                     <thead>
-//                         <tr>
-//                             <th>Name</th>
-//                             <th onClick={() => handleSort('totalCarbs')}>
-//                                 Total Carbs {sortConfig.key === 'totalCarbs' && (sortConfig.direction === 'ascending' ? '↑' : sortConfig.direction === 'descending' ? '↓' : '')}
-//                             </th>
-//                             <th onClick={() => handleSort('totalCalories')}>
-//                                 Total Calories {sortConfig.key === 'totalCalories' && (sortConfig.direction === 'ascending' ? '↑' : sortConfig.direction === 'descending' ? '↓' : '')}
-//                             </th>
-//                             <th className="description">Description</th>
-//                             <th>Actions</th>
-//                         </tr>
-//                     </thead>
-//                     <tbody>
-//                         {paginatedRecipes.map(recipe => (
-//                             <tr key={recipe.id}>
-//                                 <td>{recipe.name}</td>
-//                                 <td>{recipe.totalCarbs}</td>
-//                                 <td>{recipe.totalCalories}</td>
-//                                 <td className="description">
-//                                     {recipe.description && recipe.description.length > 100 ? (
-//                                         <>
-//                                             {recipe.description.substring(0, 100)}...
-//                                             <button onClick={() => openDescriptionModal(recipe.description)}>View</button>
-//                                         </>
-//                                     ) : (
-//                                         recipe.description
-//                                     )}
-//                                 </td>
-//                                 <td>
-//                                     <button onClick={() => handleEditRecipe(recipe)}>Edit</button>
-//                                     <button onClick={() => handleDeleteRecipe(recipe.id)}>Delete</button>
-//                                 </td>
-//                             </tr>
-//                         ))}
-//                     </tbody>
-//                 </table>
-//             )}
-//             <div className="pagination">
-//                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-//                     <button
-//                         key={page}
-//                         onClick={() => handlePageChange(page)}
-//                         className={page === currentPage ? 'active' : ''}
-//                     >
-//                         {page}
-//                     </button>
-//                 ))}
-//             </div>
-//             {viewingRecipe && (
-//                 <ViewRecipeModal
-//                     isOpen={isEditRecipeModalOpen}
-//                     onRequestClose={onCancelEditRecipe}
-//                     recipe={viewingRecipe}
-//                 />
-//             )}
-//             {deletingRecipe && (
-//                 <ConfirmDeleteModal
-//                 isOpen={isDeleteRecipeModalOpen}
-//                 onRequestClose={onCancelDeleteRecipe}
-//                 onConfirm={confirmDeleteRecipe}
-//                 message="Are you sure you want to delete this recipe?"
-//             />
-//             )}
+    const handleDelete = (id) => {
+        dispatch(deleteRecipe(id));
+        setDeleteRecipeModalOpen(false);
+    }
 
-//             <Modal
-//                 isOpen={descriptionModalIsOpen}
-//                 onRequestClose={closeDescriptionModal}
-//                 contentLabel="Description Modal"
-//                 style={{
-//                     content: {
-//                         top: '50%',
-//                         left: '50%',
-//                         right: 'auto',
-//                         bottom: 'auto',
-//                         marginRight: '-50%',
-//                         transform: 'translate(-50%, -50%)',
-//                         width: '50%',
-//                         padding: '20px'
-//                     }
-//                 }}
-//             >
-//                 <h2>Description</h2>
-//                 <p>{descriptionToView}</p>
-//                 <button onClick={closeDescriptionModal}>Close</button>
-//             </Modal>
-//         </div>
-//     );
-// };
+    return (
+        <div>
+            <div className="header">
+                <select value={itemsPerPage} onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}>
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                </select>
+                <AddRecipe onAddRecipe={handleAddRecipe} search={search} onSearchChange={handleSearchChange} />
+            </div>
+            {loading ? (
+                <p>Loading...</p>
+            ) : (
+                <RecipesTable
+                    recipes={paginatedRecipes}
+                    sortConfig={sortConfig}
+                    onSort={handleSort}
+                    onEdit={openRecipeModal}
+                    onDelete={openDeleteRecipeModal}
+                />
+            )}
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+            <ReactModal isOpen={isRecipeModalOpen} onRequestClose={closeRecipeModal}>
+                <Recipe onClose={closeRecipeModal} />
+            </ReactModal>
+            <ReactModal isOpen={isDeleteRecipeModalOpen} onRequestClose={closeDeleteRecipeModal}>
+                <DeleteRecipe
+                    name={recipeToDelete.name}
+                    onConfirm={() => handleDelete(recipeToDelete.id)}
+                    onCancel={closeDeleteRecipeModal}
+                />
+            </ReactModal>
+        </div>
+    );
+}
 
-// const mapDispatchToProps = (dispatch) => ({
-//     onEditRecipe: () => dispatch(showEditRecipeModal()),
-//     onCancelEditRecipe: () => dispatch(hideEditRecipeModal()),
-//     onDeleteRecipe: () => dispatch(showDeleteRecipeModal()),
-//     onCancelDeleteRecipe: () => dispatch(hideDeleteRecipeModal())
-// });
+function AddRecipe({ search, onSearchChange, onAddRecipe }) {
 
-// export default connect(null, mapDispatchToProps)(Recipes);
+    const handleAddRecipe = () => {
+        onAddRecipe(search);
+    };
+
+    return (
+        <div className="add-recipe-form">
+            <input
+                type="text"
+                placeholder="Search for recipes or enter a new recipe name..."
+                value={search}
+                onChange={onSearchChange}
+            />
+            <button onClick={handleAddRecipe}>Add Recipe</button>
+        </div>
+    );
+}
+
+function RecipesTable({ recipes, sortConfig, onSort, onEdit, onDelete }) {
+    return (
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th onClick={() => onSort('totalCarbs')}>
+                        Total Carbs {sortConfig.key === 'totalCarbs' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                    </th>
+                    <th onClick={() => onSort('totalCalories')}>
+                        Total Calories {sortConfig.key === 'totalCalories' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                    </th>
+                    <th className="description">Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {recipes.map(recipe => (
+                    <tr key={recipe.id}>
+                        <td>{recipe.name}</td>
+                        <td>{recipe.totalCarbs}</td>
+                        <td>{recipe.totalCalories}</td>
+                        <td>{recipe.description}</td>
+                        <td>
+                            <button onClick={() => onEdit(recipe.id)}>Edit</button>
+                            <button onClick={() => onDelete(recipe.id, recipe.name)}>Delete</button>
+                        </td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    );
+}
+
+function Pagination({ currentPage, totalPages, onPageChange }) {
+    return (
+        <div className="pagination">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button
+                    key={page}
+                    onClick={() => onPageChange(page)}
+                    className={page === currentPage ? 'active' : ''}
+                >
+                    {page}
+                </button>
+            ))}
+        </div>
+    );
+}
+
+function DeleteRecipe({ name, onConfirm, onCancel }) {
+
+    return (
+        <div>
+            <h2>Delete recipe</h2>
+            <p>Do you want to delete {name} ? </p>
+            <div className="modal-buttons">
+                <button onClick={onConfirm}>Confirm</button>
+                <button onClick={onCancel}>Cancel</button>
+            </div>
+        </div>
+    );
+}
+
+export default Recipes;
