@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ReactModal from 'react-modal';
-import { fetchFoods, fetchFoodTypes, fetchFood, addFood } from '../../features/foodsSlice';
+import { fetchFoods, fetchFoodTypes, fetchFood, addFood, deleteFood } from '../../features/foodsSlice';
 import Food from '../modal/Food';
 
 function Foods() {
@@ -12,8 +12,10 @@ function Foods() {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [searchFilters, setSearchFilters] = useState({});
-    const [isModalOpen, setIsModalOpen] = useState(false);
 
+    const [isFoodModalOpen, setFoodModalOpen] = useState(false);
+    const [isDeleteFoodModalOpen, setDeleteFoodModalOpen] = useState(false);
+    const [foodToDelete, setFoodToDelete] = useState({ id: null, name: '' });
 
     useEffect(() => {
         dispatch(fetchFoods());
@@ -80,14 +82,28 @@ function Foods() {
         setCurrentPage(1); // Reset to the first page
     };
 
-    const openEditModal = (foodId) => {
+    const openFoodModal = (foodId) => {
         dispatch(fetchFood(foodId));
-        setIsModalOpen(true);
+        setFoodModalOpen(true);
     };
 
-    const closeModal = () => {
-        setIsModalOpen(false);
+    const closeFoodModal = () => {
+        setFoodModalOpen(false);
     };
+
+    const openDeleteFoodModal = (foodId, foodName) => {
+        setFoodToDelete({ id: foodId, name: foodName });
+        setDeleteFoodModalOpen(true);
+    };
+
+    const closeDeleteFoodModal = () => {
+        setDeleteFoodModalOpen(false);
+    };
+
+    const handleDelete = (id) => {
+        dispatch(deleteFood(id));
+        setDeleteFoodModalOpen(false);
+    }
 
     return (
         <div>
@@ -107,15 +123,23 @@ function Foods() {
                         foods={paginatedFoods}
                         sortConfig={sortConfig}
                         handleSort={handleSort}
-                        onEdit={openEditModal}
+                        onEdit={openFoodModal}
+                        onDelete={openDeleteFoodModal}
                     />
                     <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
                         onPageChange={setCurrentPage}
                     />
-                    <ReactModal isOpen={isModalOpen} onRequestClose={closeModal}>
-                        <Food onClose={closeModal} />
+                    <ReactModal isOpen={isFoodModalOpen} onRequestClose={closeFoodModal}>
+                        <Food onClose={closeFoodModal} />
+                    </ReactModal>
+                    <ReactModal isOpen={isDeleteFoodModalOpen} onRequestClose={closeDeleteFoodModal}>
+                        <DeleteFood
+                            name={foodToDelete.name}
+                            onConfirm={() => handleDelete(foodToDelete.id)}
+                            onCancel={closeDeleteFoodModal}
+                        />
                     </ReactModal>
                 </div>
             )}
@@ -200,7 +224,7 @@ function AddFood({ items, itemTypes, onSearch }) {
     );
 }
 
-function FoodsTable({ foods, sortConfig, handleSort, onEdit }) {
+function FoodsTable({ foods, sortConfig, handleSort, onEdit, onDelete }) {
     return (
         <table>
             <thead>
@@ -227,7 +251,7 @@ function FoodsTable({ foods, sortConfig, handleSort, onEdit }) {
                         <td>{food.comments}</td>
                         <td>
                             <button onClick={() => onEdit(food.id)}>Edit</button>
-                            <button>Delete</button>
+                            <button onClick={() => onDelete(food.id, food.name)}>Delete</button>
                         </td>
                     </tr>
                 ))}
@@ -248,6 +272,20 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
                     {page}
                 </button>
             ))}
+        </div>
+    );
+}
+
+function DeleteFood({ name, onConfirm, onCancel }) {
+
+    return (
+        <div>
+            <h2>Delete food</h2>
+            <p>Do you want to delete {name} ? </p>
+            <div className="modal-buttons">
+                <button onClick={onConfirm}>Confirm</button>
+                <button onClick={onCancel}>Cancel</button>
+            </div>
         </div>
     );
 }
