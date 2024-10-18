@@ -3,6 +3,10 @@ import ReactModal from 'react-modal';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchRecipes, fetchRecipe, addRecipe, deleteRecipe } from '../../features/recipesSlice';
 import Recipe from '../modal/Recipe';
+import ConfirmDelete from '../modal/ConfirmDelete';
+import Pagination from '../misc/Pagination';
+import Loading from '../misc/Loading';
+import PerPage from '../misc/PerPage';
 
 function Recipes() {
     const dispatch = useDispatch();
@@ -99,36 +103,34 @@ function Recipes() {
 
     return (
         <div>
-            <div className="header">
-                <select value={itemsPerPage} onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}>
-                    <option value={5}>5</option>
-                    <option value={10}>10</option>
-                    <option value={20}>20</option>
-                </select>
-                <AddRecipe onAddRecipe={handleAddRecipe} search={search} onSearchChange={handleSearchChange} />
-            </div>
             {loading ? (
-                <p>Loading...</p>
+                <Loading />
             ) : (
-                <RecipesTable
-                    recipes={paginatedRecipes}
-                    sortConfig={sortConfig}
-                    onSort={handleSort}
-                    onEdit={openRecipeModal}
-                    onDelete={openDeleteRecipeModal}
-                />
+                <div>
+                    <div className="header">
+                        <PerPage value={itemsPerPage} onChange={(e) => handleItemsPerPageChange(Number(e.target.value))} />
+                        <AddRecipe onAddRecipe={handleAddRecipe} search={search} onSearchChange={handleSearchChange} />
+                    </div>
+                    <RecipesTable
+                        recipes={paginatedRecipes}
+                        sortConfig={sortConfig}
+                        onSort={handleSort}
+                        onEdit={openRecipeModal}
+                        onDelete={openDeleteRecipeModal}
+                    />
+                    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+                    <ReactModal isOpen={isRecipeModalOpen} onRequestClose={closeRecipeModal}>
+                        <Recipe onClose={closeRecipeModal} />
+                    </ReactModal>
+                    <ReactModal isOpen={isDeleteRecipeModalOpen} onRequestClose={closeDeleteRecipeModal}>
+                        <ConfirmDelete
+                            name={recipeToDelete.name}
+                            onConfirm={() => handleDelete(recipeToDelete.id)}
+                            onCancel={closeDeleteRecipeModal}
+                        />
+                    </ReactModal>
+                </div>
             )}
-            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
-            <ReactModal isOpen={isRecipeModalOpen} onRequestClose={closeRecipeModal}>
-                <Recipe onClose={closeRecipeModal} />
-            </ReactModal>
-            <ReactModal isOpen={isDeleteRecipeModalOpen} onRequestClose={closeDeleteRecipeModal}>
-                <DeleteRecipe
-                    name={recipeToDelete.name}
-                    onConfirm={() => handleDelete(recipeToDelete.id)}
-                    onCancel={closeDeleteRecipeModal}
-                />
-            </ReactModal>
         </div>
     );
 }
@@ -183,36 +185,6 @@ function RecipesTable({ recipes, sortConfig, onSort, onEdit, onDelete }) {
                 ))}
             </tbody>
         </table>
-    );
-}
-
-function Pagination({ currentPage, totalPages, onPageChange }) {
-    return (
-        <div className="pagination">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <button
-                    key={page}
-                    onClick={() => onPageChange(page)}
-                    className={page === currentPage ? 'active' : ''}
-                >
-                    {page}
-                </button>
-            ))}
-        </div>
-    );
-}
-
-function DeleteRecipe({ name, onConfirm, onCancel }) {
-
-    return (
-        <div>
-            <h2>Delete recipe</h2>
-            <p>Do you want to delete {name} ? </p>
-            <div className="modal-buttons">
-                <button onClick={onConfirm}>Confirm</button>
-                <button onClick={onCancel}>Cancel</button>
-            </div>
-        </div>
     );
 }
 

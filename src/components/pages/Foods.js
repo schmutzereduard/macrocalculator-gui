@@ -3,6 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import ReactModal from 'react-modal';
 import { fetchFoods, fetchFoodTypes, fetchFood, addFood, deleteFood } from '../../features/foodsSlice';
 import Food from '../modal/Food';
+import ConfirmDelete from '../modal/ConfirmDelete';
+import Pagination from '../misc/Pagination';
+import PerPage from '../misc/PerPage';
+import Loading from '../misc/Loading';
 
 function Foods() {
     const dispatch = useDispatch();
@@ -108,15 +112,11 @@ function Foods() {
     return (
         <div>
             {loading ? (
-                <p>Loading...</p>
+                <Loading />
             ) : (
                 <div>
                     <div className='header'>
-                        <select className="per-page" value={itemsPerPage} onChange={handleItemsPerPageChange}>
-                            <option value={5}>5</option>
-                            <option value={10}>10</option>
-                            <option value={20}>20</option>
-                        </select>
+                        <PerPage className="per-page" itemsPerPage={itemsPerPage} onChange={handleItemsPerPageChange} />
                         <AddFood items={items} itemTypes={itemTypes} onSearch={handleSearch} />
                     </div>
                     <FoodsTable
@@ -135,7 +135,7 @@ function Foods() {
                         <Food onClose={closeFoodModal} />
                     </ReactModal>
                     <ReactModal isOpen={isDeleteFoodModalOpen} onRequestClose={closeDeleteFoodModal}>
-                        <DeleteFood
+                        <ConfirmDelete
                             name={foodToDelete.name}
                             onConfirm={() => handleDelete(foodToDelete.id)}
                             onCancel={closeDeleteFoodModal}
@@ -257,36 +257,6 @@ function FoodsTable({ foods, sortConfig, handleSort, onEdit, onDelete }) {
                 ))}
             </tbody>
         </table>
-    );
-}
-
-function Pagination({ currentPage, totalPages, onPageChange }) {
-    return (
-        <div className="pagination">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                    key={page}
-                    onClick={() => onPageChange(page)}
-                    className={page === currentPage ? 'active' : ''}
-                >
-                    {page}
-                </button>
-            ))}
-        </div>
-    );
-}
-
-function DeleteFood({ name, onConfirm, onCancel }) {
-
-    return (
-        <div>
-            <h2>Delete food</h2>
-            <p>Do you want to delete {name} ? </p>
-            <div className="modal-buttons">
-                <button onClick={onConfirm}>Confirm</button>
-                <button onClick={onCancel}>Cancel</button>
-            </div>
-        </div>
     );
 }
 

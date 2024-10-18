@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateFood } from "../../features/foodsSlice";
 import ReactModal from "react-modal";
+import SaveChanges from "./SaveChanges";
 
 function Food({ onClose }) {
     const dispatch = useDispatch();
@@ -112,26 +113,12 @@ function Food({ onClose }) {
                     </div>
 
                     <ReactModal isOpen={isModalOpen} onRequestClose={() => setModalOpen(false)}>
-                        <SaveChangesModal onSave={onSave} onExit={onExit} />
+                        <SaveChanges onSave={onSave} onExit={onExit} />
                     </ReactModal>
                 </div>
             ) : (
                 <p>Loading...</p>
             )}
-        </div>
-    );
-}
-
-function SaveChangesModal({ onSave, onExit }) {
-
-    return (
-        <div>
-            <h2>Save Changes</h2>
-            <p>You have unsaved changes. Do you want to save them and exit?</p>
-            <div className="modal-buttons">
-                <button onClick={onSave}>Save</button>
-                <button onClick={onExit}>Exit</button>
-            </div>
         </div>
     );
 }
