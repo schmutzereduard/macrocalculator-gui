@@ -3,16 +3,16 @@ import MacroCalculatorApi from "../api/MacroCalculatorApi";
 
 // Thunks for Journals
 
-export const fetchMonthJournals = createAsyncThunk(
-  "journals/fetchMonthJournals",
+export const fetchJournals = createAsyncThunk(
+  "journals/fetchJournals",
   async ({ year, month }) => {
     const response = await MacroCalculatorApi.getMonthJournals(year, month);
     return response.data;
   }
 );
 
-export const fetchDayJournal = createAsyncThunk(
-  "journals/fetchDayJournal",
+export const fetchJournal = createAsyncThunk(
+  "journals/fetchJournal",
   async ({ year, month, day }) => {
     const response = await MacroCalculatorApi.getDayJournal(year, month, day);
     return response.data;
@@ -66,15 +66,15 @@ const journalsSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchMonthJournals.pending, handlePending)
-      .addCase(fetchMonthJournals.rejected, handleRejected)
-      .addCase(fetchMonthJournals.fulfilled, (state, action) => {
+      .addCase(fetchJournals.pending, handlePending)
+      .addCase(fetchJournals.rejected, handleRejected)
+      .addCase(fetchJournals.fulfilled, (state, action) => {
         state.loading = false;
         state.items = action.payload;
       })
-      .addCase(fetchDayJournal.pending, handlePending)
-      .addCase(fetchDayJournal.rejected, handleRejected)
-      .addCase(fetchDayJournal.fulfilled, (state, action) => {
+      .addCase(fetchJournal.pending, handlePending)
+      .addCase(fetchJournal.rejected, handleRejected)
+      .addCase(fetchJournal.fulfilled, (state, action) => {
         state.loading = false;
         state.selectedItem = action.payload;
       })

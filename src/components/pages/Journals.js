@@ -1,95 +1,86 @@
-// import React, { useEffect, useState } from 'react';
-// import { connect, useDispatch, useSelector } from 'react-redux';
-// import { fetchDayJournal, fetchMonthJournals } from '../../store/actions/journalActions';
-// import { showEditJournalModal, hideEditJournalModal } from '../../store/actions/modal/edit';
-// import EditJournalModal from '../modal/EditJournalModal';
-// import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday } from 'date-fns';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchJournal, fetchJournals } from '../../features/journalsSlice';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday } from 'date-fns';
+import Loading from '../misc/Loading';
 
-// const Journals = ({ onEditJournal, onCancelEditJournal }) => {
-//     const dispatch = useDispatch();
-//     const journals = useSelector(state => state.journals.journals);
-//     const selectedJournal = useSelector(state => state.journals.journal);
-//     const isEditJournalModalOpen = useSelector(state => state.editModal.isEditJournalModalOpen);
-//     const [currentDate, setCurrentDate] = useState(new Date());
-//     const [selectedDate, setSelectedDate] = useState(new Date());
-//     const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
-//     const months = Array.from({ length: 12 }, (_, i) => i + 1);
+function Journals() {
 
-//     useEffect(() => {
-//         const year = format(currentDate, 'yyyy');
-//         const month = format(currentDate, 'MM');
-//         dispatch(fetchMonthJournals(year, month));
-//     }, [dispatch, currentDate]);
+    const dispatch = useDispatch();
+    const { items: journals, loading } = useSelector(state => state.journals);
+    const [isJournalModalOpen, setJournalModalOpen] = useState(false);
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
+    const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
-//     const handleYearChange = (event) => {
-//         const year = event.target.value;
-//         const newDate = new Date(year, currentDate.getMonth(), 1);
-//         setCurrentDate(newDate);
-//     };
+    useEffect(() => {
+        const year = format(currentDate, 'yyyy');
+        const month = format(currentDate, 'MM');
+        dispatch(fetchJournals({ year: year, month: month }));
+    }, [dispatch, currentDate]);
 
-//     const handleMonthChange = (event) => {
-//         const month = event.target.value - 1;
-//         const newDate = new Date(currentDate.getFullYear(), month, 1);
-//         setCurrentDate(newDate);
-//     };
+    const handleYearChange = (event) => {
+        const year = event.target.value;
+        const newDate = new Date(year, currentDate.getMonth(), 1);
+        setCurrentDate(newDate);
+    };
 
-//     const handleDayClick = (date) => {
-//         const year = format(date, 'yyyy');
-//         const month = format(date, 'MM');
-//         const day = format(date, 'dd');
-//         setSelectedDate(date);
-//         dispatch(fetchDayJournal(year, month, day));
-//         dispatch(showEditJournalModal());
-//     };
+    const handleMonthChange = (event) => {
+        const month = event.target.value - 1;
+        const newDate = new Date(currentDate.getFullYear(), month, 1);
+        setCurrentDate(newDate);
+    };
 
-//     const daysInMonth = eachDayOfInterval({
-//         start: startOfMonth(currentDate),
-//         end: endOfMonth(currentDate)
-//     });
+    const handleDayClick = (date) => {
+        const year = format(date, 'yyyy');
+        const month = format(date, 'MM');
+        const day = format(date, 'dd');
+        dispatch(fetchJournal({ year: year, month: month, day: day }));
+        setJournalModalOpen(true);
+    };
 
-//     const isJournalAvailable = (date) => {
-//         return journals.some(journal => journal.date === format(date, 'yyyy-MM-dd'));
-//     };
+    const daysInMonth = eachDayOfInterval({
+        start: startOfMonth(currentDate),
+        end: endOfMonth(currentDate)
+    });
 
-//     return (
-//         <div>
-//             <div className="header">
-//                 <select value={currentDate.getFullYear()} onChange={handleYearChange}>
-//                     {years.map(year => (
-//                         <option key={year} value={year}>{year}</option>
-//                     ))}
-//                 </select>
-//                 <select value={currentDate.getMonth() + 1} onChange={handleMonthChange}>
-//                     {months.map(month => (
-//                         <option key={month} value={month}>{format(new Date(2000, month - 1), 'MMMM')}</option>
-//                     ))}
-//                 </select>
-//             </div>
-//             <div className="calendar">
-//                 {daysInMonth.map(day => (
-//                     <div 
-//                         key={day} 
-//                         className={`day ${isSameMonth(day, currentDate) ? '' : 'disabled'} ${isToday(day) ? 'today' : ''} ${isJournalAvailable(day) ? 'journal-available' : ''}`}
-//                         onClick={() => handleDayClick(day)}
-//                     >
-//                         {format(day, 'd')}
-//                     </div>
-//                 ))}
-//             </div>
-//             {isEditJournalModalOpen && (
-//                 <EditJournalModal 
-//                     isOpen={isEditJournalModalOpen}
-//                     onRequestClose={onCancelEditJournal}
-//                     journal={selectedJournal}
-//                 />
-//             )}
-//         </div>
-//     );
-// };
+    const isJournalAvailable = (date) => {
+        return journals.some(journal => journal.date === format(date, 'yyyy-MM-dd'));
+    };
 
-// const mapDispatchToProps = (dispatch) => ({
-//     onEditJournal: () => dispatch(showEditJournalModal()),
-//     onCancelEditJournal: () => dispatch(hideEditJournalModal())
-// });
+    return (
+        <div>
+            {loading ? (
+                <Loading />
+            ) : (
+                <div>
+                    <div className="header">
+                        <select value={currentDate.getFullYear()} onChange={handleYearChange}>
+                            {years.map(year => (
+                                <option key={year} value={year}>{year}</option>
+                            ))}
+                        </select>
+                        <select value={currentDate.getMonth() + 1} onChange={handleMonthChange}>
+                            {months.map(month => (
+                                <option key={month} value={month}>{format(new Date(2000, month - 1), 'MMMM')}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="calendar">
+                        {daysInMonth.map(day => (
+                            <div 
+                                key={day} 
+                                className={`day ${isSameMonth(day, currentDate) ? '' : 'disabled'} ${isToday(day) ? 'today' : ''} ${isJournalAvailable(day) ? 'journal-available' : ''}`}
+                                onClick={() => handleDayClick(day)}
+                            >
+                                {format(day, 'd')}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
 
-// export default connect(null, mapDispatchToProps)(Journals);
+export default Journals;
