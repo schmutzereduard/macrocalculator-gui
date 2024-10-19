@@ -16,6 +16,10 @@ input[type="text"], input[type="number"], select, textarea {
     margin-bottom: 10px;
 }
 
+textarea {
+    resize: none;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -126,6 +130,7 @@ th {
 .list-item {
     display: flex;
     flex-direction: column;
+    text-align: center;
     align-items: center;
     padding: 10px;
     border: 1px solid #ccc;
@@ -137,6 +142,14 @@ th {
     display: flex;
     flex-grow: 2; /* Add flexibility to the form */
     margin-right: 20px; /* Adjust right margin for spacing */
+
+}
+
+.add-foods-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
 add-food-form input, .add-food-form select, .add-food-form button {
@@ -197,7 +210,7 @@ th.description, td.description {
 /* Modal buttons */
 .modal-buttons {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 10px;
     margin-top: 20px;
 }

@@ -1,215 +1,124 @@
-import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { updateRecipe } from '../../features/recipesSlice';
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { updateRecipe } from "../../features/recipesSlice";
+import { fetchFoods } from "../../features/foodsSlice";
 import ReactModal from "react-modal";
-import SaveChanges from './SaveChanges';
+import SaveChanges from "./SaveChanges";
+import ConfirmDelete from "./ConfirmDelete";
+import Loading from "../misc/Loading";
+import PerPage from "../misc/PerPage";
 
+function Recipe({ onClose }) {
+    const dispatch = useDispatch();
+    const { selectedItem: recipe } = useSelector((state) => state.recipes);
+    const { items: foods } = useSelector((state) => state.foods);
 
-class EditRecipeModal extends Component {
-    state = {
-        selectedFoods: [],
-        foodQuantities: {},
-        foodToRemove: null,
-        showRemoveConfirmModal: false,
-        recipeFoodsVisual: [],
-        description: '',
-        name: '',
-        search: '',
-        itemsPerPage: 10,
-        currentPage: 1,
-        changesMade: false,
-        initialRecipe: null // To store the initial state of the recipe
-    };
+    const [editingRecipe, setEditingRecipe] = useState(null);
+    const [foodQuantities, setFoodQuantities] = useState({});
+    const [search, setSearch] = useState("");
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [isModalOpen, setModalOpen] = useState(false);
+    const [showRemoveConfirmModal, setShowRemoveConfirmModal] = useState(false);
+    const [foodToRemove, setFoodToRemove] = useState(null);
 
-    componentDidMount() {
-        const { recipe } = this.props;
-        this.props.fetchFoods();
+    useEffect(() => {
         if (recipe) {
-            this.setState({
-                recipeFoodsVisual: recipe.recipeFoods || [],
-                description: recipe.description || '',
-                name: recipe.name || '',
-                initialRecipe: recipe, // Store the initial state of the recipe
-                changesMade: false // Reset changesMade when the component mounts
-            });
+            setEditingRecipe({ ...recipe });
         }
-    }
+        dispatch(fetchFoods());
+    }, [recipe, dispatch]);
 
-    componentDidUpdate(prevProps) {
-        if (this.props.recipe?.id !== prevProps.recipe?.id) {
-            this.setState({
-                foodQuantities: {},
-                recipeFoodsVisual: this.props.recipe?.recipeFoods || [],
-                description: this.props.recipe?.description || '',
-                name: this.props.recipe?.name || '',
-                initialRecipe: this.props.recipe, // Store the initial state of the recipe
-                changesMade: false // Reset changesMade when a new recipe is loaded
-            });
+    const recipeChanged = () => {
+        for (let key in editingRecipe) {
+            if (editingRecipe[key] !== recipe[key]) return true;
         }
-    }
-
-    handleRemoveFood = (foodId) => {
-        this.setState({
-            foodToRemove: foodId,
-            showRemoveConfirmModal: true,
-            changesMade: true
-        });
+        return false;
     };
 
-    confirmRemoveFood = () => {
-        const { foodToRemove, recipeFoodsVisual } = this.state;
-        const updatedRecipeFoods = recipeFoodsVisual.filter(rf => rf.food.id !== foodToRemove);
-        this.setState({
-            recipeFoodsVisual: updatedRecipeFoods,
-            showRemoveConfirmModal: false,
-            foodToRemove: null
-        });
+    const onSave = () => {
+        dispatch(updateRecipe(editingRecipe));
+        onClose();
     };
 
-    handleQuantityChange = (foodId, quantity) => {
-        this.setState({
-            foodQuantities: { ...this.state.foodQuantities, [foodId]: quantity },
-            changesMade: true
-        });
+    const onExit = () => {
+        setModalOpen(false);
+        onClose();
     };
 
-    handleAddFoodsToRecipe = () => {
-        const { foodQuantities, recipeFoodsVisual } = this.state;
-        const newRecipeFoods = Object.keys(foodQuantities).map(foodId => {
-            const food = this.props.foods.find(f => f.id === parseInt(foodId));
-            return {
-                food,
-                quantity: foodQuantities[foodId]
-            };
-        }).filter(item => item.quantity > 0);
-
-        const updatedRecipeFoods = [...recipeFoodsVisual, ...newRecipeFoods];
-        this.setState({
-            selectedFoods: [],
-            foodQuantities: {},
-            recipeFoodsVisual: updatedRecipeFoods,
-            changesMade: true
-        });
-    };
-
-    handleDescriptionChange = (e) => {
-        this.setState({ description: e.target.value, changesMade: true });
-    };
-
-    handleNameChange = (e) => {
-        this.setState({ name: e.target.value, changesMade: true });
-    };
-
-    handleSearchChange = (e) => {
-        this.setState({ search: e.target.value });
-    };
-
-    handleItemsPerPageChange = (e) => {
-        this.setState({ itemsPerPage: parseInt(e.target.value, 10), currentPage: 1 });
-    };
-
-    handlePageChange = (page) => {
-        this.setState({ currentPage: page });
-    };
-
-    handleUpdateRecipe = () => {
-        if (!this.props.recipe) return;
-        const updatedRecipe = {
-            ...this.props.recipe,
-            description: this.state.description,
-            name: this.state.name,
-            recipeFoods: this.state.recipeFoodsVisual
-        };
-        this.props.updateRecipe(updatedRecipe);
-        this.setState({ initialRecipe: updatedRecipe, changesMade: false }); // Update the initial state and reset changesMade
-    };
-
-    handleModalClose = () => {
-        const { initialRecipe, recipeFoodsVisual, description, name } = this.state;
-        const isChanged = JSON.stringify(initialRecipe.recipeFoods) !== JSON.stringify(recipeFoodsVisual) ||
-            initialRecipe.description !== description ||
-            initialRecipe.name !== name;
-
-        if (isChanged) {
-            this.props.showSaveChangesModal();
+    const handleSave = () => {
+        if (recipeChanged()) {
+            onSave();
         } else {
-            this.props.onRequestClose();
+            onClose();
         }
     };
 
-    confirmSaveChanges = (saveChanges) => {
-        if (saveChanges) {
-            this.handleUpdateRecipe();
+    const handleClose = () => {
+        if (recipeChanged()) {
+            setModalOpen(true);
+        } else {
+            onExit();
         }
-        this.props.hideSaveChangesModal();
-        this.props.onRequestClose();
     };
 
-    calculateNutritionalInfo = (food, quantity) => {
-        const carbs = (food.carbs / 100) * quantity;
-        const kcal = (food.calories / 100) * quantity;
-        return `c: ${carbs.toFixed(1)} kCal: ${kcal.toFixed(1)}`;
+    const handleRemoveFood = (foodId) => {
+        setFoodToRemove(foodId);
+        setShowRemoveConfirmModal(true);
     };
 
-    calculateTotalRecipeNutritionalInfo = () => {
-        const { recipeFoodsVisual } = this.state;
-        let totalCarbs = 0;
-        let totalCalories = 0;
-
-        recipeFoodsVisual.forEach(rf => {
-            totalCarbs += (rf.food.carbs / 100) * rf.quantity;
-            totalCalories += (rf.food.calories / 100) * rf.quantity;
-        });
-
-        return `carbs: ${totalCarbs.toFixed(1)} | calories: ${totalCalories.toFixed(1)}`;
+    const confirmRemoveFood = () => {
+        setEditingRecipe((prev) => ({
+            ...prev,
+            recipeFoods: prev.recipeFoods.filter((rf) => rf.food.id !== foodToRemove),
+        }));
+        setShowRemoveConfirmModal(false);
+        setFoodToRemove(null);
     };
 
-    calculateTotalNutritionalInfo = () => {
-        const { foodQuantities } = this.state;
-        let totalCarbs = 0;
-        let totalCalories = 0;
-
-        Object.keys(foodQuantities).forEach(foodId => {
-            const food = this.props.foods.find(f => f.id === parseInt(foodId));
-            const quantity = foodQuantities[foodId];
-            if (food && quantity > 0) {
-                totalCarbs += (food.carbs / 100) * quantity;
-                totalCalories += (food.calories / 100) * quantity;
-            }
-        });
-
-        return `carbs: ${totalCarbs.toFixed(1)} | calories: ${totalCalories.toFixed(1)}`;
+    const handleQuantityChange = (foodId, quantity) => {
+        setFoodQuantities({ ...foodQuantities, [foodId]: quantity });
     };
 
-    getFilteredFoods = () => {
-        const { foods } = this.props;
-        const { search } = this.state;
-        return foods.filter(food => {
-            const searchLower = search.toLowerCase();
-            return food.name.toLowerCase().includes(searchLower) || food.type.toLowerCase().includes(searchLower);
-        });
+    const getFilteredFoods = () => {
+        return foods.filter(
+            (food) =>
+                food.name.toLowerCase().includes(search.toLowerCase()) ||
+                food.type.toLowerCase().includes(search.toLowerCase())
+        );
     };
 
-    getPaginatedFoods = () => {
-        const { itemsPerPage, currentPage } = this.state;
-        const filteredFoods = this.getFilteredFoods();
+    const getPaginatedFoods = () => {
+        const filteredFoods = getFilteredFoods();
         const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        return filteredFoods.slice(startIndex, endIndex);
+        return filteredFoods.slice(startIndex, startIndex + itemsPerPage);
     };
 
-    renderPagination = () => {
-        const { itemsPerPage, currentPage } = this.state;
-        const filteredFoods = this.getFilteredFoods();
-        const totalPages = Math.ceil(filteredFoods.length / itemsPerPage);
+    const handleAddFoodsToRecipe = () => {
+        const newRecipeFoods = Object.keys(foodQuantities)
+            .map((foodId) => ({
+                food: foods.find((f) => f.id === parseInt(foodId)),
+                quantity: foodQuantities[foodId],
+            }))
+            .filter((item) => item.quantity > 0);
 
+        setEditingRecipe({
+            ...editingRecipe,
+            recipeFoods: [...(editingRecipe.recipeFoods || []), ...newRecipeFoods],
+        });
+        setFoodQuantities({});
+    };
+
+    const renderPagination = () => {
+        const filteredFoods = getFilteredFoods();
+        const totalPages = Math.ceil(filteredFoods.length / itemsPerPage);
         return (
             <div className="pagination">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <button
                         key={page}
-                        onClick={() => this.handlePageChange(page)}
-                        className={page === currentPage ? 'active' : ''}
+                        onClick={() => setCurrentPage(page)}
+                        className={page === currentPage ? "active" : ""}
                     >
                         {page}
                     </button>
@@ -218,181 +127,120 @@ class EditRecipeModal extends Component {
         );
     };
 
-    adjustTextareaHeight = (e) => {
-        e.target.style.height = 'auto';
-        e.target.style.height = `${e.target.scrollHeight}px`;
+    const handleItemsPerPageChange = (e) => {
+        setItemsPerPage(Number(e.target.value));
+        setCurrentPage(1); // Reset to the first page
     };
 
-    render() {
-        const { isOpen, isSaveChangesRecipeModalOpen } = this.props;
-        const { foodQuantities, showRemoveConfirmModal, recipeFoodsVisual, description, name, search, itemsPerPage } = this.state;
-        const availableFoods = this.getPaginatedFoods();
-
-        return (
-            <Modal isOpen={isOpen} onRequestClose={this.handleModalClose}>
-                <div>
-                    <input
-                        type="text"
-                        name="name"
-                        placeholder="Recipe Name"
-                        value={name}
-                        onChange={this.handleNameChange}
-                        style={{ width: '100%', height: '50px', fontSize: '16px', marginBottom: '10px' }}
-                    />
-                </div>
-                <div>
-                    <textarea
-                        name="description"
-                        placeholder="Description"
-                        value={description}
-                        onChange={(e) => { this.handleDescriptionChange(e); this.adjustTextareaHeight(e); }}
-                        style={{ width: '100%', height: '100px', fontSize: '16px', marginBottom: '10px', overflow: 'hidden' }}
-                        rows="3"
-                    />
-                </div>
-                <div>
-                    <h3>Foods in this Recipe ({this.calculateTotalRecipeNutritionalInfo()})</h3>
-                    <ul className="list">
-                        {recipeFoodsVisual.map((rf, index) => (
-                            <li key={index} className="list-item">
-                                {rf.food.name} - {rf.quantity}g
-                                <button onClick={() => this.handleRemoveFood(rf.food.id)}>Remove</button>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-                <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <button onClick={this.handleAddFoodsToRecipe}>Add Foods</button>
-                        <input
-                            type="text"
-                            placeholder="Search for foods..."
-                            value={search}
-                            onChange={this.handleSearchChange}
-                            style={{ marginLeft: '10px' }}
-                        />
-                        <div>{this.calculateTotalNutritionalInfo()}</div>
-                        <select onChange={this.handleItemsPerPageChange} value={itemsPerPage} style={{ marginLeft: '10px' }}>
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                            <option value="20">20</option>
-                        </select>
-                    </div>
-                    <ul className="list">
-                        {availableFoods.map(food => (
-                            <li key={food.id} className="available-food-item">
-                                <div>{food.name} ({this.calculateNutritionalInfo(food, foodQuantities[food.id] || 0)})</div>
-                                <input
-                                    type="number"
-                                    placeholder="Quantity (g)"
-                                    value={foodQuantities[food.id] || ''}
-                                    onChange={(e) => this.handleQuantityChange(food.id, e.target.value)}
-                                />
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <button onClick={this.handleModalClose}>Close</button>
-                    {this.renderPagination()}
-                </div>
-
-                {showRemoveConfirmModal && (
-                    <Modal isOpen={showRemoveConfirmModal}>
-                        <h2>Confirm Removal</h2>
-                        <p>Are you sure you want to remove this food from the recipe?</p>
-                        <button onClick={this.confirmRemoveFood}>Yes</button>
-                        <button onClick={() => this.setState({ showRemoveConfirmModal: false })}>No</button>
-                    </Modal>
-                )}
-                {isSaveChangesRecipeModalOpen && (
-                    <ConfirmSaveModal
-                        isOpen={isSaveChangesRecipeModalOpen}
-                        onRequestClose={this.props.hideSaveChangesModal}
-                        onConfirm={this.confirmSaveChanges}
-                        message="Save changes before exiting?"
-                    />
-                )}
-            </Modal>
-        );
-    }
-}
-
-const mapStateToProps = (state) => ({
-    foods: state.foods.foods,
-    isSaveChangesRecipeModalOpen: state.insertModal.isSaveRecipeChangesModalOpen
-});
-
-const mapDispatchToProps = (dispatch) => ({
-    fetchFoods: () => dispatch(fetchFoods()),
-    updateRecipe: (recipe) => dispatch(updateRecipe(recipe)),
-    showSaveChangesModal: () => dispatch(showSaveRecipeChangesModal()),
-    hideSaveChangesModal: () => dispatch(hideSaveRecipeChangesModal())
-});
-
-function Recipe({ onClose }) {
-
-    const dispatch = useDispatch();
-    const [editingRecipe, setEditionRecipe] = useState(null);
-    const { selectedItem } = useSelector((state) => state.recipes);
-    const [isModalOpen, setModalOpen] = useState(false);
-
-
-    useEffect(() => {
-        setEditionRecipe({ ...selectedItem });
-    }, [selectedItem])
-
-    const recipeChanged = () => {
-        for (let key in editingRecipe) {
-            if (editingRecipe[key] !== selectedItem[key])
-                return true;
-        }
-
-        return false;
-    }
-
-    const onSave = () => {
-        dispatch(updateRecipe(editingRecipe));
-        onClose();
-    }
-    const onExit = () => {
-        setModalOpen(false);
-        onClose();
-    }
-
-    const handleSave = () => {
-        if (recipeChanged()) {
-            onSave();
-        } else {
-            onClose();
-        }
-    }
-
-    const handleClose = () => {
-        if (recipeChanged()) {
-            setModalOpen(true);
-        } else {
-            onExit();
-        }
-    }
+    const getTotalProperties = (recipeFoods) => {
+        let totalCarbs = 0, totalCalories = 0; // Add other properties as needed
+        recipeFoods.forEach(({ food, quantity }) => {
+            totalCarbs += (food.carbs * quantity) / 100;
+            totalCalories += (food.calories * quantity) / 100;
+        });
+        return `Carbs: ${totalCarbs}g, Calories: ${totalCalories}`;
+    };
 
     return (
         <div>
-            {selectedItem ? (
+            {editingRecipe ? (
                 <div>
-                    <div className="modal-buttons">
-                        <button onClick={handleSave}>Save</button>
-                        <button onClick={handleClose}>Close</button>
+                    <div className="modal-form">
+                        <input
+                            type="text"
+                            name="name"
+                            placeholder="Recipe Name"
+                            value={editingRecipe.name}
+                            onChange={(e) =>
+                                setEditingRecipe({ ...editingRecipe, name: e.target.value })
+                            }
+                        />
+                        <textarea
+                            name="description"
+                            placeholder="Description"
+                            value={editingRecipe.description}
+                            onChange={(e) =>
+                                setEditingRecipe({ ...editingRecipe, description: e.target.value })
+                            }
+                        />
                     </div>
+                    <div>
+                        <h3>Foods in this Recipe: <span>{getTotalProperties(editingRecipe.recipeFoods)}</span></h3>
+                        <ul className="list">
+                            {editingRecipe.recipeFoods.map((rf, index) => (
+                                <li key={index} className="list-item">
+                                    {rf.food.name} - {rf.quantity}g
+                                    <span>{getTotalProperties([{ food: rf.food, quantity: rf.quantity }])}</span>
+                                    <button onClick={() => handleRemoveFood(rf.food.id)}>Remove</button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div>
+                        <div className="add-foods-header">
+                            <input
+                                type="text"
+                                placeholder="Search for foods..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                            <div>
+                                <p>{getTotalProperties(Object.keys(foodQuantities).map(foodId => ({
+                                    food: foods.find(f => f.id === parseInt(foodId)),
+                                    quantity: foodQuantities[foodId]
+                                })))} <span><button onClick={handleAddFoodsToRecipe}>+</button></span>
+                                </p>
+                            </div>
+                            <PerPage itemsPerPage={itemsPerPage} onChange={handleItemsPerPageChange} />
+                        </div>
+                        <ul className="list">
+                            {getPaginatedFoods().map((food) => (
+                                <li key={food.id} className="list-item">
+                                    {food.name}
+                                    <br />
+                                    {foodQuantities[food.id] && (
+                                        <div className="food-totals">
+                                            ({getTotalProperties([{ food, quantity: foodQuantities[food.id] }])})
+                                        </div>
+                                    )}
+                                    <br />
+                                    <input
+                                        type="number"
+                                        placeholder="Quantity (g)"
+                                        value={foodQuantities[food.id] || ""}
+                                        onChange={(e) =>
+                                            handleQuantityChange(food.id, e.target.value)
+                                        }
+                                    />
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div className="modal-buttons">
+                        <div>
+                            <button onClick={handleSave}>Save</button>
+                            <button onClick={handleClose}>Close</button>
+                        </div>
+                        <div>{renderPagination()}</div>
+                    </div>
+
                     <ReactModal isOpen={isModalOpen} onRequestClose={() => setModalOpen(false)}>
                         <SaveChanges onSave={onSave} onExit={onExit} />
                     </ReactModal>
+
+                    <ReactModal isOpen={showRemoveConfirmModal} onRequestClose={() => setShowRemoveConfirmModal(false)}>
+                        <ConfirmDelete
+                            name={"this food from the recipe"}
+                            onConfirm={confirmRemoveFood}
+                            onCancel={() => setShowRemoveConfirmModal(false)}
+                        />
+                    </ReactModal>
                 </div>
             ) : (
-                <p>Loading...</p>
+                <Loading />
             )}
-        </div>);
+        </div>
+    );
 }
-
 
 export default Recipe;

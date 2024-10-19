@@ -10,7 +10,7 @@ import PerPage from '../misc/PerPage';
 
 function Recipes() {
     const dispatch = useDispatch();
-    const { items, loading } = useSelector(state => state.recipes);
+    const { items: recipes, loading } = useSelector(state => state.recipes);
 
     const [search, setSearch] = useState('');
     const [sortConfig, setSortConfig] = useState({ key: '', direction: '' });
@@ -42,7 +42,7 @@ function Recipes() {
         setSortConfig({ key, direction });
     };
 
-    const sortedRecipes = [...items].sort((a, b) => {
+    const sortedRecipes = [...recipes].sort((a, b) => {
         if (sortConfig.key) {
             if (sortConfig.direction === 'ascending') {
                 return a[sortConfig.key] > b[sortConfig.key] ? 1 : -1;
@@ -62,14 +62,14 @@ function Recipes() {
     const paginatedRecipes = filteredRecipes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     const handleAddRecipe = (recipeName) => {
-        if (recipeName && !items.some(recipe => recipe.name.toLowerCase() === recipeName.toLowerCase())) {
+        if (recipeName && !recipes.some(recipe => recipe.name.toLowerCase() === recipeName.toLowerCase())) {
             dispatch(addRecipe({ name: recipeName, description: '', recipeFoods: [] }));
         }
     };
 
-    const handleItemsPerPageChange = (itemsPerPage) => {
-        setItemsPerPage(itemsPerPage);
-        setCurrentPage(1);  // Reset to the first page
+    const handleItemsPerPageChange = (e) => {
+        setItemsPerPage(Number(e.target.value));
+        setCurrentPage(1); // Reset to the first page
     };
 
     const handlePageChange = (page) => {
@@ -108,7 +108,7 @@ function Recipes() {
             ) : (
                 <div>
                     <div className="header">
-                        <PerPage value={itemsPerPage} onChange={(e) => handleItemsPerPageChange(Number(e.target.value))} />
+                        <PerPage itemsPerPage={itemsPerPage} onChange={handleItemsPerPageChange} />
                         <AddRecipe onAddRecipe={handleAddRecipe} search={search} onSearchChange={handleSearchChange} />
                     </div>
                     <RecipesTable

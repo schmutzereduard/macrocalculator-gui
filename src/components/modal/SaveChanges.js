@@ -5,8 +5,10 @@ function SaveChanges({ onSave, onExit }) {
             <h2>Save Changes</h2>
             <p>You have unsaved changes. Do you want to save them and exit?</p>
             <div className="modal-buttons">
-                <button onClick={onSave}>Save</button>
-                <button onClick={onExit}>Exit</button>
+                <div>
+                    <button onClick={onSave}>Save</button>
+                    <button onClick={onExit}>Exit</button>
+                </div>
             </div>
         </div>
     );

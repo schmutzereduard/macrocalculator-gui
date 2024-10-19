@@ -3,21 +3,22 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateFood } from "../../features/foodsSlice";
 import ReactModal from "react-modal";
 import SaveChanges from "./SaveChanges";
+import Loading from "../misc/Loading";
 
 function Food({ onClose }) {
     const dispatch = useDispatch();
-    const { selectedItem, itemTypes } = useSelector((state) => state.foods);
+    const { selectedItem: food, itemTypes: foodTypes } = useSelector((state) => state.foods);
     const [editingFood, setEditingFood] = useState(null);
     const [isModalOpen, setModalOpen] = useState(false);
 
     useEffect(() => {
-        setEditingFood({ ...selectedItem });
+        setEditingFood({ ...food });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedItem]);
+    }, [food]);
 
     const foodChanged = () => {
         for (let key in editingFood) {
-            if (editingFood[key] !== selectedItem[key])
+            if (editingFood[key] !== food[key])
                 return true;
         }
 
@@ -52,7 +53,7 @@ function Food({ onClose }) {
     return (
         <div>
             <h2>Edit Food</h2>
-            {selectedItem ? (
+            {food ? (
                 <div className="modal-form">
                     <label>
                         Name:
@@ -60,7 +61,7 @@ function Food({ onClose }) {
                             type="text"
                             name="name"
                             placeholder="Name"
-                            defaultValue={selectedItem.name}
+                            defaultValue={food.name}
                             onChange={(e) => setEditingFood({ ...editingFood, name: e.target.value })}
                         />
                     </label>
@@ -70,7 +71,7 @@ function Food({ onClose }) {
                             type="text"
                             name="carbs"
                             placeholder="Carbs per 100g"
-                            defaultValue={selectedItem.carbs}
+                            defaultValue={food.carbs}
                             onChange={(e) => setEditingFood({ ...editingFood, carbs: e.target.value })}
 
                         />
@@ -81,18 +82,18 @@ function Food({ onClose }) {
                             type="text"
                             name="calories"
                             placeholder="Calories per 100g"
-                            defaultValue={selectedItem.calories}
+                            defaultValue={food.calories}
                             onChange={(e) => setEditingFood({ ...editingFood, calories: e.target.value })}
                         />
                     </label>
                     <label>
                         Type:
                         <select name="type"
-                            defaultValue={selectedItem.type}
+                            defaultValue={food.type}
                             onChange={(e) => setEditingFood({ ...editingFood, type: e.target.value })}
                         >
                             <option value="">Select Type</option>
-                            {itemTypes.map(type => (
+                            {foodTypes.map(type => (
                                 <option key={type} value={type}>{type}</option>
                             ))}
                         </select>
@@ -103,13 +104,15 @@ function Food({ onClose }) {
                             type="text"
                             name="comments"
                             placeholder="Comments"
-                            defaultValue={selectedItem.comments}
+                            defaultValue={food.comments}
                             onChange={(e) => setEditingFood({ ...editingFood, comments: e.target.value })}
                         />
                     </label>
                     <div className="modal-buttons">
-                        <button onClick={handleSave}>Save</button>
-                        <button onClick={handleClose}>Close</button>
+                        <div>
+                            <button onClick={handleSave}>Save</button>
+                            <button onClick={handleClose}>Close</button>
+                        </div>
                     </div>
 
                     <ReactModal isOpen={isModalOpen} onRequestClose={() => setModalOpen(false)}>
@@ -117,7 +120,7 @@ function Food({ onClose }) {
                     </ReactModal>
                 </div>
             ) : (
-                <p>Loading...</p>
+                <Loading />
             )}
         </div>
     );

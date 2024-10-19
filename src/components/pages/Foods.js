@@ -10,7 +10,7 @@ import Loading from '../misc/Loading';
 
 function Foods() {
     const dispatch = useDispatch();
-    const { items, itemTypes, loading } = useSelector((state) => state.foods);
+    const { items: foods, itemTypes: foodTypes, loading } = useSelector((state) => state.foods);
 
     const [sortConfig, setSortConfig] = useState({ key: '', direction: '' });
     const [currentPage, setCurrentPage] = useState(1);
@@ -57,7 +57,7 @@ function Foods() {
         return nameFilter && typeFilter && carbsFilter && caloriesFilter && commentsFilter;
     };
 
-    const filteredFoods = items.filter(applyFilters);
+    const filteredFoods = foods.filter(applyFilters);
 
     const sortedFoods = [...filteredFoods].sort((a, b) => {
         if (sortConfig.key) {
@@ -116,8 +116,8 @@ function Foods() {
             ) : (
                 <div>
                     <div className='header'>
-                        <PerPage className="per-page" itemsPerPage={itemsPerPage} onChange={handleItemsPerPageChange} />
-                        <AddFood items={items} itemTypes={itemTypes} onSearch={handleSearch} />
+                        <PerPage itemsPerPage={itemsPerPage} onChange={handleItemsPerPageChange} />
+                        <AddFood foods={foods} foodTypes={foodTypes} onSearch={handleSearch} />
                     </div>
                     <FoodsTable
                         foods={paginatedFoods}
@@ -147,7 +147,7 @@ function Foods() {
     );
 }
 
-function AddFood({ items, itemTypes, onSearch }) {
+function AddFood({ foods, foodTypes, onSearch }) {
     const dispatch = useDispatch();
     const [newFood, setNewFood] = useState({
         name: '',
@@ -159,7 +159,7 @@ function AddFood({ items, itemTypes, onSearch }) {
 
     const handleAddFood = () => {
         if (newFood.name && newFood.carbs && newFood.calories && newFood.type) {
-            const foodExists = items.some(
+            const foodExists = foods.some(
                 (food) =>
                     food.name.toLowerCase() === newFood.name.toLowerCase() &&
                     food.type.toLowerCase() === newFood.type.toLowerCase()
@@ -206,7 +206,7 @@ function AddFood({ items, itemTypes, onSearch }) {
                 onChange={handleSearchChange}
             >
                 <option value="">Any</option>
-                {itemTypes.map((type) => (
+                {foodTypes.map((type) => (
                     <option key={type} value={type}>
                         {type}
                     </option>

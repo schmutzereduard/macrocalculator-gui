@@ -1,4 +1,4 @@
-function PerPage({ itemsPerPage, handleItemsPerPageChange: onChange }) {
+function PerPage({ itemsPerPage, onChange }) {
 
     return (
         <select className="per-page" value={itemsPerPage} onChange={onChange}>
