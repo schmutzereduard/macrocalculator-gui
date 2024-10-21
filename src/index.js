@@ -3,6 +3,9 @@ import { Provider } from 'react-redux';
 import { createRoot } from 'react-dom/client';
 import App from './app/App';
 import store from './app/store';
+import ReactModal from 'react-modal';
+
+ReactModal.setAppElement('#root');
 
 const container = document.getElementById("root");
 const root = createRoot(container);

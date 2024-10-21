@@ -10,6 +10,11 @@ button:hover {
     background-color: #ddd;
 }
 
+button:disabled {
+    background-color: gray;
+    cursor: not-allowed;
+}
+
 input[type="text"], input[type="number"], select, textarea {
     padding: 10px;
     font-size: 16px;

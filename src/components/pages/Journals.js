@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import ReactModal from 'react-modal';
 import { fetchJournal, fetchJournals } from '../../features/journalsSlice';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday } from 'date-fns';
 import Loading from '../misc/Loading';
+import Journal from '../modal/Journal';
 
 function Journals() {
 
@@ -48,6 +50,10 @@ function Journals() {
         return journals.some(journal => journal.date === format(date, 'yyyy-MM-dd'));
     };
 
+    const closeJournalModal = () => {
+        setJournalModalOpen(false);
+    };
+
     return (
         <div>
             {loading ? (
@@ -77,6 +83,9 @@ function Journals() {
                             </div>
                         ))}
                     </div>
+                    <ReactModal isOpen={isJournalModalOpen} onRequestClose={closeJournalModal}>
+                        <Journal onClose={closeJournalModal} />
+                    </ReactModal>
                 </div>
             )}
         </div>

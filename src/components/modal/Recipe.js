@@ -188,7 +188,7 @@ function Recipe({ onClose }) {
                                 <p>{getTotalProperties(Object.keys(foodQuantities).map(foodId => ({
                                     food: foods.find(f => f.id === parseInt(foodId)),
                                     quantity: foodQuantities[foodId]
-                                })))} <span><button onClick={handleAddFoodsToRecipe}>+</button></span>
+                                })))} <span><button disabled={Object.keys(foodQuantities).length === 0} onClick={handleAddFoodsToRecipe}>+</button></span>
                                 </p>
                             </div>
                             <PerPage itemsPerPage={itemsPerPage} onChange={handleItemsPerPageChange} />
