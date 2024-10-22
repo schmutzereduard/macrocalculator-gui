@@ -138,8 +138,8 @@ function Entries({ editingJournal, setEditingJournal }) {
                 {editingJournal && editingJournal.entries.map((entry) => (
                     <tr key={entry.id}>
                         <td>{entry.time}</td>
-                        <td>{entry.bloodSugarBefore}</td>
-                        <td>{entry.insulinCorrection}</td>
+                        <td>{entry.bloodSugarLevel}</td>
+                        <td>{entry.insulinUnits}</td>
                         <td>{entry.insulinType}</td>
                         <td>
                             Recipes: {entry.journalRecipes.map((recipe => <span key={recipe.id}>{recipe.quantity}g of {recipe.recipe.name}, </span>))}
