@@ -69,6 +69,10 @@ class MacroCalculatorApi {
     static deleteJournal(id) {
         return instance.delete(`/journals/${id}`);
     }
+
+    static getInsulinTypes() {
+        return instance.get("/insulin-types");
+    }
 }
 
 export default MacroCalculatorApi;

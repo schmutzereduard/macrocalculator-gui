@@ -43,7 +43,13 @@ export const deleteJournal = createAsyncThunk(
   }
 );
 
-// Slice for Journals
+export const fetchInsulinTypes = createAsyncThunk(
+  "journals/fetchInsulinTypes",
+  async () => {
+    const response = await MacroCalculatorApi.getInsulinTypes();
+    return response.data;
+  }
+);
 
 const handlePending = (state) => {
   state.loading = true;
@@ -60,6 +66,7 @@ const journalsSlice = createSlice({
   initialState: {
     items: [],
     selectedItem: null,
+    insulinTypes: [],
     loading: false,
     error: null,
   },
@@ -97,6 +104,12 @@ const journalsSlice = createSlice({
       .addCase(deleteJournal.fulfilled, (state, action) => {
         state.loading = false;
         state.items = state.items.filter((journal) => journal.id !== action.payload);
+      })
+      .addCase(fetchInsulinTypes.pending, handlePending)
+      .addCase(fetchInsulinTypes.rejected, handleRejected)
+      .addCase(fetchInsulinTypes.fulfilled, (state, action) => {
+        state.loading = false;
+        state.insulinTypes = action.payload;
       });
   },
 });

@@ -83,7 +83,18 @@ function Journals() {
                             </div>
                         ))}
                     </div>
-                    <ReactModal isOpen={isJournalModalOpen} onRequestClose={closeJournalModal}>
+                    <ReactModal 
+                    isOpen={isJournalModalOpen} 
+                    onRequestClose={closeJournalModal}
+                    //remove or move to css file
+                    style={{
+                        content: {
+                          width: 'auto',       // Allows the width to grow based on content
+                          maxWidth: '80%',     // Optional: Limits the max width to 80% of the viewport
+                          margin: '0 auto',    // Centers the modal horizontally
+                          padding: '20px'      // Adds padding around the content
+                        }
+                      }}>
                         <Journal onClose={closeJournalModal} />
                     </ReactModal>
                 </div>

@@ -143,7 +143,7 @@ th {
     background-color: #f9f9f9;
 }
 
-.add-food-form, .add-recipe-form {
+.add-food-form, .add-recipe-form, .add-journal-entry-form {
     display: flex;
     flex-grow: 2; /* Add flexibility to the form */
     margin-right: 20px; /* Adjust right margin for spacing */
