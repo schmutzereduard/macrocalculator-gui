@@ -106,6 +106,25 @@ function Entries({ editingJournal, setEditingJournal }) {
     });
     const [isFoodsModalOpen, setFoodsModalOpen] = useState(false);
     const [isRecipesModalOpen, setRecipesModalOpen] = useState(false);
+    const [isDeleteEntryModalOpen, setDeleteEntryModalOpen] = useState(false);
+    const [entryToDelete, setEntryToDelete] = useState(null);
+
+    const openDeleteEntryModal = (index) => {
+        setEntryToDelete(index);
+        setDeleteEntryModalOpen(true);
+    };
+
+    const confirmDeleteEntryModal = () => {
+        if (entryToDelete !== null) {
+            setEditingJournal((prev) => ({
+                ...prev,
+                entries: prev.entries.filter((entry) => entry.id !== entryToDelete),
+            }));
+            setEntryToDelete(null);
+            setDeleteEntryModalOpen(false);
+        }
+    };
+
 
     const handleAddEntry = () => {
         setEditingJournal((prev) => ({
@@ -115,15 +134,12 @@ function Entries({ editingJournal, setEditingJournal }) {
         setNewEntry({ time: '', bloodSugarLevel: '', recipes: [], foods: [], insulinUnits: '', insulinType: '' });
     };
 
-    const handleDeleteEntry = (index) => {
-        setEditingJournal((prev) => ({
-            ...prev,
-            entries: prev.entries.filter((_, i) => i !== index)
-        }));
-    };
-
     const handleEditEntry = () => {
 
+    }
+
+    const closeDeleteEntryModal = () => {
+        setDeleteEntryModalOpen(false);
     }
 
     const closeFoodsModal = () => {
@@ -166,13 +182,26 @@ function Entries({ editingJournal, setEditingJournal }) {
                             </td>
                             <td>
                                 <button onClick={handleEditEntry}>Edit</button>
-                                <button onClick={() => handleDeleteEntry(entry.id)}>Delete</button>
+                                <button onClick={() => openDeleteEntryModal(entry.id)}>Delete</button>
                             </td>
+                            <ReactModal isOpen={isDeleteEntryModalOpen} onRequestClose={closeDeleteEntryModal}>
+                                <ConfirmDelete
+                                    name="this entry"
+                                    onConfirm={confirmDeleteEntryModal}
+                                    onCancel={closeDeleteEntryModal}
+                                />
+                            </ReactModal>
                             <ReactModal isOpen={isFoodsModalOpen} onRequestClose={closeFoodsModal}>
-                                <Foods journalFoods={entry.journalFoods} onClose={closeFoodsModal} />
+                                <Foods
+                                    journalFoods={entry.journalFoods}
+                                    onClose={closeFoodsModal}
+                                />
                             </ReactModal>
                             <ReactModal isOpen={isRecipesModalOpen} onRequestClose={closeRecipesModal}>
-                                <Recipes journalRecipes={entry.journalRecipes} onClose={closeRecipesModal} />
+                                <Recipes
+                                    journalRecipes={entry.journalRecipes}
+                                    onClose={closeRecipesModal}
+                                />
                             </ReactModal>
                         </tr>
                     ))}
