@@ -67,6 +67,9 @@ function Journal({ onClose }) {
                             rows="4"
                             placeholder="Notes"
                         />
+                        <div className="header">
+                            <AddEntry editingJournal={editingJournal} setEditingJournal={setEditingJournal}/>
+                        </div>
                         <Entries editingJournal={editingJournal} setEditingJournal={setEditingJournal} />
                     </div>
 
@@ -96,14 +99,6 @@ function Journal({ onClose }) {
 
 function Entries({ editingJournal, setEditingJournal }) {
 
-    const [newEntry, setNewEntry] = useState({
-        time: '',
-        bloodSugarLevel: '',
-        recipes: [],
-        foods: [],
-        insulinUnits: '',
-        insulinType: ''
-    });
     const [isFoodsModalOpen, setFoodsModalOpen] = useState(false);
     const [isRecipesModalOpen, setRecipesModalOpen] = useState(false);
     const [isDeleteEntryModalOpen, setDeleteEntryModalOpen] = useState(false);
@@ -126,14 +121,6 @@ function Entries({ editingJournal, setEditingJournal }) {
     };
 
 
-    const handleAddEntry = () => {
-        setEditingJournal((prev) => ({
-            ...prev,
-            entries: [...(prev.entries || []), newEntry]
-        }));
-        setNewEntry({ time: '', bloodSugarLevel: '', recipes: [], foods: [], insulinUnits: '', insulinType: '' });
-    };
-
     const handleEditEntry = () => {
 
     }
@@ -154,9 +141,6 @@ function Entries({ editingJournal, setEditingJournal }) {
     return (
         <div>
             <h3>Entries</h3>
-            <div className="header">
-                <AddEntry handleAddEntry={handleAddEntry} />
-            </div>
             <table>
                 <thead>
                     <tr>
@@ -211,10 +195,18 @@ function Entries({ editingJournal, setEditingJournal }) {
     );
 }
 
-function AddEntry({ handleAddEntry }) {
+function AddEntry({ editingJournal, setEditingJournal }) {
 
     const dispatch = useDispatch();
     const { insulinTypes } = useSelector((state) => state.journals);
+    const [newEntry, setNewEntry] = useState({
+        time: '',
+        bloodSugarLevel: '',
+        recipes: [],
+        foods: [],
+        insulinUnits: '',
+        insulinType: ''
+    });
 
     useEffect(() => {
         if (insulinTypes.length === 0) {
@@ -222,13 +214,52 @@ function AddEntry({ handleAddEntry }) {
         }
     }, [dispatch, insulinTypes.length]);
 
+    const handleAddEntry = () => {
+        if (newEntry.time && newEntry.bloodSugarLevel && newEntry.insulinUnits && newEntry.insulinType) {
+            const dateTime = editingJournal.date + "T" + newEntry.time;
+            const entryToAdd = {
+                ...newEntry,
+                time: dateTime,
+            };
+            setEditingJournal((prev) => ({
+                ...prev,
+                entries: [...(prev.entries || []), entryToAdd],
+            }));
+            setNewEntry({ time: '', bloodSugarLevel: '', recipes: [], foods: [], insulinUnits: '', insulinType: '' });
+        }
+    };
+
+    const handleInputChange = (property, event) => {
+        setNewEntry((prev) => ({
+            ...prev,
+            [property]: event.target.value,
+        }));
+    };
+
     return (
         <div className="add-journal-entry-form">
-            <input type="time" placeholder="Time" />
-            <input type="number" placeholder="Blood Sugar Level" />
-            <input type="number" placeholder="Insulin Units" />
+            <input
+                value={newEntry.time}
+                onChange={(e) => handleInputChange("time", e)}
+                type="time"
+                placeholder="Time"
+            />
+            <input
+                value={newEntry.bloodSugarLevel}
+                onChange={(e) => handleInputChange("bloodSugarLevel", e)}
+                type="number"
+                placeholder="Blood Sugar Level"
+            />
+            <input
+                value={newEntry.insulinUnits}
+                onChange={(e) => handleInputChange("insulinUnits", e)}
+                type="number"
+                placeholder="Insulin Units"
+            />
             <select
                 name="type"
+                value={newEntry.insulinType}
+                onChange={(e) => handleInputChange("insulinType", e)}
             >
                 <option value="">Select Insulin Type</option>
                 {insulinTypes.map((type) => (
@@ -237,8 +268,7 @@ function AddEntry({ handleAddEntry }) {
                     </option>
                 ))}
             </select>
-            {/* <button>Food</button> */}
-            {/* <button>Recipes</button> */}
+
             <button onClick={handleAddEntry}>Add Entry</button>
         </div>
     );
@@ -247,7 +277,7 @@ function AddEntry({ handleAddEntry }) {
 function Foods({ journalFoods, onClose }) {
 
     const dispatch = useDispatch();
-    const { items: foods } = useSelector((state) => state.foods);
+    const {items: foods} = useSelector((state) => state.foods);
 
     useEffect(() => {
         if (foods.length === 0) {
