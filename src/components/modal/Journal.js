@@ -9,6 +9,7 @@ import { fetchFoods } from '../../features/foodsSlice';
 import { fetchRecipes } from '../../features/recipesSlice';
 
 function Journal({ onClose }) {
+
     const dispatch = useDispatch();
     const { selectedItem: journal, loading } = useSelector(state => state.journals);
 
@@ -78,6 +79,7 @@ function Journal({ onClose }) {
                             <button onClick={handleSaveChanges}>Save</button>
                             <button onClick={handleModalClose}>Close</button>
                         </div>
+                        <button onClick={() => setDeleteJournalModalOpen(true)}>Delete</button>
                     </div>
 
                     <ReactModal isOpen={isSaveChangesModalOpen} onRequestClose={() => setSaveChangesModalOpen(false)}>
@@ -86,7 +88,7 @@ function Journal({ onClose }) {
 
                     <ReactModal isOpen={isDeleteJournalModalOpen} onRequestClose={() => setDeleteJournalModalOpen(false)}>
                         <ConfirmDelete
-                            name={editingJournal?.date}
+                            name={"journal for " + editingJournal?.date}
                             onConfirm={confirmDeleteJournal}
                             onCancel={() => setDeleteJournalModalOpen(false)}
                         />
@@ -120,23 +122,9 @@ function Entries({ editingJournal, setEditingJournal }) {
         }
     };
 
-
     const handleEditEntry = () => {
 
     }
-
-    const closeDeleteEntryModal = () => {
-        setDeleteEntryModalOpen(false);
-    }
-
-    const closeFoodsModal = () => {
-        setFoodsModalOpen(false);
-    }
-
-    const closeRecipesModal = () => {
-        setRecipesModalOpen(false);
-    }
-
 
     return (
         <div>
@@ -168,23 +156,23 @@ function Entries({ editingJournal, setEditingJournal }) {
                                 <button onClick={handleEditEntry}>Edit</button>
                                 <button onClick={() => openDeleteEntryModal(entry.id)}>Delete</button>
                             </td>
-                            <ReactModal isOpen={isDeleteEntryModalOpen} onRequestClose={closeDeleteEntryModal}>
+                            <ReactModal isOpen={isDeleteEntryModalOpen} onRequestClose={() => setDeleteEntryModalOpen(false)}>
                                 <ConfirmDelete
                                     name="this entry"
                                     onConfirm={confirmDeleteEntryModal}
-                                    onCancel={closeDeleteEntryModal}
+                                    onCancel={() => setDeleteEntryModalOpen(false)}
                                 />
                             </ReactModal>
-                            <ReactModal isOpen={isFoodsModalOpen} onRequestClose={closeFoodsModal}>
+                            <ReactModal isOpen={isFoodsModalOpen} onRequestClose={() => setFoodsModalOpen(false)}>
                                 <Foods
                                     journalFoods={entry.journalFoods}
-                                    onClose={closeFoodsModal}
+                                    onClose={() => setFoodsModalOpen(false)}
                                 />
                             </ReactModal>
-                            <ReactModal isOpen={isRecipesModalOpen} onRequestClose={closeRecipesModal}>
+                            <ReactModal isOpen={isRecipesModalOpen} onRequestClose={() => setRecipesModalOpen(false)}>
                                 <Recipes
                                     journalRecipes={entry.journalRecipes}
-                                    onClose={closeRecipesModal}
+                                    onClose={() => setRecipesModalOpen(false)}
                                 />
                             </ReactModal>
                         </tr>
@@ -198,6 +186,8 @@ function Entries({ editingJournal, setEditingJournal }) {
 function AddEntry({ editingJournal, setEditingJournal }) {
 
     const dispatch = useDispatch();
+    const [isFoodsModalOpen, setFoodsModalOpen] = useState(false);
+    const [isRecipesModalOpen, setRecipesModalOpen] = useState(false);
     const { insulinTypes } = useSelector((state) => state.journals);
     const [newEntry, setNewEntry] = useState({
         time: '',
@@ -269,7 +259,21 @@ function AddEntry({ editingJournal, setEditingJournal }) {
                 ))}
             </select>
 
-            <button onClick={handleAddEntry}>Add Entry</button>
+            <button onClick={() => setFoodsModalOpen(true)}>Foods</button>
+            <button onClick={() => setRecipesModalOpen(true)}>Recipes</button>
+            <button onClick={handleAddEntry}>+</button>
+            <ReactModal isOpen={isFoodsModalOpen} onRequestClose={() => setFoodsModalOpen(false)}>
+                <Foods
+                    journalFoods={newEntry.journalFoods}
+                    onClose={() => setFoodsModalOpen(false)}
+                />
+            </ReactModal>
+            <ReactModal isOpen={isRecipesModalOpen} onRequestClose={() => setRecipesModalOpen(false)}>
+                <Recipes
+                    journalRecipes={newEntry.journalRecipes}
+                    onClose={() => setRecipesModalOpen(false)}
+                />
+            </ReactModal>
         </div>
     );
 }
