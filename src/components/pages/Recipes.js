@@ -109,7 +109,7 @@ function Recipes() {
                 <div>
                     <div className="header">
                         <PerPage itemsPerPage={itemsPerPage} onChange={handleItemsPerPageChange} />
-                        <AddRecipe onAddRecipe={handleAddRecipe} search={search} onSearchChange={handleSearchChange} />
+                        <AddRecipe search={search} onSearchChange={handleSearchChange}  onAddRecipe={handleAddRecipe} />
                     </div>
                     <RecipesTable
                         recipes={paginatedRecipes}
@@ -137,10 +137,6 @@ function Recipes() {
 
 function AddRecipe({ search, onSearchChange, onAddRecipe }) {
 
-    const handleAddRecipe = () => {
-        onAddRecipe(search);
-    };
-
     return (
         <div className="add-recipe-form">
             <input
@@ -149,7 +145,7 @@ function AddRecipe({ search, onSearchChange, onAddRecipe }) {
                 value={search}
                 onChange={onSearchChange}
             />
-            <button onClick={handleAddRecipe}>Add Recipe</button>
+            <button onClick={() => onAddRecipe(search)}>+</button>
         </div>
     );
 }

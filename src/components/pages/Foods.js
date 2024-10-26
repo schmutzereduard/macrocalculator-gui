@@ -10,7 +10,7 @@ import Loading from '../misc/Loading';
 
 function Foods() {
     const dispatch = useDispatch();
-    const { items: foods, itemTypes: foodTypes, loading } = useSelector((state) => state.foods);
+    const { items: foods, loading } = useSelector((state) => state.foods);
 
     const [sortConfig, setSortConfig] = useState({ key: '', direction: '' });
     const [currentPage, setCurrentPage] = useState(1);
@@ -77,7 +77,7 @@ function Foods() {
 
     const totalPages = Math.ceil(sortedFoods.length / itemsPerPage);
 
-    const handleSearch = (filters) => {
+    const handleSearchChange = (filters) => {
         setSearchFilters(filters);
     };
 
@@ -109,6 +109,20 @@ function Foods() {
         setDeleteFoodModalOpen(false);
     }
 
+    const handleAddFood = () => {
+        if (searchFilters.name && searchFilters.carbs && searchFilters.calories && searchFilters.type) {
+            const foodExists = foods.some(
+                (food) =>
+                    food.name.toLowerCase() === searchFilters.name.toLowerCase() &&
+                    food.type.toLowerCase() === searchFilters.type.toLowerCase()
+            );
+            if (!foodExists) {
+                dispatch(addFood({...searchFilters}));
+                setSearchFilters({name: searchFilters.name});
+            }
+        }
+    };
+
     return (
         <div>
             {loading ? (
@@ -117,7 +131,7 @@ function Foods() {
                 <div>
                     <div className='header'>
                         <PerPage itemsPerPage={itemsPerPage} onChange={handleItemsPerPageChange} />
-                        <AddFood foods={foods} foodTypes={foodTypes} onSearch={handleSearch} />
+                        <AddFood search={searchFilters} onSearchChange={handleSearchChange} onAddFood={handleAddFood} />
                     </div>
                     <FoodsTable
                         foods={paginatedFoods}
@@ -147,34 +161,13 @@ function Foods() {
     );
 }
 
-function AddFood({ foods, foodTypes, onSearch }) {
-    const dispatch = useDispatch();
-    const [newFood, setNewFood] = useState({
-        name: '',
-        carbs: '',
-        calories: '',
-        type: '',
-        comments: ''
-    });
+function AddFood({ search, onSearchChange, onAddFood }) {
 
-    const handleAddFood = () => {
-        if (newFood.name && newFood.carbs && newFood.calories && newFood.type) {
-            const foodExists = foods.some(
-                (food) =>
-                    food.name.toLowerCase() === newFood.name.toLowerCase() &&
-                    food.type.toLowerCase() === newFood.type.toLowerCase()
-            );
-            if (!foodExists) {
-                dispatch(addFood(newFood));
-                setNewFood({ name: '', carbs: '', calories: '', type: '', comments: '' });
-            }
-        }
-    };
+    const { itemTypes: foodTypes } = useSelector((state) => state.foods);
 
     const handleSearchChange = (e) => {
         const { name, value } = e.target;
-        setNewFood((prevState) => ({ ...prevState, [name]: value }));
-        onSearch({ ...newFood, [name]: value });
+        onSearchChange({ ...search, [name]: value });
     };
 
     return (
@@ -183,30 +176,30 @@ function AddFood({ foods, foodTypes, onSearch }) {
                 type="text"
                 placeholder="Name"
                 name="name"
-                value={newFood.name}
+                value={search.name}
                 onChange={handleSearchChange}
             />
             <input
                 type="text"
                 placeholder="Carbs"
                 name="carbs"
-                value={newFood.carbs}
+                value={search.carbs}
                 onChange={handleSearchChange}
             />
             <input
                 type="text"
                 placeholder="Calories"
                 name="calories"
-                value={newFood.calories}
+                value={search.calories}
                 onChange={handleSearchChange}
             />
             <select
                 name="type"
-                value={newFood.type}
+                value={search.type}
                 onChange={handleSearchChange}
             >
                 <option value="">Any</option>
-                {foodTypes.map((type) => (
+                {foodTypes && foodTypes.map((type) => (
                     <option key={type} value={type}>
                         {type}
                     </option>
@@ -216,10 +209,10 @@ function AddFood({ foods, foodTypes, onSearch }) {
                 type="text"
                 placeholder="Comments"
                 name="comments"
-                value={newFood.comments}
+                value={search.comments}
                 onChange={handleSearchChange}
             />
-            <button onClick={handleAddFood}>Add Food</button>
+            <button onClick={onAddFood}>+</button>
         </div>
     );
 }
