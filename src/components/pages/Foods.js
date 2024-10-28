@@ -7,84 +7,34 @@ import ConfirmDelete from '../modal/ConfirmDelete';
 import Pagination from '../misc/Pagination';
 import PerPage from '../misc/PerPage';
 import Loading from '../misc/Loading';
+import useSorting from "../../hooks/useSorting";
+import usePagination from "../../hooks/usePagination";
+import useSearching from "../../hooks/useSearching";
 
 function Foods() {
     const dispatch = useDispatch();
     const { items: foods, loading } = useSelector((state) => state.foods);
-
-    const [sortConfig, setSortConfig] = useState({ key: '', direction: '' });
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
-    const [searchFilters, setSearchFilters] = useState({});
-
+    const { sortConfig, handleSortChange, sort } = useSorting();
+    const { pageConfig, handlePageChange, handleItemsPerPageChange, paginate } = usePagination();
+    const { searchConfig, search, handleSearchChange } = useSearching({
+        name: '',
+        type: '',
+        carbs: '',
+        calories: '',
+        comments: ''
+    });
+    const [foodToDelete, setFoodToDelete] = useState({ id: null, name: '' });
     const [isFoodModalOpen, setFoodModalOpen] = useState(false);
     const [isDeleteFoodModalOpen, setDeleteFoodModalOpen] = useState(false);
-    const [foodToDelete, setFoodToDelete] = useState({ id: null, name: '' });
 
     useEffect(() => {
         dispatch(fetchFoods());
         dispatch(fetchFoodTypes());
     }, [dispatch]);
 
-    const handleSort = (key) => {
-        let direction = 'ascending';
-        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-            direction = 'descending';
-        } else if (sortConfig.key === key && sortConfig.direction === 'descending') {
-            direction = '';
-        } else {
-            direction = 'ascending';
-        }
-        setSortConfig({ key, direction });
-    };
-
-    const parseCondition = (condition, value) => {
-        if (!condition) return true;
-        if (condition.startsWith('>=')) return value >= parseFloat(condition.substring(2));
-        if (condition.startsWith('>')) return value > parseFloat(condition.substring(1));
-        if (condition.startsWith('<=')) return value <= parseFloat(condition.substring(2));
-        if (condition.startsWith('<')) return value < parseFloat(condition.substring(1));
-        return value === parseFloat(condition);
-    };
-
-    const applyFilters = (food) => {
-        const { name, type, carbs, calories, comments } = searchFilters;
-        const nameFilter = name ? food.name.toLowerCase().includes(name.toLowerCase()) : true;
-        const typeFilter = type ? food.type.toLowerCase() === type.toLowerCase() : true;
-        const carbsFilter = carbs ? parseCondition(carbs, food.carbs) : true;
-        const caloriesFilter = calories ? parseCondition(calories, food.calories) : true;
-        const commentsFilter = comments ? food.comments.toLowerCase().includes(comments.toLowerCase()) : true;
-        return nameFilter && typeFilter && carbsFilter && caloriesFilter && commentsFilter;
-    };
-
-    const filteredFoods = foods.filter(applyFilters);
-
-    const sortedFoods = [...filteredFoods].sort((a, b) => {
-        if (sortConfig.key) {
-            if (sortConfig.direction === 'ascending') {
-                return a[sortConfig.key] > b[sortConfig.key] ? 1 : -1;
-            } else if (sortConfig.direction === 'descending') {
-                return a[sortConfig.key] < b[sortConfig.key] ? 1 : -1;
-            }
-        }
-        return 0;
-    });
-
-    const paginatedFoods = sortedFoods.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
-
-    const totalPages = Math.ceil(sortedFoods.length / itemsPerPage);
-
-    const handleSearchChange = (filters) => {
-        setSearchFilters(filters);
-    };
-
-    const handleItemsPerPageChange = (e) => {
-        setItemsPerPage(Number(e.target.value));
-        setCurrentPage(1); // Reset to the first page
-    };
+    const filteredFoods = search(foods);
+    const sortedFoods = sort(filteredFoods);
+    const paginatedFoods = paginate(sortedFoods);
 
     const openFoodModal = (foodId) => {
         dispatch(fetchFood(foodId));
@@ -109,16 +59,17 @@ function Foods() {
         setDeleteFoodModalOpen(false);
     }
 
-    const handleAddFood = () => {
-        if (searchFilters.name && searchFilters.carbs && searchFilters.calories && searchFilters.type) {
+    const handleAdd = () => {
+        const isFormValid = searchConfig.name && searchConfig.carbs && searchConfig.calories && searchConfig.type;
+        if (isFormValid) {
             const foodExists = foods.some(
                 (food) =>
-                    food.name.toLowerCase() === searchFilters.name.toLowerCase() &&
-                    food.type.toLowerCase() === searchFilters.type.toLowerCase()
+                    food.name.toLowerCase() === searchConfig.name.toLowerCase() &&
+                    food.type.toLowerCase() === searchConfig.type.toLowerCase()
             );
             if (!foodExists) {
-                dispatch(addFood({...searchFilters}));
-                setSearchFilters({name: searchFilters.name});
+                dispatch(addFood({...searchConfig}));
+                handleSearchChange({ name: searchConfig.name, type: '', carbs: '', calories: '', comments: '' });
             }
         }
     };
@@ -130,20 +81,21 @@ function Foods() {
             ) : (
                 <div>
                     <div className='header'>
-                        <PerPage itemsPerPage={itemsPerPage} onChange={handleItemsPerPageChange} />
-                        <AddFood search={searchFilters} onSearchChange={handleSearchChange} onAddFood={handleAddFood} />
+                        <PerPage itemsPerPage={pageConfig.itemsPerPage} onChange={handleItemsPerPageChange} />
+                        <AddFood searchConfig={searchConfig} handlePageChange={handlePageChange} handleSearchChange={handleSearchChange} onAddFood={handleAdd} />
                     </div>
                     <FoodsTable
                         foods={paginatedFoods}
                         sortConfig={sortConfig}
-                        handleSort={handleSort}
+                        handlePageChange={handlePageChange}
+                        handleSortChange={handleSortChange}
                         onEdit={openFoodModal}
                         onDelete={openDeleteFoodModal}
                     />
                     <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={setCurrentPage}
+                        currentPage={pageConfig.currentPage}
+                        totalPages={Math.ceil(sortedFoods.length / pageConfig.itemsPerPage)}
+                        onPageChange={handlePageChange}
                     />
                     <ReactModal isOpen={isFoodModalOpen} onRequestClose={closeFoodModal}>
                         <Food onClose={closeFoodModal} />
@@ -161,13 +113,14 @@ function Foods() {
     );
 }
 
-function AddFood({ search, onSearchChange, onAddFood }) {
+function AddFood({ searchConfig, handlePageChange, handleSearchChange, onAddFood }) {
 
     const { itemTypes: foodTypes } = useSelector((state) => state.foods);
 
-    const handleSearchChange = (e) => {
+    const handleInputChange = (e) => {
         const { name, value } = e.target;
-        onSearchChange({ ...search, [name]: value });
+        handleSearchChange({ [name]: value });
+        handlePageChange(1);
     };
 
     return (
@@ -176,27 +129,27 @@ function AddFood({ search, onSearchChange, onAddFood }) {
                 type="text"
                 placeholder="Name"
                 name="name"
-                value={search.name}
-                onChange={handleSearchChange}
+                value={searchConfig.name}
+                onChange={handleInputChange}
             />
             <input
                 type="text"
                 placeholder="Carbs"
                 name="carbs"
-                value={search.carbs}
-                onChange={handleSearchChange}
+                value={searchConfig.carbs}
+                onChange={handleInputChange}
             />
             <input
                 type="text"
                 placeholder="Calories"
                 name="calories"
-                value={search.calories}
-                onChange={handleSearchChange}
+                value={searchConfig.calories}
+                onChange={handleInputChange}
             />
             <select
                 name="type"
-                value={search.type}
-                onChange={handleSearchChange}
+                value={searchConfig.type}
+                onChange={handleInputChange}
             >
                 <option value="">Any</option>
                 {foodTypes && foodTypes.map((type) => (
@@ -209,25 +162,31 @@ function AddFood({ search, onSearchChange, onAddFood }) {
                 type="text"
                 placeholder="Comments"
                 name="comments"
-                value={search.comments}
-                onChange={handleSearchChange}
+                value={searchConfig.comments}
+                onChange={handleInputChange}
             />
             <button onClick={onAddFood}>+</button>
         </div>
     );
 }
 
-function FoodsTable({ foods, sortConfig, handleSort, onEdit, onDelete }) {
+function FoodsTable({ foods, sortConfig,handlePageChange, handleSortChange, onEdit, onDelete }) {
+
+    const handleHeaderClick = (value) => {
+        handleSortChange(value);
+        handlePageChange(1);
+    }
+
     return (
         <table>
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th onClick={() => handleSort('carbs')}>
-                        Carbs {sortConfig.key === 'carbs' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                    <th onClick={() => handleHeaderClick('carbs')}>
+                        Carbs {sortConfig.key === 'carbs' ? sortConfig.icon : ''}
                     </th>
-                    <th onClick={() => handleSort('calories')}>
-                        Calories {sortConfig.key === 'calories' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                    <th onClick={() => handleHeaderClick('calories')}>
+                        Calories {sortConfig.key === 'calories' ? sortConfig.icon : ''}
                     </th>
                     <th>Type</th>
                     <th>Comments</th>
