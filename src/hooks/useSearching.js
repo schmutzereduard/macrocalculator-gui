@@ -19,11 +19,8 @@ function useSearching(initialFilters = {}) {
             const filterValue = searchConfig[key];
             if (!filterValue) return true;
 
-            // Custom handling for specific properties if needed
             if (key === "name") {
                 return item.name.toLowerCase().includes(filterValue.toLowerCase());
-            } else if (key === "recipeFoods") {
-                return item.recipeFoods.some(rf => rf.food.name.toLowerCase().includes(filterValue.toLowerCase()));
             } else if (["carbs", "calories", "totalCalories", "totalCarbs"].includes(key)) {
                 return parseCondition(filterValue, item[key]);
             } else {

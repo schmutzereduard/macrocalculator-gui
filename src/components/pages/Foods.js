@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ReactModal from 'react-modal';
 import { fetchFoods, fetchFoodTypes, fetchFood, addFood, deleteFood } from '../../features/foodsSlice';
@@ -10,10 +10,12 @@ import Loading from '../misc/Loading';
 import useSorting from "../../hooks/useSorting";
 import usePagination from "../../hooks/usePagination";
 import useSearching from "../../hooks/useSearching";
+import useModals from "../../hooks/useModals";
 
 function Foods() {
     const dispatch = useDispatch();
     const { items: foods, loading } = useSelector((state) => state.foods);
+    const { modalConfig, setModalConfig } = useModals();
     const { sortConfig, handleSortChange, sort } = useSorting();
     const { pageConfig, handlePageChange, handleItemsPerPageChange, paginate } = usePagination();
     const { searchConfig, search, handleSearchChange } = useSearching({
@@ -23,13 +25,9 @@ function Foods() {
         calories: '',
         comments: ''
     });
-    const [foodToDelete, setFoodToDelete] = useState({ id: null, name: '' });
-    const [isFoodModalOpen, setFoodModalOpen] = useState(false);
-    const [isDeleteFoodModalOpen, setDeleteFoodModalOpen] = useState(false);
 
     useEffect(() => {
         dispatch(fetchFoods());
-        dispatch(fetchFoodTypes());
     }, [dispatch]);
 
     const filteredFoods = search(foods);
@@ -38,25 +36,42 @@ function Foods() {
 
     const openFoodModal = (foodId) => {
         dispatch(fetchFood(foodId));
-        setFoodModalOpen(true);
+        setModalConfig({...modalConfig, isItemModalOpen: true});
     };
 
     const closeFoodModal = () => {
-        setFoodModalOpen(false);
+        setModalConfig({
+            ...modalConfig,
+            isItemModalOpen: false
+        });
     };
 
     const openDeleteFoodModal = (foodId, foodName) => {
-        setFoodToDelete({ id: foodId, name: foodName });
-        setDeleteFoodModalOpen(true);
+        setModalConfig({
+            ...modalConfig,
+            isDeleteItemModalOpen: true,
+            itemToDelete: {
+                id: foodId,
+                name: foodName
+            }
+        });
+
     };
 
     const closeDeleteFoodModal = () => {
-        setDeleteFoodModalOpen(false);
+        setModalConfig({
+            ...modalConfig,
+            isDeleteItemModalOpen: false,
+            itemToDelete: {
+                id: null,
+                name: null
+            }
+        });
     };
 
     const handleDelete = (id) => {
         dispatch(deleteFood(id));
-        setDeleteFoodModalOpen(false);
+        closeDeleteFoodModal();
     }
 
     const handleAdd = () => {
@@ -81,8 +96,16 @@ function Foods() {
             ) : (
                 <div>
                     <div className='header'>
-                        <PerPage itemsPerPage={pageConfig.itemsPerPage} onChange={handleItemsPerPageChange} />
-                        <AddFood searchConfig={searchConfig} handlePageChange={handlePageChange} handleSearchChange={handleSearchChange} onAddFood={handleAdd} />
+                        <PerPage
+                            itemsPerPage={pageConfig.itemsPerPage}
+                            onChange={handleItemsPerPageChange}
+                        />
+                        <AddFood
+                            searchConfig={searchConfig}
+                            handlePageChange={handlePageChange}
+                            handleSearchChange={handleSearchChange}
+                            onAddFood={handleAdd}
+                        />
                     </div>
                     <FoodsTable
                         foods={paginatedFoods}
@@ -97,13 +120,21 @@ function Foods() {
                         totalPages={Math.ceil(sortedFoods.length / pageConfig.itemsPerPage)}
                         onPageChange={handlePageChange}
                     />
-                    <ReactModal isOpen={isFoodModalOpen} onRequestClose={closeFoodModal}>
-                        <Food onClose={closeFoodModal} />
+                    <ReactModal
+                        isOpen={modalConfig.isItemModalOpen}
+                        onRequestClose={closeFoodModal}
+                    >
+                        <Food
+                            onClose={closeFoodModal}
+                        />
                     </ReactModal>
-                    <ReactModal isOpen={isDeleteFoodModalOpen} onRequestClose={closeDeleteFoodModal}>
+                    <ReactModal
+                        isOpen={modalConfig.isDeleteItemModalOpen}
+                        onRequestClose={closeDeleteFoodModal}
+                    >
                         <ConfirmDelete
-                            name={foodToDelete.name}
-                            onConfirm={() => handleDelete(foodToDelete.id)}
+                            name={modalConfig.itemToDelete.name}
+                            onConfirm={() => handleDelete(modalConfig.itemToDelete.id)}
                             onCancel={closeDeleteFoodModal}
                         />
                     </ReactModal>
@@ -115,7 +146,13 @@ function Foods() {
 
 function AddFood({ searchConfig, handlePageChange, handleSearchChange, onAddFood }) {
 
+    const dispatch = useDispatch();
     const { itemTypes: foodTypes } = useSelector((state) => state.foods);
+
+    useEffect(() => {
+        if (!foodTypes)
+            dispatch(fetchFoodTypes());
+    }, [foodTypes, dispatch]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -170,7 +207,7 @@ function AddFood({ searchConfig, handlePageChange, handleSearchChange, onAddFood
     );
 }
 
-function FoodsTable({ foods, sortConfig,handlePageChange, handleSortChange, onEdit, onDelete }) {
+function FoodsTable({ foods, sortConfig, handlePageChange, handleSortChange, onEdit, onDelete }) {
 
     const handleHeaderClick = (value) => {
         handleSortChange(value);
