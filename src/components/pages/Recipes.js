@@ -35,14 +35,14 @@ function Recipes() {
         setModalConfig({
             ...modalConfig,
             isItemModalOpen: true
-        })
+        });
     };
 
     const closeRecipeModal = () => {
         setModalConfig({
             ...modalConfig,
             isItemModalOpen: false
-        })
+        });
     };
 
     const openDeleteRecipeModal = (recipeId, recipeName) => {
@@ -53,7 +53,7 @@ function Recipes() {
                 id: recipeId,
                 name: recipeName
             }
-        })
+        });
     };
 
     const closeDeleteRecipeModal = () => {
@@ -64,13 +64,13 @@ function Recipes() {
                 id: null,
                 name: null
             }
-        })
+        });
     };
 
     const handleDelete = (id) => {
         dispatch(deleteRecipe(id));
         closeDeleteRecipeModal();
-    }
+    };
 
     const handleAdd = (recipeName) => {
         if (recipeName && !recipes.some(recipe => recipe.name.toLowerCase() === recipeName.toLowerCase())) {
@@ -159,7 +159,7 @@ function RecipesTable({ recipes, sortConfig,handlePageChange, handleSortChange, 
     const handleHeaderClick = (value) => {
         handleSortChange(value);
         handlePageChange(1);
-    }
+    };
 
     return (
         <table>

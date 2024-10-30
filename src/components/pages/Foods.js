@@ -36,7 +36,10 @@ function Foods() {
 
     const openFoodModal = (foodId) => {
         dispatch(fetchFood(foodId));
-        setModalConfig({...modalConfig, isItemModalOpen: true});
+        setModalConfig({
+            ...modalConfig,
+            isItemModalOpen: true
+        });
     };
 
     const closeFoodModal = () => {
@@ -72,7 +75,7 @@ function Foods() {
     const handleDelete = (id) => {
         dispatch(deleteFood(id));
         closeDeleteFoodModal();
-    }
+    };
 
     const handleAdd = () => {
         const isFormValid = searchConfig.name && searchConfig.carbs && searchConfig.calories && searchConfig.type;
@@ -212,7 +215,7 @@ function FoodsTable({ foods, sortConfig, handlePageChange, handleSortChange, onE
     const handleHeaderClick = (value) => {
         handleSortChange(value);
         handlePageChange(1);
-    }
+    };
 
     return (
         <table>
