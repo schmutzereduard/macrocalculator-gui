@@ -28,6 +28,7 @@ function Foods() {
 
     useEffect(() => {
         dispatch(fetchFoods());
+        dispatch(fetchFoodTypes());
     }, [dispatch]);
 
     const filteredFoods = search(foods);
@@ -149,13 +150,7 @@ function Foods() {
 
 function AddFood({ searchConfig, handlePageChange, handleSearchChange, onAddFood }) {
 
-    const dispatch = useDispatch();
     const { itemTypes: foodTypes } = useSelector((state) => state.foods);
-
-    useEffect(() => {
-        if (!foodTypes)
-            dispatch(fetchFoodTypes());
-    }, [foodTypes, dispatch]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;

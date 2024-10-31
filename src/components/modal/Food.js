@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { updateFood } from "../../features/foodsSlice";
+import { updateFood} from "../../features/foodsSlice";
 import ReactModal from "react-modal";
 import SaveChanges from "./SaveChanges";
 import Loading from "../misc/Loading";
@@ -13,7 +13,6 @@ function Food({ onClose }) {
 
     useEffect(() => {
         setEditingFood({ ...food });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [food]);
 
     const foodChanged = () => {
@@ -29,6 +28,7 @@ function Food({ onClose }) {
         dispatch(updateFood(editingFood));
         onClose();
     }
+
     const onExit = () => {
         setModalOpen(false);
         onClose();
@@ -50,6 +50,14 @@ function Food({ onClose }) {
         }
     }
 
+    const handleInputChange = (e) => {
+        const { name, value} = e.target;
+        setEditingFood({
+            ...editingFood,
+            [name]: value
+        });
+    }
+
     return (
         <div>
             <h2>Edit Food</h2>
@@ -62,7 +70,7 @@ function Food({ onClose }) {
                             name="name"
                             placeholder="Name"
                             defaultValue={food.name}
-                            onChange={(e) => setEditingFood({ ...editingFood, name: e.target.value })}
+                            onChange={handleInputChange}
                         />
                     </label>
                     <label>
@@ -72,7 +80,7 @@ function Food({ onClose }) {
                             name="carbs"
                             placeholder="Carbs per 100g"
                             defaultValue={food.carbs}
-                            onChange={(e) => setEditingFood({ ...editingFood, carbs: e.target.value })}
+                            onChange={handleInputChange}
 
                         />
                     </label>
@@ -83,14 +91,14 @@ function Food({ onClose }) {
                             name="calories"
                             placeholder="Calories per 100g"
                             defaultValue={food.calories}
-                            onChange={(e) => setEditingFood({ ...editingFood, calories: e.target.value })}
+                            onChange={handleInputChange}
                         />
                     </label>
                     <label>
                         Type:
                         <select name="type"
                             defaultValue={food.type}
-                            onChange={(e) => setEditingFood({ ...editingFood, type: e.target.value })}
+                            onChange={handleInputChange}
                         >
                             <option value="">Select Type</option>
                             {foodTypes.map(type => (
@@ -105,7 +113,7 @@ function Food({ onClose }) {
                             name="comments"
                             placeholder="Comments"
                             defaultValue={food.comments}
-                            onChange={(e) => setEditingFood({ ...editingFood, comments: e.target.value })}
+                            onChange={handleInputChange}
                         />
                     </label>
                     <div className="modal-buttons">
@@ -115,8 +123,13 @@ function Food({ onClose }) {
                         </div>
                     </div>
 
-                    <ReactModal isOpen={isModalOpen} onRequestClose={() => setModalOpen(false)}>
-                        <SaveChanges onSave={onSave} onExit={onExit} />
+                    <ReactModal
+                        isOpen={isModalOpen}
+                        onRequestClose={() => setModalOpen(false)}>
+                        <SaveChanges
+                            onSave={onSave}
+                            onExit={onExit}
+                        />
                     </ReactModal>
                 </div>
             ) : (
