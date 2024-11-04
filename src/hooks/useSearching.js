@@ -1,8 +1,8 @@
 import { useState } from "react";
 
-function useSearching(initialFilters = {}) {
+function useSearching() {
 
-    const [searchConfig, setSearchConfig] = useState(initialFilters);
+    const [searchConfig, setSearchConfig] = useState({});
 
     const parseCondition = (condition, value) => {
         if (!condition) return true;
@@ -14,15 +14,18 @@ function useSearching(initialFilters = {}) {
     };
 
     const applyFilters = (item) => {
-        // Adapt to different search properties dynamically
+
         return Object.keys(searchConfig).every(key => {
             const filterValue = searchConfig[key];
             if (!filterValue) return true;
 
-            if (key === "name") {
-                return item.name.toLowerCase().includes(filterValue.toLowerCase());
+            if (["name", "type"].includes(key)) {
+                return item[key].toLowerCase().includes(filterValue.toLowerCase());
             } else if (["carbs", "calories", "totalCalories", "totalCarbs"].includes(key)) {
                 return parseCondition(filterValue, item[key]);
+            } else if (["foodName", "foodType"].includes(key)) {
+                const foodKey = key.replace("food", "").toLowerCase();
+                return item["recipeFoods"].some(recipeFood => recipeFood.food[foodKey].toLowerCase().includes(filterValue.toLowerCase()));
             } else {
                 return item[key]?.toLowerCase() === filterValue.toLowerCase();
             }
@@ -31,8 +34,8 @@ function useSearching(initialFilters = {}) {
 
     const search = (items) => items.filter(applyFilters);
 
-    const handleSearchChange = (updatedField) => {
-        setSearchConfig(prevFilters => ({ ...prevFilters, ...updatedField }));
+    const handleSearchChange = (config) => {
+        setSearchConfig({ ...config });
     };
 
     return { search, searchConfig, handleSearchChange };

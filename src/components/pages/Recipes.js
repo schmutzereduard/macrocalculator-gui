@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import ReactModal from 'react-modal';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchRecipes, fetchRecipe, addRecipe, deleteRecipe } from '../../features/recipesSlice';
@@ -18,9 +18,8 @@ function Recipes() {
     const { modalConfig, setModalConfig } = useModals();
     const { sortConfig, handleSortChange, sort } = useSorting();
     const { pageConfig, handlePageChange, handleItemsPerPageChange, paginate } = usePagination();
-    const { searchConfig, search, handleSearchChange } = useSearching({
-        name: ''
-    });
+    const { searchConfig, search, handleSearchChange } = useSearching();
+    const [searchBy, setSearchBy] = useState("name");
 
     useEffect(() => {
         dispatch(fetchRecipes());
@@ -91,6 +90,8 @@ function Recipes() {
                         />
                         <AddRecipe
                             searchConfig={searchConfig}
+                            searchBy={searchBy}
+                            setSearchBy={setSearchBy}
                             handlePageChange={handlePageChange}
                             handleSearchChange={handleSearchChange}
                             onAddRecipe={handleAdd}
@@ -132,21 +133,37 @@ function Recipes() {
     );
 }
 
-function AddRecipe({ searchConfig, handlePageChange, handleSearchChange, onAddRecipe }) {
+function AddRecipe({ searchBy, setSearchBy, searchConfig, handlePageChange, handleSearchChange, onAddRecipe }) {
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        handleSearchChange({ [name]: value });
+        const { value } = e.target;
+        handleSearchChange({ [searchBy]: value });
         handlePageChange(1);
+    };
+
+    const handleSelectChange = (e) => {
+        const newSearchBy = e.target.value;
+
+        setSearchBy((prev) => {
+            handleSearchChange({ [prev]: "" });
+            handleSearchChange({ [newSearchBy]: searchConfig[newSearchBy] || "" });
+            return newSearchBy;
+        });
     };
 
     return (
         <div className="add-recipe-form">
+            <select onChange={handleSelectChange} value={searchBy}>
+                <option value="name">By Name</option>
+                <option value="totalCarbs">By Total Carbs</option>
+                <option value="totalCalories">By Total Calories</option>
+                <option value="foodName">By Food Name</option>
+                <option value="foodType">By Food Type</option>
+            </select>
             <input
-                name="name"
                 type="text"
                 placeholder="Search for recipes or enter a new recipe name..."
-                value={searchConfig.name}
+                value={searchConfig[searchBy] || ""}
                 onChange={handleInputChange}
             />
             <button onClick={() => onAddRecipe(searchConfig.name)}>+</button>
@@ -154,7 +171,7 @@ function AddRecipe({ searchConfig, handlePageChange, handleSearchChange, onAddRe
     );
 }
 
-function RecipesTable({ recipes, sortConfig,handlePageChange, handleSortChange, onEdit, onDelete }) {
+function RecipesTable({recipes, sortConfig, handlePageChange, handleSortChange, onEdit, onDelete}) {
 
     const handleHeaderClick = (value) => {
         handleSortChange(value);
@@ -164,9 +181,9 @@ function RecipesTable({ recipes, sortConfig,handlePageChange, handleSortChange, 
     return (
         <table>
             <thead>
-                <tr>
-                    <th>Name</th>
-                    <th onClick={() => handleHeaderClick('totalCarbs')}>
+            <tr>
+                <th>Name</th>
+                <th onClick={() => handleHeaderClick('totalCarbs')}>
                         Total Carbs {sortConfig.key === 'totalCarbs' ? sortConfig.icon : ''}
                     </th>
                     <th onClick={() => handleHeaderClick('totalCalories')}>

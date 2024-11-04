@@ -18,13 +18,7 @@ function Foods() {
     const { modalConfig, setModalConfig } = useModals();
     const { sortConfig, handleSortChange, sort } = useSorting();
     const { pageConfig, handlePageChange, handleItemsPerPageChange, paginate } = usePagination();
-    const { searchConfig, search, handleSearchChange } = useSearching({
-        name: '',
-        type: '',
-        carbs: '',
-        calories: '',
-        comments: ''
-    });
+    const { searchConfig, search, handleSearchChange } = useSearching();
 
     useEffect(() => {
         dispatch(fetchFoods());
@@ -154,7 +148,7 @@ function AddFood({ searchConfig, handlePageChange, handleSearchChange, onAddFood
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        handleSearchChange({ [name]: value });
+        handleSearchChange({ ...searchConfig, [name]: value });
         handlePageChange(1);
     };
 
