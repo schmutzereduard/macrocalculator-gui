@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ReactModal from 'react-modal';
-import {fetchFoods, fetchFoodTypes, fetchFood, addFood, deleteFood, addNewFood} from '../../features/foodsSlice';
+import {fetchFoods, fetchFoodTypes, fetchFood, deleteFood, addNewFood} from '../../features/foodsSlice';
 import Food from '../modal/Food';
 import ConfirmDelete from '../modal/ConfirmDelete';
 import Pagination from '../misc/Pagination';
