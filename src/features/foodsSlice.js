@@ -68,7 +68,11 @@ const foodsSlice = createSlice({
         loading: false,
         error: null
     },
-    reducers: {},
+    reducers: {
+        addNewFood: (state) => {
+            state.selectedItem = { name: '', carbs: '', calories: '', type: '', comments: '' };
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(fetchFoods.pending, handlePending)
@@ -110,4 +114,5 @@ const foodsSlice = createSlice({
     },
 });
 
+export const { addNewFood } = foodsSlice.actions;
 export default foodsSlice.reducer;

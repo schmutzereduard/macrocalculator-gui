@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ReactModal from 'react-modal';
-import { fetchFoods, fetchFoodTypes, fetchFood, addFood, deleteFood } from '../../features/foodsSlice';
+import {fetchFoods, fetchFoodTypes, fetchFood, addFood, deleteFood, addNewFood} from '../../features/foodsSlice';
 import Food from '../modal/Food';
 import ConfirmDelete from '../modal/ConfirmDelete';
 import Pagination from '../misc/Pagination';
@@ -14,7 +14,7 @@ import useModals from "../../hooks/useModals";
 
 function Foods() {
     const dispatch = useDispatch();
-    const { items: foods, loading } = useSelector((state) => state.foods);
+    const { items: foods, selectedItem: food, loading } = useSelector((state) => state.foods);
     const { modalConfig, setModalConfig } = useModals();
     const { sortConfig, handleSortChange, sort } = useSorting();
     const { pageConfig, handlePageChange, handleItemsPerPageChange, paginate } = usePagination();
@@ -29,8 +29,7 @@ function Foods() {
     const sortedFoods = sort(filteredFoods);
     const paginatedFoods = paginate(sortedFoods);
 
-    const openFoodModal = (foodId) => {
-        dispatch(fetchFood(foodId));
+    const openFoodModal = () => {
         setModalConfig({
             ...modalConfig,
             isItemModalOpen: true
@@ -73,19 +72,14 @@ function Foods() {
     };
 
     const handleAdd = () => {
-        const isFormValid = searchConfig.name && searchConfig.carbs && searchConfig.calories && searchConfig.type;
-        if (isFormValid) {
-            const foodExists = foods.some(
-                (food) =>
-                    food.name.toLowerCase() === searchConfig.name.toLowerCase() &&
-                    food.type.toLowerCase() === searchConfig.type.toLowerCase()
-            );
-            if (!foodExists) {
-                dispatch(addFood({...searchConfig}));
-                handleSearchChange({ name: searchConfig.name, type: '', carbs: '', calories: '', comments: '' });
-            }
-        }
+        dispatch(addNewFood());
+        openFoodModal();
     };
+
+    const handleEdit = (foodId) => {
+        dispatch(fetchFood(foodId));
+        openFoodModal();
+    }
 
     return (
         <div>
@@ -93,24 +87,20 @@ function Foods() {
                 <Loading />
             ) : (
                 <div>
-                    <div className='header'>
-                        <PerPage
-                            itemsPerPage={pageConfig.itemsPerPage}
-                            onChange={handleItemsPerPageChange}
-                        />
-                        <AddFood
-                            searchConfig={searchConfig}
-                            handlePageChange={handlePageChange}
-                            handleSearchChange={handleSearchChange}
-                            onAddFood={handleAdd}
-                        />
-                    </div>
+                    <FoodsHeader
+                        pageConfig={pageConfig}
+                        searchConfig={searchConfig}
+                        handleAdd={handleAdd}
+                        handleItemsPerPageChange={handleItemsPerPageChange}
+                        handlePageChange={handlePageChange}
+                        handleSearchChange={handleSearchChange}
+                    />
                     <FoodsTable
                         foods={paginatedFoods}
                         sortConfig={sortConfig}
                         handlePageChange={handlePageChange}
                         handleSortChange={handleSortChange}
-                        onEdit={openFoodModal}
+                        onEdit={handleEdit}
                         onDelete={openDeleteFoodModal}
                     />
                     <Pagination
@@ -123,6 +113,7 @@ function Foods() {
                         onRequestClose={closeFoodModal}
                     >
                         <Food
+                            food={food}
                             onClose={closeFoodModal}
                         />
                     </ReactModal>
@@ -142,13 +133,31 @@ function Foods() {
     );
 }
 
-function AddFood({ searchConfig, handlePageChange, handleSearchChange, onAddFood }) {
+function FoodsHeader({ pageConfig, searchConfig, handleAdd, handleItemsPerPageChange, handlePageChange, handleSearchChange }) {
 
-    const { itemTypes: foodTypes } = useSelector((state) => state.foods);
+    return (
+        <div className='header'>
+            <PerPage
+                itemsPerPage={pageConfig.itemsPerPage}
+                onChange={handleItemsPerPageChange}
+            />
+            <SearchFood
+                searchConfig={searchConfig}
+                handlePageChange={handlePageChange}
+                handleSearchChange={handleSearchChange}
+            />
+            <button onClick={handleAdd}>Add Food</button>
+        </div>
+    );
+}
+
+function SearchFood({ searchConfig, handlePageChange, handleSearchChange }) {
+
+    const {itemTypes: foodTypes} = useSelector((state) => state.foods);
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        handleSearchChange({ ...searchConfig, [name]: value });
+        const {name, value} = e.target;
+        handleSearchChange({...searchConfig, [name]: value});
         handlePageChange(1);
     };
 
@@ -194,7 +203,6 @@ function AddFood({ searchConfig, handlePageChange, handleSearchChange, onAddFood
                 value={searchConfig.comments}
                 onChange={handleInputChange}
             />
-            <button onClick={onAddFood}>+</button>
         </div>
     );
 }
