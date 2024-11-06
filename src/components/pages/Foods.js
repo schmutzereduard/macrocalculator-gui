@@ -141,7 +141,7 @@ function FoodsHeader({ pageConfig, searchConfig, handleAdd, handleItemsPerPageCh
                 itemsPerPage={pageConfig.itemsPerPage}
                 onChange={handleItemsPerPageChange}
             />
-            <SearchFood
+            <SearchFoods
                 searchConfig={searchConfig}
                 handlePageChange={handlePageChange}
                 handleSearchChange={handleSearchChange}
@@ -151,7 +151,7 @@ function FoodsHeader({ pageConfig, searchConfig, handleAdd, handleItemsPerPageCh
     );
 }
 
-function SearchFood({ searchConfig, handlePageChange, handleSearchChange }) {
+function SearchFoods({ searchConfig, handlePageChange, handleSearchChange }) {
 
     const {itemTypes: foodTypes} = useSelector((state) => state.foods);
 

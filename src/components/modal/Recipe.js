@@ -1,6 +1,6 @@
 import {useState, useEffect} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {updateRecipe} from "../../features/recipesSlice";
+import {addRecipe, updateRecipe} from "../../features/recipesSlice";
 import {fetchFoods} from "../../features/foodsSlice";
 import ReactModal from "react-modal";
 import SaveChanges from "./SaveChanges";
@@ -11,20 +11,29 @@ import useSearching from "../../hooks/useSearching";
 import usePagination from "../../hooks/usePagination";
 import useModals from "../../hooks/useModals";
 
-function Recipe({ onClose }) {
+function Recipe({ recipe, onClose }) {
     const dispatch = useDispatch();
-    const { selectedItem: recipe } = useSelector((state) => state.recipes);
     const { items: foods } = useSelector((state) => state.foods);
     const { modalConfig, setModalConfig } = useModals();
 
     const [editingRecipe, setEditingRecipe] = useState(null);
+    const [alert, setAlert] = useState("");
 
     useEffect(() => {
         setEditingRecipe({...recipe});
         dispatch(fetchFoods());
     }, [recipe, dispatch]);
 
+    const recipeValid = () => {
+        return editingRecipe
+            && editingRecipe.name;
+    };
+
     const recipeChanged = () => {
+
+        if (!recipe.id)
+            return false;
+
         for (let key in editingRecipe) {
             if (editingRecipe[key] !== recipe[key]) return true;
         }
@@ -32,7 +41,11 @@ function Recipe({ onClose }) {
     };
 
     const onSave = () => {
-        dispatch(updateRecipe(editingRecipe));
+        if (!recipe.id){
+            dispatch(addRecipe(editingRecipe));
+        } else {
+            dispatch(updateRecipe(editingRecipe));
+        }
         onClose();
     };
 
@@ -49,6 +62,7 @@ function Recipe({ onClose }) {
     };
 
     const handleSave = () => {
+
         if (recipeChanged()) {
             onSave();
         } else {
@@ -65,7 +79,7 @@ function Recipe({ onClose }) {
                     id: null,
                     name: null
                 }
-            })
+            });
         } else {
             onExit();
         }
@@ -131,6 +145,15 @@ function Recipe({ onClose }) {
         return `Carbs: ${totalCarbs}g, Calories: ${totalCalories}`;
     };
 
+    const showAlert = () => {
+
+        if (editingRecipe.name === "") {
+            setAlert("Please enter a name");
+        } else {
+            setAlert("");
+        }
+    }
+
     return (
         <div>
             {editingRecipe ? (
@@ -174,8 +197,18 @@ function Recipe({ onClose }) {
 
                     <div className="modal-buttons">
                         <div>
-                            <button onClick={handleSave}>Save</button>
+                            <span
+                                onMouseEnter={showAlert}
+                                onMouseLeave={() => setAlert("")}
+                            ><button
+                                onClick={handleSave}
+                                disabled={!recipeValid()}
+                            >
+                                Save
+                            </button>
+                            </span>
                             <button onClick={handleClose}>Close</button>
+                            <div>{alert}</div>
                         </div>
                     </div>
 
@@ -266,13 +299,22 @@ function AddFoods({handleAddFoodsToRecipe, getTotalProperties}) {
 
                 <PerPage itemsPerPage={pageConfig.itemsPerPage} onChange={handleItemsPerPageChange}/>
             </div>
-            <div>
+            <div style={{
+                display: "inline-flex",
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+                gap: "10px"
+
+            }}>
                 <p>{getTotalProperties(Object.keys(foodQuantities).map(foodId => ({
                     food: foods.find(f => f.id === parseInt(foodId)),
                     quantity: foodQuantities[foodId]
-                })))} <span><button disabled={Object.keys(foodQuantities).length === 0}
-                                    onClick={addFoodsToRecipe}>+</button></span>
+                })))}
                 </p>
+                <button disabled={Object.keys(foodQuantities).length === 0}
+                        onClick={addFoodsToRecipe}>Add
+                </button>
             </div>
             <ul className="list">
                 {paginatedFoods.map((food) => (

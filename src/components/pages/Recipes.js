@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import ReactModal from 'react-modal';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchRecipes, fetchRecipe, addRecipe, deleteRecipe } from '../../features/recipesSlice';
+import {fetchRecipes, fetchRecipe, deleteRecipe, addNewRecipe} from '../../features/recipesSlice';
 import Recipe from '../modal/Recipe';
 import ConfirmDelete from '../modal/ConfirmDelete';
 import Pagination from '../misc/Pagination';
@@ -14,12 +14,11 @@ import useSearching from "../../hooks/useSearching";
 
 function Recipes() {
     const dispatch = useDispatch();
-    const { items: recipes, loading } = useSelector(state => state.recipes);
+    const { items: recipes, selectedItem: recipe, loading } = useSelector(state => state.recipes);
     const { modalConfig, setModalConfig } = useModals();
     const { sortConfig, handleSortChange, sort } = useSorting();
     const { pageConfig, handlePageChange, handleItemsPerPageChange, paginate } = usePagination();
     const { searchConfig, search, handleSearchChange } = useSearching();
-    const [searchBy, setSearchBy] = useState("name");
 
     useEffect(() => {
         dispatch(fetchRecipes());
@@ -29,8 +28,7 @@ function Recipes() {
     const sortedRecipes = sort(filteredRecipes);
     const paginatedRecipes = paginate(sortedRecipes);
 
-    const openRecipeModal = (recipeId) => {
-        dispatch(fetchRecipe(recipeId));
+    const openRecipeModal = () => {
         setModalConfig({
             ...modalConfig,
             isItemModalOpen: true
@@ -66,15 +64,19 @@ function Recipes() {
         });
     };
 
+    const handleEdit = (recipeId) => {
+        dispatch(fetchRecipe(recipeId));
+        openRecipeModal();
+    }
+
     const handleDelete = (id) => {
         dispatch(deleteRecipe(id));
         closeDeleteRecipeModal();
     };
 
-    const handleAdd = (recipeName) => {
-        if (recipeName && !recipes.some(recipe => recipe.name.toLowerCase() === recipeName.toLowerCase())) {
-            dispatch(addRecipe({ name: recipeName, description: '', recipeFoods: [] }));
-        }
+    const handleAdd = () => {
+        dispatch(addNewRecipe());
+        openRecipeModal();
     };
 
     return (
@@ -83,26 +85,20 @@ function Recipes() {
                 <Loading />
             ) : (
                 <div>
-                    <div className="header">
-                        <PerPage
-                            itemsPerPage={pageConfig.itemsPerPage}
-                            onChange={handleItemsPerPageChange}
-                        />
-                        <AddRecipe
-                            searchConfig={searchConfig}
-                            searchBy={searchBy}
-                            setSearchBy={setSearchBy}
-                            handlePageChange={handlePageChange}
-                            handleSearchChange={handleSearchChange}
-                            onAddRecipe={handleAdd}
-                        />
-                    </div>
+                    <RecipesHeader
+                        pageConfig={pageConfig}
+                        searchConfig={searchConfig}
+                        handleAdd={handleAdd}
+                        handleItemsPerPageChange={handleItemsPerPageChange}
+                        handlePageChange={handlePageChange}
+                        handleSearchChange={handleSearchChange}
+                    />
                     <RecipesTable
                         recipes={paginatedRecipes}
                         sortConfig={sortConfig}
                         handlePageChange={handlePageChange}
                         handleSortChange={handleSortChange}
-                        onEdit={openRecipeModal}
+                        onEdit={handleEdit}
                         onDelete={openDeleteRecipeModal}
                     />
                     <Pagination
@@ -114,6 +110,7 @@ function Recipes() {
                         onRequestClose={closeRecipeModal}
                     >
                         <Recipe
+                            recipe={recipe}
                             onClose={closeRecipeModal}
                         />
                     </ReactModal>
@@ -132,12 +129,33 @@ function Recipes() {
         </div>
     );
 }
+function RecipesHeader({ pageConfig, searchConfig, handleAdd, handleItemsPerPageChange, handlePageChange, handleSearchChange }) {
 
-function AddRecipe({ searchBy, setSearchBy, searchConfig, handlePageChange, handleSearchChange, onAddRecipe }) {
+    const [searchBy, setSearchBy] = useState("name");
+
+    return (
+        <div className="header">
+            <PerPage
+                itemsPerPage={pageConfig.itemsPerPage}
+                onChange={handleItemsPerPageChange}
+            />
+            <SearchRecipes
+                searchConfig={searchConfig}
+                searchBy={searchBy}
+                setSearchBy={setSearchBy}
+                handlePageChange={handlePageChange}
+                handleSearchChange={handleSearchChange}
+                onAddRecipe={handleAdd}
+            />
+        </div>
+    );
+}
+
+function SearchRecipes({ searchBy, setSearchBy, searchConfig, handlePageChange, handleSearchChange, onAddRecipe }) {
 
     const handleInputChange = (e) => {
-        const { value } = e.target;
-        handleSearchChange({ [searchBy]: value });
+        const {value} = e.target;
+        handleSearchChange({[searchBy]: value});
         handlePageChange(1);
     };
 
@@ -145,15 +163,15 @@ function AddRecipe({ searchBy, setSearchBy, searchConfig, handlePageChange, hand
         const newSearchBy = e.target.value;
 
         setSearchBy((prev) => {
-            handleSearchChange({ [prev]: "" });
-            handleSearchChange({ [newSearchBy]: searchConfig[newSearchBy] || "" });
+            handleSearchChange({[prev]: ""});
+            handleSearchChange({[newSearchBy]: searchConfig[newSearchBy] || ""});
             return newSearchBy;
         });
     };
 
     return (
         <div className="add-recipe-form">
-            <select onChange={handleSelectChange} value={searchBy}>
+        <select onChange={handleSelectChange} value={searchBy}>
                 <option value="name">By Name</option>
                 <option value="totalCarbs">By Total Carbs</option>
                 <option value="totalCalories">By Total Calories</option>
@@ -166,12 +184,12 @@ function AddRecipe({ searchBy, setSearchBy, searchConfig, handlePageChange, hand
                 value={searchConfig[searchBy] || ""}
                 onChange={handleInputChange}
             />
-            <button onClick={() => onAddRecipe(searchConfig.name)}>+</button>
+            <button onClick={() => onAddRecipe(searchConfig.name)}>Add Recipe</button>
         </div>
     );
 }
 
-function RecipesTable({recipes, sortConfig, handlePageChange, handleSortChange, onEdit, onDelete}) {
+function RecipesTable({ recipes, sortConfig, handlePageChange, handleSortChange, onEdit, onDelete }) {
 
     const handleHeaderClick = (value) => {
         handleSortChange(value);

@@ -61,7 +61,11 @@ const recipesSlice = createSlice({
     loading: false,
     error: null,
   },
-  reducers: {},
+  reducers: {
+      addNewRecipe: (state) => {
+        state.selectedItem = { name: '', description: '', recipeFoods: [] }
+      },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchRecipes.pending, handlePending)
@@ -99,4 +103,5 @@ const recipesSlice = createSlice({
   },
 });
 
+export const { addNewRecipe } = recipesSlice.actions;
 export default recipesSlice.reducer;
