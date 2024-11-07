@@ -31,9 +31,6 @@ function Recipe({ recipe, onClose }) {
 
     const recipeChanged = () => {
 
-        if (!recipe.id)
-            return false;
-
         for (let key in editingRecipe) {
             if (editingRecipe[key] !== recipe[key]) return true;
         }
@@ -71,7 +68,7 @@ function Recipe({ recipe, onClose }) {
     };
 
     const handleClose = () => {
-        if (recipeChanged()) {
+        if (recipeChanged() && recipeValid()) {
             setModalConfig({
                 ...modalConfig,
                 isItemModalOpen: true,

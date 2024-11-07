@@ -30,9 +30,6 @@ function Food({food, onClose}) {
 
     const foodChanged = () => {
 
-        if (!food.id)
-            return false;
-
         for (let key in editingFood) {
             if (editingFood[key] !== food[key])
                 return true;
@@ -42,6 +39,9 @@ function Food({food, onClose}) {
     };
 
     const onSave = () => {
+
+        if (!foodValid())
+            return;
 
         if (!editingFood.id) {
             dispatch(addFood(editingFood));
@@ -73,7 +73,7 @@ function Food({food, onClose}) {
     };
 
     const handleClose = () => {
-        if (foodChanged()) {
+        if (foodChanged() && foodValid()) {
             setModalConfig({
                 ...modalConfig,
                 isItemModalOpen: true,
