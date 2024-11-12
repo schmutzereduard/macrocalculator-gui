@@ -10,9 +10,9 @@ import useModals from "../../hooks/useModals";
 function Journals() {
 
     const dispatch = useDispatch();
-    const {items: journals, loading} = useSelector(state => state.journals);
-    const [currentDate, setCurrentDate] = useState(new Date());
-    const {modalConfig, setModalConfig} = useModals();
+    const { items: journals, loading } = useSelector(state => state.journals);
+    const [ currentDate, setCurrentDate ] = useState(new Date());
+    const { modalConfig, setModalConfig } = useModals();
 
     useEffect(() => {
         const year = format(currentDate, 'yyyy');
@@ -22,6 +22,7 @@ function Journals() {
 
 
     const openJournalModal = (date) => {
+
         const year = format(date, 'yyyy');
         const month = format(date, 'MM');
         const day = format(date, 'dd');
@@ -37,6 +38,7 @@ function Journals() {
     };
 
     const closeJournalModal = () => {
+
         setModalConfig({
             ...modalConfig,
             isItemModalOpen: false
@@ -88,15 +90,19 @@ function Calendar({ journals , currentDate, setCurrentDate, handleDayClick }) {
     });
 
     const handleYearChange = (event) => {
+
         const year = event.target.value;
         setCurrentDate(new Date(year, currentDate.getMonth(), 1));
     };
 
     const handleMonthChange = (event) => {
+
         const month = event.target.value - 1;
         setCurrentDate(new Date(currentDate.getFullYear(), month, 1));
     };
+
     const isJournalAvailable = (date) => {
+
         return journals.some(journal => journal.date === format(date, 'yyyy-MM-dd'));
     };
 

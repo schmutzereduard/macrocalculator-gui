@@ -6,13 +6,14 @@ import SaveChanges from "./SaveChanges";
 import Loading from "../misc/Loading";
 import useModals from "../../hooks/useModals";
 
-function Food({food, onClose}) {
+function Food({ food, onClose }) {
+
     const dispatch = useDispatch();
-    const {itemTypes: foodTypes} = useSelector((state) => state.foods);
+    const { itemTypes: foodTypes } = useSelector((state) => state.foods);
     const { modalConfig, setModalConfig } = useModals();
 
-    const [editingFood, setEditingFood] = useState(null);
-    const [alert, setAlert] = useState("");
+    const [ editingFood, setEditingFood ] = useState(null);
+    const [ alert, setAlert ] = useState("");
 
 
     useEffect(() => {
@@ -21,6 +22,7 @@ function Food({food, onClose}) {
 
 
     const foodValid = () => {
+
         return editingFood
             && editingFood.name !== ""
             && editingFood.carbs !== ""
@@ -40,9 +42,6 @@ function Food({food, onClose}) {
 
     const onSave = () => {
 
-        if (!foodValid())
-            return;
-
         if (!editingFood.id) {
             dispatch(addFood(editingFood));
         } else {
@@ -52,13 +51,10 @@ function Food({food, onClose}) {
     };
 
     const onExit = () => {
+
         setModalConfig({
             ...modalConfig,
-            isItemModalOpen: false,
-            itemToDelete: {
-                id: null,
-                name: null
-            }
+            isSaveItemModalOpen: false
         })
         onClose();
     };
@@ -73,14 +69,11 @@ function Food({food, onClose}) {
     };
 
     const handleClose = () => {
+
         if (foodChanged() && foodValid()) {
             setModalConfig({
                 ...modalConfig,
-                isItemModalOpen: true,
-                itemToDelete: {
-                    id: null,
-                    name: null
-                }
+                isSaveItemModalOpen: true
             });
         } else {
             onExit();
@@ -88,6 +81,7 @@ function Food({food, onClose}) {
     };
 
     const handleInputChange = (e) => {
+
         const {name, value} = e.target;
         setEditingFood({
             ...editingFood,
@@ -186,7 +180,7 @@ function Food({food, onClose}) {
                     </div>
 
                     <ReactModal
-                        isOpen={modalConfig.isItemModalOpen}
+                        isOpen={modalConfig.isSaveItemModalOpen}
                         onRequestClose={onExit}>
                         <SaveChanges
                             onSave={onSave}

@@ -13,6 +13,7 @@ import useSearching from "../../hooks/useSearching";
 import useModals from "../../hooks/useModals";
 
 function Foods() {
+
     const dispatch = useDispatch();
     const { items: foods, selectedItem: food, loading } = useSelector((state) => state.foods);
     const { modalConfig, setModalConfig } = useModals();
@@ -30,6 +31,7 @@ function Foods() {
     const paginatedFoods = paginate(sortedFoods);
 
     const openFoodModal = () => {
+
         setModalConfig({
             ...modalConfig,
             isItemModalOpen: true
@@ -37,6 +39,7 @@ function Foods() {
     };
 
     const closeFoodModal = () => {
+
         setModalConfig({
             ...modalConfig,
             isItemModalOpen: false
@@ -44,10 +47,11 @@ function Foods() {
     };
 
     const openDeleteFoodModal = (foodId, foodName) => {
+
         setModalConfig({
             ...modalConfig,
             isDeleteItemModalOpen: true,
-            itemToDelete: {
+            item: {
                 id: foodId,
                 name: foodName
             }
@@ -56,10 +60,11 @@ function Foods() {
     };
 
     const closeDeleteFoodModal = () => {
+
         setModalConfig({
             ...modalConfig,
             isDeleteItemModalOpen: false,
-            itemToDelete: {
+            item: {
                 id: null,
                 name: null
             }
@@ -67,19 +72,22 @@ function Foods() {
     };
 
     const handleDelete = (id) => {
+
         dispatch(deleteFood(id));
         closeDeleteFoodModal();
     };
 
     const handleAdd = () => {
+
         dispatch(addNewFood());
         openFoodModal();
     };
 
     const handleEdit = (foodId) => {
+
         dispatch(fetchFood(foodId));
         openFoodModal();
-    }
+    };
 
     return (
         <div>
@@ -122,8 +130,8 @@ function Foods() {
                         onRequestClose={closeDeleteFoodModal}
                     >
                         <ConfirmDelete
-                            name={modalConfig.itemToDelete.name}
-                            onConfirm={() => handleDelete(modalConfig.itemToDelete.id)}
+                            name={modalConfig.item.name}
+                            onConfirm={() => handleDelete(modalConfig.item.id)}
                             onCancel={closeDeleteFoodModal}
                         />
                     </ReactModal>
@@ -153,9 +161,10 @@ function FoodsHeader({ pageConfig, searchConfig, handleAdd, handleItemsPerPageCh
 
 function SearchFoods({ searchConfig, handlePageChange, handleSearchChange }) {
 
-    const {itemTypes: foodTypes} = useSelector((state) => state.foods);
+    const { itemTypes: foodTypes } = useSelector((state) => state.foods);
 
     const handleInputChange = (e) => {
+
         const {name, value} = e.target;
         handleSearchChange({...searchConfig, [name]: value});
         handlePageChange(1);
@@ -210,6 +219,7 @@ function SearchFoods({ searchConfig, handlePageChange, handleSearchChange }) {
 function FoodsTable({ foods, sortConfig, handlePageChange, handleSortChange, onEdit, onDelete }) {
 
     const handleHeaderClick = (value) => {
+
         handleSortChange(value);
         handlePageChange(1);
     };

@@ -4,8 +4,9 @@ function useModals() {
 
     const[modalConfig, setModalConfig] = useState({
         isItemModalOpen: false,
+        isSaveItemModalOpen: false,
         isDeleteItemModalOpen: false,
-        itemToDelete: {
+        item: {
             id: null,
             name: null
         }

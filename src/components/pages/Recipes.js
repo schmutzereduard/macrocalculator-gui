@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import ReactModal from 'react-modal';
-import { useDispatch, useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {fetchRecipes, fetchRecipe, deleteRecipe, addNewRecipe} from '../../features/recipesSlice';
 import Recipe from '../modal/Recipe';
 import ConfirmDelete from '../modal/ConfirmDelete';
@@ -13,6 +13,7 @@ import usePagination from "../../hooks/usePagination";
 import useSearching from "../../hooks/useSearching";
 
 function Recipes() {
+
     const dispatch = useDispatch();
     const { items: recipes, selectedItem: recipe, loading } = useSelector(state => state.recipes);
     const { modalConfig, setModalConfig } = useModals();
@@ -29,6 +30,7 @@ function Recipes() {
     const paginatedRecipes = paginate(sortedRecipes);
 
     const openRecipeModal = () => {
+
         setModalConfig({
             ...modalConfig,
             isItemModalOpen: true
@@ -36,6 +38,7 @@ function Recipes() {
     };
 
     const closeRecipeModal = () => {
+
         setModalConfig({
             ...modalConfig,
             isItemModalOpen: false
@@ -43,10 +46,11 @@ function Recipes() {
     };
 
     const openDeleteRecipeModal = (recipeId, recipeName) => {
+
         setModalConfig({
             ...modalConfig,
             isDeleteItemModalOpen: true,
-            itemToDelete: {
+            item: {
                 id: recipeId,
                 name: recipeName
             }
@@ -54,10 +58,11 @@ function Recipes() {
     };
 
     const closeDeleteRecipeModal = () => {
+
         setModalConfig({
             ...modalConfig,
             isDeleteItemModalOpen: false,
-            itemToDelete: {
+            item: {
                 id: null,
                 name: null
             }
@@ -65,16 +70,19 @@ function Recipes() {
     };
 
     const handleEdit = (recipeId) => {
+
         dispatch(fetchRecipe(recipeId));
         openRecipeModal();
-    }
+    };
 
     const handleDelete = (id) => {
+
         dispatch(deleteRecipe(id));
         closeDeleteRecipeModal();
     };
 
     const handleAdd = () => {
+
         dispatch(addNewRecipe());
         openRecipeModal();
     };
@@ -82,7 +90,7 @@ function Recipes() {
     return (
         <div>
             {loading ? (
-                <Loading />
+                <Loading/>
             ) : (
                 <div>
                     <RecipesHeader
@@ -104,7 +112,7 @@ function Recipes() {
                     <Pagination
                         currentPage={pageConfig.currentPage}
                         totalPages={Math.ceil(sortedRecipes.length / pageConfig.itemsPerPage)}
-                        onPageChange={handlePageChange} />
+                        onPageChange={handlePageChange}/>
                     <ReactModal
                         isOpen={modalConfig.isItemModalOpen}
                         onRequestClose={closeRecipeModal}
@@ -119,8 +127,8 @@ function Recipes() {
                         onRequestClose={closeDeleteRecipeModal}
                     >
                         <ConfirmDelete
-                            name={modalConfig.itemToDelete.name}
-                            onConfirm={() => handleDelete(modalConfig.itemToDelete.id)}
+                            name={modalConfig.item.name}
+                            onConfirm={() => handleDelete(modalConfig.item.id)}
                             onCancel={closeDeleteRecipeModal}
                         />
                     </ReactModal>
@@ -129,6 +137,7 @@ function Recipes() {
         </div>
     );
 }
+
 function RecipesHeader({ pageConfig, searchConfig, handleAdd, handleItemsPerPageChange, handlePageChange, handleSearchChange }) {
 
     const [searchBy, setSearchBy] = useState("name");
@@ -154,12 +163,14 @@ function RecipesHeader({ pageConfig, searchConfig, handleAdd, handleItemsPerPage
 function SearchRecipes({ searchBy, setSearchBy, searchConfig, handlePageChange, handleSearchChange, onAddRecipe }) {
 
     const handleInputChange = (e) => {
+
         const {value} = e.target;
         handleSearchChange({[searchBy]: value});
         handlePageChange(1);
     };
 
     const handleSelectChange = (e) => {
+
         const newSearchBy = e.target.value;
 
         setSearchBy((prev) => {
@@ -171,7 +182,7 @@ function SearchRecipes({ searchBy, setSearchBy, searchConfig, handlePageChange, 
 
     return (
         <div className="add-recipe-form">
-        <select onChange={handleSelectChange} value={searchBy}>
+            <select onChange={handleSelectChange} value={searchBy}>
                 <option value="name">By Name</option>
                 <option value="totalCarbs">By Total Carbs</option>
                 <option value="totalCalories">By Total Calories</option>
@@ -189,9 +200,10 @@ function SearchRecipes({ searchBy, setSearchBy, searchConfig, handlePageChange, 
     );
 }
 
-function RecipesTable({ recipes, sortConfig, handlePageChange, handleSortChange, onEdit, onDelete }) {
+function RecipesTable({recipes, sortConfig, handlePageChange, handleSortChange, onEdit, onDelete}) {
 
     const handleHeaderClick = (value) => {
+
         handleSortChange(value);
         handlePageChange(1);
     };
@@ -202,28 +214,28 @@ function RecipesTable({ recipes, sortConfig, handlePageChange, handleSortChange,
             <tr>
                 <th>Name</th>
                 <th onClick={() => handleHeaderClick('totalCarbs')}>
-                        Total Carbs {sortConfig.key === 'totalCarbs' ? sortConfig.icon : ''}
-                    </th>
-                    <th onClick={() => handleHeaderClick('totalCalories')}>
-                        Total Calories {sortConfig.key === 'totalCalories' ? sortConfig.icon : ''}
-                    </th>
-                    <th className="description">Description</th>
-                    <th>Actions</th>
-                </tr>
+                    Total Carbs {sortConfig.key === 'totalCarbs' ? sortConfig.icon : ''}
+                </th>
+                <th onClick={() => handleHeaderClick('totalCalories')}>
+                    Total Calories {sortConfig.key === 'totalCalories' ? sortConfig.icon : ''}
+                </th>
+                <th className="description">Description</th>
+                <th>Actions</th>
+            </tr>
             </thead>
             <tbody>
-                {recipes.map(recipe => (
-                    <tr key={recipe.id}>
-                        <td>{recipe.name}</td>
-                        <td>{recipe.totalCarbs}</td>
-                        <td>{recipe.totalCalories}</td>
-                        <td>{recipe.description}</td>
-                        <td>
-                            <button onClick={() => onEdit(recipe.id)}>Edit</button>
-                            <button onClick={() => onDelete(recipe.id, recipe.name)}>Delete</button>
-                        </td>
-                    </tr>
-                ))}
+            {recipes.map(recipe => (
+                <tr key={recipe.id}>
+                    <td>{recipe.name}</td>
+                    <td>{recipe.totalCarbs}</td>
+                    <td>{recipe.totalCalories}</td>
+                    <td>{recipe.description}</td>
+                    <td>
+                        <button onClick={() => onEdit(recipe.id)}>Edit</button>
+                        <button onClick={() => onDelete(recipe.id, recipe.name)}>Delete</button>
+                    </td>
+                </tr>
+            ))}
             </tbody>
         </table>
     );

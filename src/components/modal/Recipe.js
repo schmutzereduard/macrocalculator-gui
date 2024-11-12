@@ -16,8 +16,8 @@ function Recipe({ recipe, onClose }) {
     const { items: foods } = useSelector((state) => state.foods);
     const { modalConfig, setModalConfig } = useModals();
 
-    const [editingRecipe, setEditingRecipe] = useState(null);
-    const [alert, setAlert] = useState("");
+    const [ editingRecipe, setEditingRecipe ] = useState(null);
+    const [ alert, setAlert ] = useState("");
 
     useEffect(() => {
         setEditingRecipe({...recipe});
@@ -25,6 +25,7 @@ function Recipe({ recipe, onClose }) {
     }, [recipe, dispatch]);
 
     const recipeValid = () => {
+        
         return editingRecipe
             && editingRecipe.name;
     };
@@ -38,6 +39,7 @@ function Recipe({ recipe, onClose }) {
     };
 
     const onSave = () => {
+        
         if (!recipe.id){
             dispatch(addRecipe(editingRecipe));
         } else {
@@ -47,10 +49,11 @@ function Recipe({ recipe, onClose }) {
     };
 
     const onExit = () => {
+        
         setModalConfig({
             ...modalConfig,
-            isItemModalOpen: false,
-            itemToDelete: {
+            isSaveItemModalOpen: false,
+            item: {
                 id: null,
                 name: null
             }
@@ -68,11 +71,12 @@ function Recipe({ recipe, onClose }) {
     };
 
     const handleClose = () => {
+        
         if (recipeChanged() && recipeValid()) {
             setModalConfig({
                 ...modalConfig,
-                isItemModalOpen: true,
-                itemToDelete: {
+                isSaveItemModalOpen: true,
+                item: {
                     id: null,
                     name: null
                 }
@@ -83,10 +87,11 @@ function Recipe({ recipe, onClose }) {
     };
 
     const openRemoveFoodModal = (foodId, foodName) => {
+        
         setModalConfig({
             ...modalConfig,
             isDeleteItemModalOpen: true,
-            itemToDelete: {
+            item: {
                 id: foodId,
                 name: foodName
             }
@@ -94,10 +99,11 @@ function Recipe({ recipe, onClose }) {
     };
 
     const closeRemoveFoodModal = () => {
+        
         setModalConfig({
             ...modalConfig,
             isDeleteItemModalOpen: false,
-            itemToDelete: {
+            item: {
                 id: null,
                 name: null
             }
@@ -105,14 +111,15 @@ function Recipe({ recipe, onClose }) {
     };
 
     const handleRemoveFood = () => {
+        
         setEditingRecipe((prev) => ({
             ...prev,
-            recipeFoods: prev.recipeFoods.filter((rf) => rf.food.id !== modalConfig.itemToDelete.id),
+            recipeFoods: prev.recipeFoods.filter((rf) => rf.food.id !== modalConfig.item.id),
         }));
         setModalConfig({
             ...modalConfig,
             isDeleteItemModalOpen: false,
-            itemToDelete: {
+            item: {
                 id: null,
                 name: null
             }
@@ -120,6 +127,7 @@ function Recipe({ recipe, onClose }) {
     };
 
     const handleAddFoodsToRecipe = (foodQuantities) => {
+        
         const newRecipeFoods = Object.keys(foodQuantities)
             .map((foodId) => ({
                 food: foods.find((f) => f.id === parseInt(foodId)),
@@ -134,6 +142,7 @@ function Recipe({ recipe, onClose }) {
     };
 
     const getTotalProperties = (recipeFoods) => {
+        
         let totalCarbs = 0, totalCalories = 0; // Add other properties as needed
         recipeFoods.forEach(({food, quantity}) => {
             totalCarbs += (food.carbs * quantity) / 100;
@@ -174,19 +183,12 @@ function Recipe({ recipe, onClose }) {
                             }
                         />
                     </div>
-                    <div>
-                        <h3>Foods in this Recipe: <span>{getTotalProperties(editingRecipe.recipeFoods)}</span></h3>
-                        <ul className="list">
-                            {editingRecipe.recipeFoods.map((rf, index) => (
-                                <li key={index} className="list-item">
-                                    {rf.food.name} - {rf.quantity}g
-                                    <span>{getTotalProperties([{food: rf.food, quantity: rf.quantity}])}</span>
-                                    <button onClick={() => openRemoveFoodModal(rf.food.id, rf.food.name)}>Remove</button>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
+                    
+                    <RecipeFoods 
+                        editingRecipe={editingRecipe}
+                        getTotalProperties={getTotalProperties}
+                        onRemove={openRemoveFoodModal}
+                    />
                     <AddFoods
                         handleAddFoodsToRecipe={handleAddFoodsToRecipe}
                         getTotalProperties={getTotalProperties}
@@ -210,7 +212,7 @@ function Recipe({ recipe, onClose }) {
                     </div>
 
                     <ReactModal
-                        isOpen={modalConfig.isItemModalOpen}
+                        isOpen={modalConfig.isSaveItemModalOpen}
                         onRequestClose={onExit}>
                         <SaveChanges
                             onSave={onSave}
@@ -218,9 +220,11 @@ function Recipe({ recipe, onClose }) {
                         />
                     </ReactModal>
 
-                    <ReactModal isOpen={modalConfig.isDeleteItemModalOpen} onRequestClose={closeRemoveFoodModal}>
+                    <ReactModal
+                        isOpen={modalConfig.isDeleteItemModalOpen}
+                        onRequestClose={closeRemoveFoodModal}>
                         <ConfirmDelete
-                            name={modalConfig.itemToDelete.name + "|" + modalConfig.itemToDelete.id}
+                            name={`${modalConfig.item.name} from ${editingRecipe.name}`}
                             onConfirm={handleRemoveFood}
                             onCancel={closeRemoveFoodModal}
                         />
@@ -233,7 +237,25 @@ function Recipe({ recipe, onClose }) {
     );
 }
 
-function AddFoods({handleAddFoodsToRecipe, getTotalProperties}) {
+function RecipeFoods({ editingRecipe, getTotalProperties, onRemove }) {
+    
+    return (
+        <div>
+            <h3>Foods in this Recipe: <span>{getTotalProperties(editingRecipe.recipeFoods)}</span></h3>
+            <ul className="list">
+                {editingRecipe.recipeFoods.map((rf, index) => (
+                    <li key={index} className="list-item">
+                        {rf.food.name} - {rf.quantity}g
+                        <span>{getTotalProperties([{food: rf.food, quantity: rf.quantity}])}</span>
+                        <button onClick={() => onRemove(rf.food.id, rf.food.name)}>Remove</button>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
+function AddFoods({ handleAddFoodsToRecipe, getTotalProperties }) {
 
     const {items: foods} = useSelector((state) => state.foods);
     const {pageConfig, handlePageChange, handleItemsPerPageChange, paginate} = usePagination();
