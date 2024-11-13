@@ -12,10 +12,15 @@ import {fetchRecipes} from "../../features/recipesSlice";
 function Journal({ onClose }) {
 
     const dispatch = useDispatch();
-    const { selectedItem: journal, loading } = useSelector(state => state.journals);
+    const { selectedItem: journal, insulinTypes, loading } = useSelector(state => state.journals);
     const { modalConfig, setModalConfig } = useModals();
 
     const [ editingJournal, setEditingJournal ] = useState(null);
+
+    useEffect(() => {
+        if (insulinTypes.length === 0)
+            dispatch(fetchInsulinTypes());
+    }, [dispatch, insulinTypes]);
 
     useEffect(() => {
         setEditingJournal({ ...journal });
@@ -115,7 +120,10 @@ function Journal({ onClose }) {
             ) : (
                 <div>
                     <div className="modal-form">
-                        <h2>Journal for {editingJournal ? editingJournal.date : ''}</h2>
+                        <h2>
+                            Journal for {editingJournal ? editingJournal.date : ''}
+                            <span><button onClick={openDeleteJournalModal}>Delete</button></span>
+                        </h2>
                         <textarea
                             value={editingJournal?.notes || ''}
                             onChange={(e) => {
@@ -142,7 +150,6 @@ function Journal({ onClose }) {
                             <button onClick={handleSave}>Save</button>
                             <button onClick={handleClose}>Close</button>
                         </div>
-                        <button onClick={openDeleteJournalModal}>Delete</button>
                     </div>
 
                     <ReactModal
@@ -173,11 +180,10 @@ function Journal({ onClose }) {
 
 function EntriesHeader({ editingJournal, setEditingJournal }) {
 
-    const dispatch = useDispatch();
     const { insulinTypes } = useSelector((state) => state.journals);
     const { modalConfig: foodsModalConfig, setModalConfig: setFoodsModalConfig } = useModals();
     const { modalConfig: recipesModalConfig, setModalConfig: setRecipesModalConfig } = useModals();
-    const [newEntry, setNewEntry] = useState({
+    const [ newEntry, setNewEntry ] = useState({
         time: '',
         bloodSugarLevel: '',
         recipes: [],
@@ -185,12 +191,6 @@ function EntriesHeader({ editingJournal, setEditingJournal }) {
         insulinUnits: '',
         insulinType: ''
     });
-
-    useEffect(() => {
-        if (insulinTypes?.length === 0) {
-            dispatch(fetchInsulinTypes());
-        }
-    }, [dispatch, insulinTypes]);
 
     const openFoodsModal = () => {
 
@@ -309,6 +309,7 @@ function EntriesHeader({ editingJournal, setEditingJournal }) {
             >
                 Add entry
             </button>
+
             <ReactModal
                 isOpen={foodsModalConfig.isItemModalOpen}
                 onRequestClose={closeFoodsModal}
@@ -318,6 +319,7 @@ function EntriesHeader({ editingJournal, setEditingJournal }) {
                     onClose={closeFoodsModal}
                 />
             </ReactModal>
+
             <ReactModal
                 isOpen={recipesModalConfig.isItemModalOpen}
                 onRequestClose={closeRecipesModal}
@@ -331,14 +333,12 @@ function EntriesHeader({ editingJournal, setEditingJournal }) {
     );
 }
 
-function Entries({editingJournal, setEditingJournal}) {
+function Entries({ editingJournal, setEditingJournal }) {
 
-    const {modalConfig, setModalConfig} = useModals();
-    const [isFoodsModalOpen, setFoodsModalOpen] = useState(false);
-    const [isRecipesModalOpen, setRecipesModalOpen] = useState(false);
-    const [ editEntryConfig, setEditEntryConfig ] = useState({
-        id: null,
-        editable: false
+    const { modalConfig, setModalConfig } = useModals();
+    const [ entryConfig, setEntryConfig ] = useState({
+        isFoodsModalOpen: false,
+        isRecipesModalOpen: false
     });
 
     const openDeleteEntryModal = (entryId, entryTime) => {
@@ -396,6 +396,37 @@ function Entries({editingJournal, setEditingJournal}) {
         });
     };
 
+    const openFoodsModal = () => {
+
+        setEntryConfig({
+            ...entryConfig,
+            isFoodsModalOpen: true
+        })
+    };
+
+    const openRecipesModal = () => {
+
+        setEntryConfig({
+            ...entryConfig,
+            isRecipesModalOpen: true
+        })
+    };
+
+    const closeFoodsModal = () => {
+
+        setEntryConfig({
+            ...entryConfig,
+            isFoodsModalOpen: false
+        })
+    };
+
+    const closeRecipesModal = () => {
+
+        setEntryConfig({
+            ...entryConfig,
+            isRecipesModalOpen: false
+        })
+    };
 
     return (
         <div>
@@ -415,22 +446,33 @@ function Entries({editingJournal, setEditingJournal}) {
                     {editingJournal && editingJournal.entries.map((entry) => {
                         return (
                             <tr key={entry.id}>
-                                <td>{new Date(entry.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                                <td>{new Date(entry.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</td>
                                 <td>{entry.bloodSugarLevel}</td>
                                 <td>{entry.insulinUnits}</td>
                                 <td>{entry.insulinType}</td>
                                 <td>
-                                    <p>Carbs: {entry.totalCarbs}, Calories: {entry.totalCalories}</p>
-                                    <button onClick={() => setFoodsModalOpen(true)}>Foods</button>
-                                    <button onClick={() => setRecipesModalOpen(true)}>Recipes</button>
+                                    <p>Carbs: {entry.totalCarbs ? entry.totalCarbs : 0}, Calories: {entry.totalCalories ? entry.totalCalories : 0}</p>
+                                    <button onClick={openFoodsModal}>Foods</button>
+                                    <button onClick={openRecipesModal}>Recipes</button>
                                 </td>
                                 <td>
                                     <button onClick={() => openEditEntryModal(entry.id)}>Edit</button>
                                     <button onClick={() => openDeleteEntryModal(entry.id, entry.time)}>Delete</button>
                                 </td>
                                 <ReactModal
+                                    isOpen={modalConfig.isItemModalOpen}
+                                    onRequestClose={closeEditEntryModal}
+                                >
+                                    <Entry
+                                        entry={entry}
+                                        setEditingJournal={setEditingJournal}
+                                        onClose={closeEditEntryModal}
+                                    />
+                                </ReactModal>
+                                <ReactModal
                                     isOpen={modalConfig.isDeleteItemModalOpen}
-                                    onRequestClose={closeDeleteEntryModal}>
+                                    onRequestClose={closeDeleteEntryModal}
+                                >
                                     <ConfirmDelete
                                         name={`entry for ${modalConfig.item.name}`}
                                         onConfirm={handleDelete}
@@ -438,19 +480,21 @@ function Entries({editingJournal, setEditingJournal}) {
                                     />
                                 </ReactModal>
                                 <ReactModal
-                                    isOpen={isFoodsModalOpen}
-                                    onRequestClose={() => setFoodsModalOpen(false)}>
+                                    isOpen={entryConfig.isFoodsModalOpen}
+                                    onRequestClose={closeFoodsModal}
+                                >
                                     <Foods
                                         journalFoods={entry.journalFoods}
-                                        onClose={() => setFoodsModalOpen(false)}
+                                        onClose={closeFoodsModal}
                                     />
                                 </ReactModal>
                                 <ReactModal
-                                    isOpen={isRecipesModalOpen}
-                                    onRequestClose={() => setRecipesModalOpen(false)}>
+                                    isOpen={entryConfig.isRecipesModalOpen}
+                                    onRequestClose={closeRecipesModal}
+                                >
                                     <Recipes
                                         journalRecipes={entry.journalRecipes}
-                                        onClose={() => setRecipesModalOpen(false)}
+                                        onClose={closeRecipesModal}
                                     />
                                 </ReactModal>
                             </tr>
@@ -461,19 +505,153 @@ function Entries({editingJournal, setEditingJournal}) {
     );
 }
 
-function Entry ({ entry, onClose }) {
+function Entry({ entry, setEditingJournal, onClose }) {
+
+    const { insulinTypes } = useSelector((state) => state.journals);
+    const [ entryConfig, setEntryConfig ] = useState({
+        isFoodsModalOpen: false,
+        isRecipesModalOpen: false
+    });
+
+    const openFoodsModal = () => {
+
+        setEntryConfig({
+            ...entryConfig,
+            isFoodsModalOpen: true
+        })
+    };
+
+    const openRecipesModal = () => {
+
+        setEntryConfig({
+            ...entryConfig,
+            isRecipesModalOpen: true
+        })
+    };
+
+    const closeFoodsModal = () => {
+
+        setEntryConfig({
+            ...entryConfig,
+            isFoodsModalOpen: false
+        })
+    };
+
+    const closeRecipesModal = () => {
+
+        setEntryConfig({
+            ...entryConfig,
+            isRecipesModalOpen: false
+        })
+    };
+
+    const handleInputChange = (e) => {
+
+        const { name, value } = e.target;
+        setEditingJournal((prev) => ({
+            ...prev,
+            entries: prev.entries.map((item) =>
+                item.id === entry.id ? { ...item, [name]: value } : item
+            )
+        }));
+    };
 
     return (
         <div>
+            <h2>Edit {entry.time}</h2>
+            <div className="modal-form">
+                <label>
+                    Time:
+                    <input
+                        name="time"
+                        value={new Date(entry.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                        onChange={(e) => handleInputChange(e)}
+                        type="time"
+                        placeholder="Time"
+                    />
+                </label>
+                <label>
+                    Blood Sugar:
+                    <input
+                        name="bloodSugarLevel"
+                        value={entry.bloodSugarLevel}
+                        onChange={(e) => handleInputChange(e)}
+                        type="number"
+                        placeholder="Blood Sugar Level"
+                    />
+                </label>
+                <label>
+                    Insulin units:
+                    <input
+                        name="insulinUnits"
+                        value={entry.insulinUnits}
+                        onChange={(e) => handleInputChange(e)}
+                        type="number"
+                        placeholder="Insulin Units"
+                    />
+                </label>
+                <label>
+                    Insulin type:
+                    <select
+                        name="insulinType"
+                        value={entry.insulinType}
+                        onChange={(e) => handleInputChange(e)}
+                    >
+                        <option value="">Select Insulin Type</option>
+                        {insulinTypes && insulinTypes.map((type) => (
+                            <option key={type} value={type}>
+                                {type}
+                            </option>
+                        ))}
+                    </select>
+                </label>
+                <label>
+                    Intake:
+                    <button
+                        onClick={openFoodsModal}
+                    >
+                        Foods
+                    </button>
+                    <button
+                        onClick={openRecipesModal}
+                    >
+                        Recipes
+                    </button>
+                </label>
+                <div className="modal-buttons">
+                    <div>
+                        <button onClick={onClose}>Close</button>
+                    </div>
+                </div>
 
+                <ReactModal
+                    isOpen={entryConfig.isItemModalOpen}
+                    onRequestClose={closeFoodsModal}
+                >
+                    <Foods
+                        journalFoods={entry.journalFoods}
+                        onClose={closeFoodsModal}
+                    />
+                </ReactModal>
+
+                <ReactModal
+                    isOpen={entryConfig.isItemModalOpen}
+                    onRequestClose={closeRecipesModal}
+                >
+                    <Recipes
+                        journalRecipes={entry.journalRecipes}
+                        onClose={closeRecipesModal}
+                    />
+                </ReactModal>
+            </div>
         </div>
     );
 }
 
-function Foods({journalFoods, onClose}) {
+function Foods({ journalFoods, onClose }) {
 
     const dispatch = useDispatch();
-    const {items: foods} = useSelector((state) => state.foods);
+    const { items: foods } = useSelector((state) => state.foods);
 
     useEffect(() => {
         if (foods.length === 0) {
@@ -529,10 +707,10 @@ function Foods({journalFoods, onClose}) {
     );
 }
 
-function Recipes({journalRecipes, onClose}) {
+function Recipes({ journalRecipes, onClose }) {
 
     const dispatch = useDispatch();
-    const {items: recipes} = useSelector((state) => state.recipes);
+    const { items: recipes } = useSelector((state) => state.recipes);
 
     useEffect(() => {
         if (recipes.length === 0) {
