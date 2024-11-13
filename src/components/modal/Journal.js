@@ -338,7 +338,8 @@ function Entries({ editingJournal, setEditingJournal }) {
     const { modalConfig, setModalConfig } = useModals();
     const [ entryConfig, setEntryConfig ] = useState({
         isFoodsModalOpen: false,
-        isRecipesModalOpen: false
+        isRecipesModalOpen: false,
+        entry: null
     });
 
     const openDeleteEntryModal = (entryId, entryTime) => {
@@ -396,19 +397,21 @@ function Entries({ editingJournal, setEditingJournal }) {
         });
     };
 
-    const openFoodsModal = () => {
+    const openFoodsModal = (entry) => {
 
         setEntryConfig({
             ...entryConfig,
-            isFoodsModalOpen: true
+            isFoodsModalOpen: true,
+            entry: entry
         })
     };
 
-    const openRecipesModal = () => {
+    const openRecipesModal = (entry) => {
 
         setEntryConfig({
             ...entryConfig,
-            isRecipesModalOpen: true
+            isRecipesModalOpen: true,
+            entryId: entry
         })
     };
 
@@ -416,7 +419,8 @@ function Entries({ editingJournal, setEditingJournal }) {
 
         setEntryConfig({
             ...entryConfig,
-            isFoodsModalOpen: false
+            isFoodsModalOpen: false,
+            entry: null
         })
     };
 
@@ -424,7 +428,8 @@ function Entries({ editingJournal, setEditingJournal }) {
 
         setEntryConfig({
             ...entryConfig,
-            isRecipesModalOpen: false
+            isRecipesModalOpen: false,
+            entry: null
         })
     };
 
@@ -452,53 +457,53 @@ function Entries({ editingJournal, setEditingJournal }) {
                                 <td>{entry.insulinType}</td>
                                 <td>
                                     <p>Carbs: {entry.totalCarbs ? entry.totalCarbs : 0}, Calories: {entry.totalCalories ? entry.totalCalories : 0}</p>
-                                    <button onClick={openFoodsModal}>Foods</button>
-                                    <button onClick={openRecipesModal}>Recipes</button>
+                                    <button onClick={() => openFoodsModal(entry)}>Foods</button>
+                                    <button onClick={() => openRecipesModal(entry)}>Recipes</button>
                                 </td>
                                 <td>
                                     <button onClick={() => openEditEntryModal(entry.id)}>Edit</button>
                                     <button onClick={() => openDeleteEntryModal(entry.id, entry.time)}>Delete</button>
                                 </td>
-                                <ReactModal
-                                    isOpen={modalConfig.isItemModalOpen}
-                                    onRequestClose={closeEditEntryModal}
-                                >
-                                    <Entry
-                                        entry={entry}
-                                        setEditingJournal={setEditingJournal}
-                                        onClose={closeEditEntryModal}
-                                    />
-                                </ReactModal>
-                                <ReactModal
-                                    isOpen={modalConfig.isDeleteItemModalOpen}
-                                    onRequestClose={closeDeleteEntryModal}
-                                >
-                                    <ConfirmDelete
-                                        name={`entry for ${modalConfig.item.name}`}
-                                        onConfirm={handleDelete}
-                                        onCancel={closeDeleteEntryModal}
-                                    />
-                                </ReactModal>
-                                <ReactModal
-                                    isOpen={entryConfig.isFoodsModalOpen}
-                                    onRequestClose={closeFoodsModal}
-                                >
-                                    <Foods
-                                        journalFoods={entry.journalFoods}
-                                        onClose={closeFoodsModal}
-                                    />
-                                </ReactModal>
-                                <ReactModal
-                                    isOpen={entryConfig.isRecipesModalOpen}
-                                    onRequestClose={closeRecipesModal}
-                                >
-                                    <Recipes
-                                        journalRecipes={entry.journalRecipes}
-                                        onClose={closeRecipesModal}
-                                    />
-                                </ReactModal>
                             </tr>
                     )})}
+                    <ReactModal
+                        isOpen={modalConfig.isItemModalOpen}
+                        onRequestClose={closeEditEntryModal}
+                    >
+                        <Entry
+                            entry={editingJournal && editingJournal.entries.find((entry) => entry.id === modalConfig.item.id)}
+                            setEditingJournal={setEditingJournal}
+                            onClose={closeEditEntryModal}
+                        />
+                    </ReactModal>
+                    <ReactModal
+                        isOpen={modalConfig.isDeleteItemModalOpen}
+                        onRequestClose={closeDeleteEntryModal}
+                    >
+                        <ConfirmDelete
+                            name={`entry for ${modalConfig.item.name}`}
+                            onConfirm={handleDelete}
+                            onCancel={closeDeleteEntryModal}
+                        />
+                    </ReactModal>
+                    <ReactModal
+                        isOpen={entryConfig.isFoodsModalOpen}
+                        onRequestClose={closeFoodsModal}
+                    >
+                        <Foods
+                            journalFoods={entryConfig.entry?.journalFoods}
+                            onClose={closeFoodsModal}
+                        />
+                    </ReactModal>
+                    <ReactModal
+                        isOpen={entryConfig.isRecipesModalOpen}
+                        onRequestClose={closeRecipesModal}
+                    >
+                        <Recipes
+                            journalRecipes={entryConfig.entry?.journalRecipes}
+                            onClose={closeRecipesModal}
+                        />
+                    </ReactModal>
                 </tbody>
             </table>
         </div>
@@ -512,6 +517,10 @@ function Entry({ entry, setEditingJournal, onClose }) {
         isFoodsModalOpen: false,
         isRecipesModalOpen: false
     });
+
+    useEffect(() => {
+        console.log("Entry: " + JSON.stringify(entry));
+    }, [entry]);
 
     const openFoodsModal = () => {
 
@@ -556,7 +565,7 @@ function Entry({ entry, setEditingJournal, onClose }) {
         }));
     };
 
-    return (
+    return entry && (
         <div>
             <h2>Edit {entry.time}</h2>
             <div className="modal-form">
@@ -625,7 +634,7 @@ function Entry({ entry, setEditingJournal, onClose }) {
                 </div>
 
                 <ReactModal
-                    isOpen={entryConfig.isItemModalOpen}
+                    isOpen={entryConfig.isFoodsModalOpen}
                     onRequestClose={closeFoodsModal}
                 >
                     <Foods
@@ -635,7 +644,7 @@ function Entry({ entry, setEditingJournal, onClose }) {
                 </ReactModal>
 
                 <ReactModal
-                    isOpen={entryConfig.isItemModalOpen}
+                    isOpen={entryConfig.isRecipesModalOpen}
                     onRequestClose={closeRecipesModal}
                 >
                     <Recipes
