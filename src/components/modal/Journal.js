@@ -8,6 +8,7 @@ import Loading from '../misc/Loading';
 import { fetchFoods } from '../../features/foodsSlice';
 import useModals from "../../hooks/useModals";
 import {fetchRecipes} from "../../features/recipesSlice";
+import useDynamicModals from "../../hooks/useDynamicModals";
 
 function Journal({ onClose }) {
 
@@ -335,103 +336,67 @@ function EntriesHeader({ editingJournal, setEditingJournal }) {
 
 function Entries({ editingJournal, setEditingJournal }) {
 
-    const { modalConfig, setModalConfig } = useModals();
-    const [ entryConfig, setEntryConfig ] = useState({
-        isFoodsModalOpen: false,
-        isRecipesModalOpen: false,
-        entry: null
-    });
+    const { modals, openModal, closeModal } = useDynamicModals();
 
     const openDeleteEntryModal = (entryId, entryTime) => {
 
-        setModalConfig({
-            ...modalConfig,
-            isDeleteItemModalOpen: true,
-            item: {
-                id: entryId,
-                name: entryTime
-            }
-        });
+        openModal("deleteEntry", { id: entryId, name: entryTime});
     };
 
     const closeDeleteEntryModal = () => {
 
-        setModalConfig({
-            ...modalConfig,
-            isDeleteItemModalOpen: false,
-            item: {
-                id: null,
-                name: null
-            }
-        });
+        closeModal("deleteEntry");
     };
 
     const handleDelete = () => {
 
         setEditingJournal((prev) => ({
             ...prev,
-            entries: prev.entries.filter((entry) => entry.id !== modalConfig.item.id),
+            entries: prev.entries.filter((entry) => entry.id !== modals.deleteEntry?.id),
         }));
         closeDeleteEntryModal();
     };
 
     const openEditEntryModal = (entryId) => {
 
-        setModalConfig({
-           ...modalConfig,
-           isItemModalOpen: true,
-           item: {
-               id: entryId
-           }
-        });
+        openModal("editEntry", { id: entryId });
     };
 
     const closeEditEntryModal = () => {
 
-        setModalConfig({
-            ...modalConfig,
-            isItemModalOpen: false,
-            item: {
-                id: null
-            }
-        });
+        closeModal("editEntry");
     };
 
     const openFoodsModal = (entry) => {
 
-        setEntryConfig({
-            ...entryConfig,
-            isFoodsModalOpen: true,
-            entry: entry
-        })
+        openModal("foodsModal", { entry: entry });
     };
 
     const openRecipesModal = (entry) => {
 
-        setEntryConfig({
-            ...entryConfig,
-            isRecipesModalOpen: true,
-            entryId: entry
-        })
+        openModal("recipesModal", { entry: entry });
     };
 
     const closeFoodsModal = () => {
 
-        setEntryConfig({
-            ...entryConfig,
-            isFoodsModalOpen: false,
-            entry: null
-        })
+        closeModal("foodsModal");
     };
 
     const closeRecipesModal = () => {
 
-        setEntryConfig({
-            ...entryConfig,
-            isRecipesModalOpen: false,
-            entry: null
-        })
+        closeModal("recipesModal");
     };
+
+    const onAddFood = (food) => {
+
+        setEditingJournal((prev) => ({
+            ...prev,
+            entries: prev.entries.map((entry) => ({
+                ...entry,
+                journalFoods: [...entry.journalFoods, food]
+                }))
+        }));
+    }
 
     return (
         <div>
@@ -467,40 +432,41 @@ function Entries({ editingJournal, setEditingJournal }) {
                             </tr>
                     )})}
                     <ReactModal
-                        isOpen={modalConfig.isItemModalOpen}
+                        isOpen={modals.editEntry?.isOpen}
                         onRequestClose={closeEditEntryModal}
                     >
                         <Entry
-                            entry={editingJournal && editingJournal.entries.find((entry) => entry.id === modalConfig.item.id)}
+                            entry={editingJournal && editingJournal.entries.find((entry) => entry.id === modals.editEntry?.id)}
                             setEditingJournal={setEditingJournal}
                             onClose={closeEditEntryModal}
                         />
                     </ReactModal>
                     <ReactModal
-                        isOpen={modalConfig.isDeleteItemModalOpen}
+                        isOpen={modals.deleteEntry?.isOpen}
                         onRequestClose={closeDeleteEntryModal}
                     >
                         <ConfirmDelete
-                            name={`entry for ${modalConfig.item.name}`}
+                            name={`entry for ${modals.deleteEntry?.name}`}
                             onConfirm={handleDelete}
                             onCancel={closeDeleteEntryModal}
                         />
                     </ReactModal>
                     <ReactModal
-                        isOpen={entryConfig.isFoodsModalOpen}
+                        isOpen={modals.foodsModal?.isOpen}
                         onRequestClose={closeFoodsModal}
                     >
                         <Foods
-                            journalFoods={entryConfig.entry?.journalFoods}
+                            journalFoods={modals.foodsModal?.entry.journalFoods}
+                            onAdd={onAddFood}
                             onClose={closeFoodsModal}
                         />
                     </ReactModal>
                     <ReactModal
-                        isOpen={entryConfig.isRecipesModalOpen}
+                        isOpen={modals.recipesModal?.isOpen}
                         onRequestClose={closeRecipesModal}
                     >
                         <Recipes
-                            journalRecipes={entryConfig.entry?.journalRecipes}
+                            journalRecipes={modals.recipesModal?.entry.journalRecipes}
                             onClose={closeRecipesModal}
                         />
                     </ReactModal>
@@ -517,10 +483,6 @@ function Entry({ entry, setEditingJournal, onClose }) {
         isFoodsModalOpen: false,
         isRecipesModalOpen: false
     });
-
-    useEffect(() => {
-        console.log("Entry: " + JSON.stringify(entry));
-    }, [entry]);
 
     const openFoodsModal = () => {
 
@@ -657,10 +619,14 @@ function Entry({ entry, setEditingJournal, onClose }) {
     );
 }
 
-function Foods({ journalFoods, onClose }) {
+function Foods({ journalFoods, onAdd, onEdit, onDelete, onClose }) {
 
     const dispatch = useDispatch();
     const { items: foods } = useSelector((state) => state.foods);
+    const [ newFood, setNewFood ] = useState({
+        quantity: '',
+        food: ''
+    });
 
     useEffect(() => {
         if (foods.length === 0) {
@@ -677,38 +643,101 @@ function Foods({ journalFoods, onClose }) {
         return `Carbs: ${totalCarbs}g, Calories: ${totalCalories}`;
     };
 
-    const handleSave = () => {
-        onClose();
-    };
-
     const handleClose = () => {
         onClose();
     };
 
+    const handleEdit = () => {
+
+    };
+
+    const handleDelete = () => {
+
+    };
+
+    const handleAdd = () => {
+
+        const selectedFood = foods.find(food => food.id === Number.parseInt(newFood.food));
+
+        onAdd({
+            quantity: newFood.quantity,
+            food: selectedFood
+        });
+        setNewFood({
+            quantity: '',
+            food: null
+        });
+    };
+
+    const handleInputChange = (e) => {
+
+        const { name, value } = e.target;
+        setNewFood({
+            ...newFood,
+            [name]: value
+        });
+    };
+
+    const foodValid = () => {
+
+        return !newFood.quantity.startsWith("0")
+            && Number.parseInt(newFood.quantity) > 0
+            && newFood.food !== null;
+    };
+
     return (
         <div>
-            <h3>Foods in this entry</h3>
-            {journalFoods && getTotalProperties(journalFoods)}
-            <ol>
-                {journalFoods && journalFoods.map((journalFood, index) => (
-                    <div style={{display: "flex"}}>
-                        <li key={index}>{journalFood.quantity}g of {journalFood.food.name}</li>
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </div>
-                ))}
-            </ol>
-            <input placeholder="Enter quantity (g)"/> of
-            <select>
-                <option>Select Food</option>
-                {foods && foods.map(food => (
-                    <option key={food.id} value={food}>{food.name}</option>
-                ))}
-            </select>
-            <button>Add</button>
+            <div className="food-list">
+                <h3>Foods in this entry</h3>
+                {journalFoods && getTotalProperties(journalFoods)}
+                <ul>
+                    {journalFoods && journalFoods.map((journalFood, index) => (
+                        <div style={{display: "flex"}} key={index}>
+                            <li>{journalFood.quantity}g of {journalFood.food.name}</li>
+                            <button onClick={handleEdit}>Edit</button>
+                            <button onClick={handleDelete}>Delete</button>
+                        </div>
+                    ))}
+                </ul>
+            </div>
+            <br />
+            <div className="modal-form">
+                <h3>Add a new food to this entry</h3>
+                <label>
+                    Quantity:
+                    <input
+                        value={newFood.quantity}
+                        name="quantity"
+                        onChange={handleInputChange}
+                        placeholder="Enter quantity (g)"
+                        type="number"
+                    />
+                </label>
+                <label>
+                    Food:
+                    <select name="food" onChange={handleInputChange}>
+                        <option>Select Food</option>
+                        {foods && foods.map(food => (
+                            <option
+                                key={food.id}
+                                name = "food"
+                                value={food.id}
+                            >
+                                {food.name}
+                            </option>
+                        ))}
+                    </select>
+                    <button
+                        onClick={handleAdd}
+                        disabled={!foodValid()}
+                    >
+                        Add
+                    </button>
+                </label>
+            </div>
+
             <div className="modal-buttons">
                 <div>
-                    <button onClick={handleSave}>Save</button>
                     <button onClick={handleClose}>Close</button>
                 </div>
             </div>
@@ -719,7 +748,7 @@ function Foods({ journalFoods, onClose }) {
 function Recipes({ journalRecipes, onClose }) {
 
     const dispatch = useDispatch();
-    const { items: recipes } = useSelector((state) => state.recipes);
+    const {items: recipes } = useSelector((state) => state.recipes);
 
     useEffect(() => {
         if (recipes.length === 0) {
@@ -750,8 +779,8 @@ function Recipes({ journalRecipes, onClose }) {
             {journalRecipes && getTotalProperties(journalRecipes)}
             <ul>
                 {journalRecipes && journalRecipes.map((journalRecipe, index) => (
-                    <div style={{ display: "flex" }}>
-                        <li key={index}>{journalRecipe.quantity}g of {journalRecipe.recipe.name}</li>
+                    <div style={{ display: "flex" }} key={index}>
+                        <li>{journalRecipe.quantity}g of {journalRecipe.recipe.name}</li>
                         <button>Edit</button>
                         <button>Delete</button>
                     </div>
