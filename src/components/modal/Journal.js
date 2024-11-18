@@ -6,15 +6,14 @@ import ConfirmDelete from '../modal/ConfirmDelete';
 import SaveChanges from '../modal/SaveChanges';
 import Loading from '../misc/Loading';
 import { fetchFoods } from '../../features/foodsSlice';
-import useModals from "../../hooks/useModals";
-import {fetchRecipes} from "../../features/recipesSlice";
+import { fetchRecipes } from "../../features/recipesSlice";
 import useDynamicModals from "../../hooks/useDynamicModals";
 
 function Journal({ onClose }) {
 
     const dispatch = useDispatch();
     const { selectedItem: journal, insulinTypes, loading } = useSelector(state => state.journals);
-    const { modalConfig, setModalConfig } = useModals();
+    const { modals, openModal, closeModal } = useDynamicModals();
 
     const [ editingJournal, setEditingJournal ] = useState(null);
 
@@ -47,14 +46,7 @@ function Journal({ onClose }) {
 
     const onExit = () => {
 
-        setModalConfig({
-            ...modalConfig,
-            isSaveItemModalOpen: false,
-            item: {
-                id: null,
-                name: null
-            }
-        })
+        closeModal("saveChanges");
         onClose();
     };
 
@@ -70,14 +62,7 @@ function Journal({ onClose }) {
     const handleClose = () => {
 
         if (journalChanged()) {
-            setModalConfig({
-                ...modalConfig,
-                isSaveItemModalOpen: true,
-                item: {
-                    id: null,
-                    name: null
-                }
-            });
+            openModal("saveChanges");
         } else {
             onExit();
         }
@@ -85,26 +70,12 @@ function Journal({ onClose }) {
 
     const openDeleteJournalModal = () => {
 
-        setModalConfig({
-            ...modalConfig,
-            isDeleteItemModalOpen: true,
-            item: {
-                id: editingJournal.id,
-                name: `journal for ${editingJournal.date}`
-            }
-        });
+        openModal("deleteJournal", { id: editingJournal.id, name: `journal for ${editingJournal.date}` });
     };
 
     const closeDeleteJournalModal = () => {
 
-        setModalConfig({
-            ...modalConfig,
-            isDeleteItemModalOpen: false,
-            item: {
-                id: null,
-                name: null
-            }
-        });
+        closeModal("deleteJournal");
     };
 
     const handleDelete = () => {
@@ -154,7 +125,7 @@ function Journal({ onClose }) {
                     </div>
 
                     <ReactModal
-                        isOpen={modalConfig.isSaveItemModalOpen}
+                        isOpen={modals.saveChanges?.isOpen}
                         onRequestClose={onExit}
                     >
                         <SaveChanges
@@ -164,7 +135,7 @@ function Journal({ onClose }) {
                     </ReactModal>
 
                     <ReactModal
-                        isOpen={modalConfig.isDeleteItemModalOpen}
+                        isOpen={modals.deleteJournal?.isOpen}
                         onRequestClose={closeDeleteJournalModal}
                     >
                         <ConfirmDelete
@@ -182,8 +153,7 @@ function Journal({ onClose }) {
 function EntriesHeader({ editingJournal, setEditingJournal }) {
 
     const { insulinTypes } = useSelector((state) => state.journals);
-    const { modalConfig: foodsModalConfig, setModalConfig: setFoodsModalConfig } = useModals();
-    const { modalConfig: recipesModalConfig, setModalConfig: setRecipesModalConfig } = useModals();
+    const { modals, openModal, closeModal } = useDynamicModals();
     const [ newEntry, setNewEntry ] = useState({
         time: '',
         bloodSugarLevel: '',
@@ -195,34 +165,22 @@ function EntriesHeader({ editingJournal, setEditingJournal }) {
 
     const openFoodsModal = () => {
 
-        setFoodsModalConfig({
-            ...foodsModalConfig,
-            isItemModalOpen: true
-        });
+        openModal("foodsModal");
     };
 
     const openRecipesModal = () => {
 
-        setRecipesModalConfig({
-            ...recipesModalConfig,
-            isItemModalOpen: true
-        });
+        openModal("recipesModal");
     };
 
     const closeFoodsModal = () => {
 
-        setFoodsModalConfig({
-            ...foodsModalConfig,
-            isItemModalOpen: false
-        });
+        closeModal("foodsModal");
     };
 
     const closeRecipesModal = () => {
 
-        setRecipesModalConfig({
-            ...recipesModalConfig,
-            isItemModalOpen: false
-        });
+        closeModal("recipesModal");
     };
 
     const entryValid = () => {
@@ -312,7 +270,7 @@ function EntriesHeader({ editingJournal, setEditingJournal }) {
             </button>
 
             <ReactModal
-                isOpen={foodsModalConfig.isItemModalOpen}
+                isOpen={modals.foodsModal?.isOpen}
                 onRequestClose={closeFoodsModal}
             >
                 <Foods
@@ -322,7 +280,7 @@ function EntriesHeader({ editingJournal, setEditingJournal }) {
             </ReactModal>
 
             <ReactModal
-                isOpen={recipesModalConfig.isItemModalOpen}
+                isOpen={modals.recipesModal?.isOpen}
                 onRequestClose={closeRecipesModal}
             >
                 <Recipes
@@ -479,41 +437,26 @@ function Entries({ editingJournal, setEditingJournal }) {
 function Entry({ entry, setEditingJournal, onClose }) {
 
     const { insulinTypes } = useSelector((state) => state.journals);
-    const [ entryConfig, setEntryConfig ] = useState({
-        isFoodsModalOpen: false,
-        isRecipesModalOpen: false
-    });
+    const { modals, openModal, closeModal } = useDynamicModals();
 
     const openFoodsModal = () => {
 
-        setEntryConfig({
-            ...entryConfig,
-            isFoodsModalOpen: true
-        })
+        openModal("foodsModal");
     };
 
     const openRecipesModal = () => {
 
-        setEntryConfig({
-            ...entryConfig,
-            isRecipesModalOpen: true
-        })
+        openModal("recipesModal");
     };
 
     const closeFoodsModal = () => {
 
-        setEntryConfig({
-            ...entryConfig,
-            isFoodsModalOpen: false
-        })
+        closeModal("foodsModal");
     };
 
     const closeRecipesModal = () => {
 
-        setEntryConfig({
-            ...entryConfig,
-            isRecipesModalOpen: false
-        })
+        closeModal("recipesModal");
     };
 
     const handleInputChange = (e) => {
@@ -596,7 +539,7 @@ function Entry({ entry, setEditingJournal, onClose }) {
                 </div>
 
                 <ReactModal
-                    isOpen={entryConfig.isFoodsModalOpen}
+                    isOpen={modals.foodsModal?.isOpen}
                     onRequestClose={closeFoodsModal}
                 >
                     <Foods
@@ -606,7 +549,7 @@ function Entry({ entry, setEditingJournal, onClose }) {
                 </ReactModal>
 
                 <ReactModal
-                    isOpen={entryConfig.isRecipesModalOpen}
+                    isOpen={modals.recipesModal?.isOpen}
                     onRequestClose={closeRecipesModal}
                 >
                     <Recipes
