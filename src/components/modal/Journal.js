@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import {createContext, useContext, useEffect, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ReactModal from 'react-modal';
 import { addJournal, updateJournal, deleteJournal, fetchInsulinTypes } from '../../features/journalsSlice';
@@ -8,6 +8,8 @@ import Loading from '../misc/Loading';
 import { fetchFoods } from '../../features/foodsSlice';
 import { fetchRecipes } from "../../features/recipesSlice";
 import useDynamicModals from "../../hooks/useDynamicModals";
+
+const JournalContext = createContext(null);
 
 function Journal({ onClose }) {
 
@@ -107,14 +109,15 @@ function Journal({ onClose }) {
                             rows="4"
                             placeholder="Notes"
                         />
-                        <EntriesHeader
-                            editingJournal={editingJournal}
-                            setEditingJournal={setEditingJournal}
-                        />
-                        <Entries
-                            editingJournal={editingJournal}
-                            setEditingJournal={setEditingJournal}
-                        />
+                        <JournalContext.Provider
+                            value={{
+                                editingJournal,
+                                setEditingJournal,
+                            }}
+                        >
+                            <EntriesHeader />
+                            <Entries />
+                        </JournalContext.Provider>
                     </div>
 
                     <div className="modal-buttons">
@@ -150,8 +153,9 @@ function Journal({ onClose }) {
     );
 }
 
-function EntriesHeader({ editingJournal, setEditingJournal }) {
+function EntriesHeader() {
 
+    const { editingJournal, setEditingJournal } = useContext(JournalContext);
     const { insulinTypes } = useSelector((state) => state.journals);
     const { modals, openModal, closeModal } = useDynamicModals();
     const [ newEntry, setNewEntry ] = useState({
@@ -292,8 +296,9 @@ function EntriesHeader({ editingJournal, setEditingJournal }) {
     );
 }
 
-function Entries({ editingJournal, setEditingJournal }) {
+function Entries() {
 
+    const { editingJournal, setEditingJournal } = useContext(JournalContext);
     const { modals, openModal, closeModal } = useDynamicModals();
 
     const openDeleteEntryModal = (entryId, entryTime) => {
@@ -345,17 +350,6 @@ function Entries({ editingJournal, setEditingJournal }) {
         closeModal("recipesModal");
     };
 
-    const onAddFood = (food) => {
-
-        setEditingJournal((prev) => ({
-            ...prev,
-            entries: prev.entries.map((entry) => ({
-                ...entry,
-                journalFoods: [...entry.journalFoods, food]
-                }))
-        }));
-    }
-
     return (
         <div>
             <h3>Entries</h3>
@@ -379,7 +373,10 @@ function Entries({ editingJournal, setEditingJournal }) {
                                 <td>{entry.insulinUnits}</td>
                                 <td>{entry.insulinType}</td>
                                 <td>
-                                    <p>Carbs: {entry.totalCarbs ? entry.totalCarbs : 0}, Calories: {entry.totalCalories ? entry.totalCalories : 0}</p>
+                                    <p>
+                                        Carbs: {entry.journalFoods?.reduce((sum, food) => sum + food.carbs, 0) || 0},
+                                        Calories: {entry.journalFoods?.reduce((sum, food) => sum + food.calories, 0) || 0}
+                                    </p>
                                     <button onClick={() => openFoodsModal(entry)}>Foods</button>
                                     <button onClick={() => openRecipesModal(entry)}>Recipes</button>
                                 </td>
@@ -388,14 +385,13 @@ function Entries({ editingJournal, setEditingJournal }) {
                                     <button onClick={() => openDeleteEntryModal(entry.id, entry.time)}>Delete</button>
                                 </td>
                             </tr>
-                    )})}
+                        )})}
                     <ReactModal
                         isOpen={modals.editEntry?.isOpen}
                         onRequestClose={closeEditEntryModal}
                     >
                         <Entry
                             entry={editingJournal && editingJournal.entries.find((entry) => entry.id === modals.editEntry?.id)}
-                            setEditingJournal={setEditingJournal}
                             onClose={closeEditEntryModal}
                         />
                     </ReactModal>
@@ -414,8 +410,7 @@ function Entries({ editingJournal, setEditingJournal }) {
                         onRequestClose={closeFoodsModal}
                     >
                         <Foods
-                            journalFoods={modals.foodsModal?.entry.journalFoods}
-                            onAdd={onAddFood}
+                            entry={editingJournal?.entries.find((entry) => entry.id === modals.foodsModal?.entry.id)}
                             onClose={closeFoodsModal}
                         />
                     </ReactModal>
@@ -434,8 +429,9 @@ function Entries({ editingJournal, setEditingJournal }) {
     );
 }
 
-function Entry({ entry, setEditingJournal, onClose }) {
+function Entry({ entry, onClose }) {
 
+    const { setEditingJournal } = useContext(JournalContext);
     const { insulinTypes } = useSelector((state) => state.journals);
     const { modals, openModal, closeModal } = useDynamicModals();
 
@@ -562,9 +558,10 @@ function Entry({ entry, setEditingJournal, onClose }) {
     );
 }
 
-function Foods({ journalFoods, onAdd, onEdit, onDelete, onClose }) {
+function Foods({ entry, onClose }) {
 
     const dispatch = useDispatch();
+    const { setEditingJournal } = useContext(JournalContext);
     const { items: foods } = useSelector((state) => state.foods);
     const [ newFood, setNewFood ] = useState({
         quantity: '',
@@ -577,38 +574,70 @@ function Foods({ journalFoods, onAdd, onEdit, onDelete, onClose }) {
         }
     }, [dispatch, foods.length]);
 
-    const getTotalProperties = (journalFoods) => {
+    const getTotalProperties = (foods) => {
+
         let totalCarbs = 0, totalCalories = 0;
-        journalFoods.forEach(food => {
+        foods.forEach(food => {
             totalCarbs += food.carbs;
             totalCalories += food.calories;
         });
         return `Carbs: ${totalCarbs}g, Calories: ${totalCalories}`;
     };
 
-    const handleClose = () => {
-        onClose();
+    const calculateProperties = (food, quantity) => {
+
+        let carbs = food.carbs * (quantity / 100);
+        let calories = food.calories * (quantity / 100);
+
+        return { carbs, calories };
     };
 
-    const handleEdit = () => {
+    const handleDelete = (food) => {
 
-    };
-
-    const handleDelete = () => {
-
+        setEditingJournal((prev) => {
+            const updatedEntries = prev.entries.map((prevEntry) =>
+                prevEntry.id === entry.id
+                    ? {
+                        ...prevEntry,
+                        journalFoods: [...(prevEntry.journalFoods.filter((journalFood) => journalFood.id !== food) || [])],
+                    }
+                    : prevEntry
+            );
+            return {
+                ...prev,
+                entries: updatedEntries,
+            };
+        });
     };
 
     const handleAdd = () => {
 
         const selectedFood = foods.find(food => food.id === Number.parseInt(newFood.food));
-
-        onAdd({
+        const properties = calculateProperties(selectedFood, newFood.quantity);
+        const computedFood = {
+            ...properties,
             quantity: newFood.quantity,
-            food: selectedFood
+            food: selectedFood,
+        };
+
+        setEditingJournal((prev) => {
+            const updatedEntries = prev.entries.map((prevEntry) =>
+                prevEntry.id === entry.id
+                    ? {
+                        ...prevEntry,
+                        journalFoods: [...(prevEntry.journalFoods || []), computedFood],
+                    }
+                    : prevEntry
+            );
+            return {
+                ...prev,
+                entries: updatedEntries,
+            };
         });
+
         setNewFood({
             quantity: '',
-            food: null
+            food: '',
         });
     };
 
@@ -625,20 +654,19 @@ function Foods({ journalFoods, onAdd, onEdit, onDelete, onClose }) {
 
         return !newFood.quantity.startsWith("0")
             && Number.parseInt(newFood.quantity) > 0
-            && newFood.food !== null;
+            && newFood.food !== '';
     };
 
     return (
         <div>
             <div className="food-list">
                 <h3>Foods in this entry</h3>
-                {journalFoods && getTotalProperties(journalFoods)}
+                {entry?.journalFoods && getTotalProperties(entry.journalFoods)}
                 <ul>
-                    {journalFoods && journalFoods.map((journalFood, index) => (
+                    {entry?.journalFoods && entry.journalFoods.map((journalFood, index) => (
                         <div style={{display: "flex"}} key={index}>
                             <li>{journalFood.quantity}g of {journalFood.food.name}</li>
-                            <button onClick={handleEdit}>Edit</button>
-                            <button onClick={handleDelete}>Delete</button>
+                            <button onClick={() => handleDelete(journalFood.id)}>Delete</button>
                         </div>
                     ))}
                 </ul>
@@ -646,6 +674,16 @@ function Foods({ journalFoods, onAdd, onEdit, onDelete, onClose }) {
             <br />
             <div className="modal-form">
                 <h3>Add a new food to this entry</h3>
+                <p>
+                    {(() => {
+                        if (!foodValid())
+                            return 'Enter quantity and select food';
+
+                        const selectedFood = foods.find(food => food.id === Number.parseInt(newFood.food));
+                        const properties = calculateProperties(selectedFood, newFood.quantity);
+                        return `Carbs: ${properties.carbs}g, Calories: ${properties.calories}`;
+                    })()}
+                </p>
                 <label>
                     Quantity:
                     <input
@@ -681,7 +719,7 @@ function Foods({ journalFoods, onAdd, onEdit, onDelete, onClose }) {
 
             <div className="modal-buttons">
                 <div>
-                    <button onClick={handleClose}>Close</button>
+                    <button onClick={onClose}>Close</button>
                 </div>
             </div>
         </div>
