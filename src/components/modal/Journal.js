@@ -157,7 +157,6 @@ function EntriesHeader() {
 
     const { editingJournal, setEditingJournal } = useContext(JournalContext);
     const { insulinTypes } = useSelector((state) => state.journals);
-    const { modals, openModal, closeModal } = useDynamicModals();
     const [ newEntry, setNewEntry ] = useState({
         time: '',
         bloodSugarLevel: '',
@@ -166,26 +165,6 @@ function EntriesHeader() {
         insulinUnits: '',
         insulinType: ''
     });
-
-    const openFoodsModal = () => {
-
-        openModal("foodsModal");
-    };
-
-    const openRecipesModal = () => {
-
-        openModal("recipesModal");
-    };
-
-    const closeFoodsModal = () => {
-
-        closeModal("foodsModal");
-    };
-
-    const closeRecipesModal = () => {
-
-        closeModal("recipesModal");
-    };
 
     const entryValid = () => {
 
@@ -255,43 +234,12 @@ function EntriesHeader() {
                     </option>
                 ))}
             </select>
-
-            <button
-                onClick={openFoodsModal}
-            >
-                Foods
-            </button>
-            <button
-                onClick={openRecipesModal}
-            >
-                Recipes
-            </button>
             <button
                 onClick={handleAddEntry}
                 disabled={!entryValid()}
             >
                 Add entry
             </button>
-
-            <ReactModal
-                isOpen={modals.foodsModal?.isOpen}
-                onRequestClose={closeFoodsModal}
-            >
-                <Foods
-                    journalFoods={newEntry.journalFoods}
-                    onClose={closeFoodsModal}
-                />
-            </ReactModal>
-
-            <ReactModal
-                isOpen={modals.recipesModal?.isOpen}
-                onRequestClose={closeRecipesModal}
-            >
-                <Recipes
-                    journalRecipes={newEntry.journalRecipes}
-                    onClose={closeRecipesModal}
-                />
-            </ReactModal>
         </div>
     );
 }
@@ -330,26 +278,6 @@ function Entries() {
         closeModal("editEntry");
     };
 
-    const openFoodsModal = (entry) => {
-
-        openModal("foodsModal", { entry: entry });
-    };
-
-    const openRecipesModal = (entry) => {
-
-        openModal("recipesModal", { entry: entry });
-    };
-
-    const closeFoodsModal = () => {
-
-        closeModal("foodsModal");
-    };
-
-    const closeRecipesModal = () => {
-
-        closeModal("recipesModal");
-    };
-
     return (
         <div>
             <h3>Entries</h3>
@@ -360,7 +288,7 @@ function Entries() {
                         <th>Blood Sugar (Level)</th>
                         <th>Insulin (Units)</th>
                         <th>Insulin (Type)</th>
-                        <th>Intake (Food / Recipes)</th>
+                        <th>Intake (Foods & Recipes)</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -377,8 +305,6 @@ function Entries() {
                                         Carbs: {entry.journalFoods?.reduce((sum, food) => sum + food.carbs, 0) || 0},
                                         Calories: {entry.journalFoods?.reduce((sum, food) => sum + food.calories, 0) || 0}
                                     </p>
-                                    <button onClick={() => openFoodsModal(entry)}>Foods</button>
-                                    <button onClick={() => openRecipesModal(entry)}>Recipes</button>
                                 </td>
                                 <td>
                                     <button onClick={() => openEditEntryModal(entry.id)}>Edit</button>
@@ -403,24 +329,6 @@ function Entries() {
                             name={`entry for ${modals.deleteEntry?.name}`}
                             onConfirm={handleDelete}
                             onCancel={closeDeleteEntryModal}
-                        />
-                    </ReactModal>
-                    <ReactModal
-                        isOpen={modals.foodsModal?.isOpen}
-                        onRequestClose={closeFoodsModal}
-                    >
-                        <Foods
-                            entry={editingJournal?.entries.find((entry) => entry.id === modals.foodsModal?.entry.id)}
-                            onClose={closeFoodsModal}
-                        />
-                    </ReactModal>
-                    <ReactModal
-                        isOpen={modals.recipesModal?.isOpen}
-                        onRequestClose={closeRecipesModal}
-                    >
-                        <Recipes
-                            journalRecipes={modals.recipesModal?.entry.journalRecipes}
-                            onClose={closeRecipesModal}
                         />
                     </ReactModal>
                 </tbody>
@@ -539,7 +447,7 @@ function Entry({ entry, onClose }) {
                     onRequestClose={closeFoodsModal}
                 >
                     <Foods
-                        journalFoods={entry.journalFoods}
+                        entry={entry}
                         onClose={closeFoodsModal}
                     />
                 </ReactModal>
@@ -549,7 +457,7 @@ function Entry({ entry, onClose }) {
                     onRequestClose={closeRecipesModal}
                 >
                     <Recipes
-                        journalRecipes={entry.journalRecipes}
+                        entry={entry}
                         onClose={closeRecipesModal}
                     />
                 </ReactModal>
@@ -696,7 +604,11 @@ function Foods({ entry, onClose }) {
                 </label>
                 <label>
                     Food:
-                    <select name="food" onChange={handleInputChange}>
+                    <select
+                        name="food"
+                        value={newFood.food}
+                        onChange={handleInputChange}
+                    >
                         <option>Select Food</option>
                         {foods && foods.map(food => (
                             <option
@@ -726,10 +638,15 @@ function Foods({ entry, onClose }) {
     );
 }
 
-function Recipes({ journalRecipes, onClose }) {
+function Recipes({ entry, onClose }) {
 
     const dispatch = useDispatch();
-    const {items: recipes } = useSelector((state) => state.recipes);
+    const { items: recipes } = useSelector((state) => state.recipes);
+    const { setEditingJournal } = useContext(JournalContext);
+    const [ newRecipe, setNewRecipe ] = useState({
+        quantity: '',
+        recipe: ''
+    });
 
     useEffect(() => {
         if (recipes.length === 0) {
@@ -739,46 +656,147 @@ function Recipes({ journalRecipes, onClose }) {
 
     const getTotalProperties = (journalRecipes) => {
         let totalCarbs = 0, totalCalories = 0;
-        journalRecipes.forEach(food => {
-            totalCarbs += food.carbs;
-            totalCalories += food.calories;
+        journalRecipes.forEach(recipe => {
+            totalCarbs += recipe.carbs;
+            totalCalories += recipe.calories;
         });
         return `Carbs: ${totalCarbs}g, Calories: ${totalCalories}`;
     };
 
-    const handleSave = () => {
-        onClose();
+    const calculateProperties = (recipe, quantity) => {
+        let carbs = recipe.totalCarbs * (quantity / 100);
+        let calories = recipe.totalCalories * (quantity / 100);
+        return { carbs, calories };
     };
 
-    const handleClose = () => {
-        onClose();
+    const handleDelete = (recipeId) => {
+
+        setEditingJournal((prev) => {
+            const updatedEntries = prev.entries.map((prevEntry) =>
+                prevEntry.id === entry.id
+                    ? {
+                        ...prevEntry,
+                        journalRecipes: prevEntry.journalRecipes.filter(
+                            (journalRecipe) => journalRecipe.id !== recipeId
+                        ),
+                    }
+                    : prevEntry
+            );
+            return {
+                ...prev,
+                entries: updatedEntries,
+            };
+        });
+    };
+
+    const handleAdd = () => {
+
+        const selectedRecipe = recipes.find(recipe => recipe.id === parseInt(newRecipe.recipe));
+        const properties = calculateProperties(selectedRecipe, newRecipe.quantity);
+        const computedRecipe = {
+            ...properties,
+            quantity: newRecipe.quantity,
+            recipe: selectedRecipe,
+        };
+
+        setEditingJournal((prev) => {
+            const updatedEntries = prev.entries.map((prevEntry) =>
+                prevEntry.id === entry.id
+                    ? {
+                        ...prevEntry,
+                        journalRecipes: [...(prevEntry.journalRecipes || []), computedRecipe],
+                    }
+                    : prevEntry
+            );
+            return {
+                ...prev,
+                entries: updatedEntries,
+            };
+        });
+
+        setNewRecipe({ quantity: '', recipe: '' });
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setNewRecipe((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const recipeValid = () => {
+        return !newRecipe.quantity.startsWith('0') &&
+            parseInt(newRecipe.quantity) > 0 &&
+            newRecipe.recipe !== '';
     };
 
     return (
         <div>
-            <h3>Recipes in this entry</h3>
-            {journalRecipes && getTotalProperties(journalRecipes)}
-            <ul>
-                {journalRecipes && journalRecipes.map((journalRecipe, index) => (
-                    <div style={{ display: "flex" }} key={index}>
-                        <li>{journalRecipe.quantity}g of {journalRecipe.recipe.name}</li>
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </div>
-                ))}
-            </ul>
-            <input placeholder="Enter quantity (g)" /> of
-            <select>
-                <option>Select Recipe</option>
-                {recipes && recipes.map(recipe => (
-                    <option value={recipe}>{recipe.name}</option>
-                ))}
-            </select>
-            <button>Add</button>
+            <div className="recipes-list">
+                <h3>Recipes in this entry</h3>
+                {entry?.journalRecipes && getTotalProperties(entry.journalRecipes)}
+                <ul>
+                    {entry?.journalRecipes && entry.journalRecipes.map((journalRecipe, index) => (
+                        <div style={{display: "flex"}} key={index}>
+                            <li>{journalRecipe.quantity}g of {journalRecipe.recipe.name}</li>
+                            <button onClick={() => handleDelete(journalRecipe.id)}>Delete</button>
+                        </div>
+                    ))}
+                </ul>
+            </div>
+            <br/>
+            <div className="modal-form">
+                <h3>Add a new recipe to this entry</h3>
+                <p>
+                    {(() => {
+                        if (!recipeValid())
+                            return 'Enter quantity and select recipe';
+
+                        const selectedRecipe = recipes.find(recipe => recipe.id === parseInt(newRecipe.recipe));
+                        const properties = calculateProperties(selectedRecipe, newRecipe.quantity);
+                        return `Carbs: ${properties.carbs}g, Calories: ${properties.calories}`;
+                    })()}
+                </p>
+                <label>
+                    Quantity:
+                    <input
+                        value={newRecipe.quantity}
+                        name="quantity"
+                        onChange={handleInputChange}
+                        placeholder="Enter quantity (g)"
+                        type="number"
+                    />
+                </label>
+                <label>
+                    Recipe:
+                    <select
+                        name="recipe"
+                        value={newRecipe.recipe}
+                        onChange={handleInputChange}
+                    >
+                        <option value="">Select Recipe</option>
+                        {recipes && recipes.map(recipe => (
+                            <option
+                                key={recipe.id}
+                                value={recipe.id}
+                            >
+                                {recipe.name}
+                            </option>
+                        ))}
+                    </select>
+                    <button
+                        onClick={handleAdd}
+                        disabled={!recipeValid()}
+                    >
+                        Add
+                    </button>
+                </label>
+            </div>
+
             <div className="modal-buttons">
                 <div>
-                    <button onClick={handleSave}>Save</button>
-                    <button onClick={handleClose}>Close</button>
+                    <button onClick={onClose}>Close</button>
                 </div>
             </div>
         </div>
