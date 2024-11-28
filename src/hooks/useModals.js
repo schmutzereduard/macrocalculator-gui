@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function useDynamicModals() {
+function useModals() {
 
     const [modals, setModals] = useState({});
 
@@ -32,4 +32,4 @@ function useDynamicModals() {
     return { modals, openModal, closeModal, resetModal };
 }
 
-export default useDynamicModals;
+export default useModals;

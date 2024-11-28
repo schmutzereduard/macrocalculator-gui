@@ -5,14 +5,14 @@ import { fetchJournal, fetchJournals } from '../../features/journalsSlice';
 import ReactModal from 'react-modal';
 import Loading from '../misc/Loading';
 import Journal from '../modal/Journal';
-import useDynamicModals from "../../hooks/useDynamicModals";
+import useModals from "../../hooks/useModals";
 
 function Journals() {
 
     const dispatch = useDispatch();
     const { items: journals, loading } = useSelector(state => state.journals);
     const [ currentDate, setCurrentDate ] = useState(new Date());
-    const { modals, openModal, closeModal } = useDynamicModals();
+    const { modals, openModal, closeModal } = useModals();
 
     useEffect(() => {
         const year = format(currentDate, 'yyyy');

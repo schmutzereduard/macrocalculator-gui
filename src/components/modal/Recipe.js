@@ -9,13 +9,13 @@ import Loading from "../misc/Loading";
 import PerPage from "../misc/PerPage";
 import useSearching from "../../hooks/useSearching";
 import usePagination from "../../hooks/usePagination";
-import useDynamicModals from "../../hooks/useDynamicModals";
+import useModals from "../../hooks/useModals";
 
 function Recipe({ recipe, onClose }) {
 
     const dispatch = useDispatch();
     const { items: foods } = useSelector((state) => state.foods);
-    const { modals, openModal, closeModal } = useDynamicModals();
+    const { modals, openModal, closeModal } = useModals();
     const [ editingRecipe, setEditingRecipe ] = useState(null);
     const [ alert, setAlert ] = useState("");
 

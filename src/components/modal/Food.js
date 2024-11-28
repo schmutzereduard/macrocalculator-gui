@@ -4,13 +4,13 @@ import { addFood, updateFood } from "../../features/foodsSlice";
 import ReactModal from "react-modal";
 import SaveChanges from "./SaveChanges";
 import Loading from "../misc/Loading";
-import useDynamicModals from "../../hooks/useDynamicModals";
+import useModals from "../../hooks/useModals";
 
 function Food({ food, onClose }) {
 
     const dispatch = useDispatch();
     const { itemTypes: foodTypes } = useSelector((state) => state.foods);
-    const { modals, openModal, closeModal } = useDynamicModals();
+    const { modals, openModal, closeModal } = useModals();
     const [ editingFood, setEditingFood ] = useState(null);
     const [ alert, setAlert ] = useState("");
 

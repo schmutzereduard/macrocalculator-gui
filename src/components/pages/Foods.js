@@ -10,13 +10,13 @@ import Loading from '../misc/Loading';
 import useSorting from "../../hooks/useSorting";
 import usePagination from "../../hooks/usePagination";
 import useSearching from "../../hooks/useSearching";
-import useDynamicModals from "../../hooks/useDynamicModals";
+import useModals from "../../hooks/useModals";
 
 function Foods() {
 
     const dispatch = useDispatch();
     const { items: foods, selectedItem: food, loading } = useSelector((state) => state.foods);
-    const { modals, openModal, closeModal } = useDynamicModals();
+    const { modals, openModal, closeModal } = useModals();
     const { sortConfig, handleSortChange, sort } = useSorting();
     const { pageConfig, handlePageChange, handleItemsPerPageChange, paginate } = usePagination();
     const { searchConfig, search, handleSearchChange } = useSearching();

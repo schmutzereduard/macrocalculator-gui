@@ -7,7 +7,7 @@ import { fetchRecipes } from "../../features/recipesSlice";
 import ConfirmDelete from '../modal/ConfirmDelete';
 import SaveChanges from '../modal/SaveChanges';
 import Loading from '../misc/Loading';
-import useDynamicModals from "../../hooks/useDynamicModals";
+import useModals from "../../hooks/useModals";
 
 const JournalContext = createContext(null);
 
@@ -15,7 +15,7 @@ function Journal({ onClose }) {
 
     const dispatch = useDispatch();
     const { selectedItem: journal, insulinTypes, loading } = useSelector(state => state.journals);
-    const { modals, openModal, closeModal } = useDynamicModals();
+    const { modals, openModal, closeModal } = useModals();
 
     const [ editingJournal, setEditingJournal ] = useState(null);
 
@@ -247,7 +247,7 @@ function EntriesHeader() {
 function Entries() {
 
     const { editingJournal, setEditingJournal } = useContext(JournalContext);
-    const { modals, openModal, closeModal } = useDynamicModals();
+    const { modals, openModal, closeModal } = useModals();
 
     const openDeleteEntryModal = (entryId, entryTime) => {
 
@@ -341,7 +341,7 @@ function Entry({ entry, onClose }) {
 
     const { setEditingJournal } = useContext(JournalContext);
     const { insulinTypes } = useSelector((state) => state.journals);
-    const { modals, openModal, closeModal } = useDynamicModals();
+    const { modals, openModal, closeModal } = useModals();
 
     const openFoodsModal = () => {
 
