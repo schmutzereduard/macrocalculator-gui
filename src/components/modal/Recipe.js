@@ -222,14 +222,23 @@ function RecipeFoods({ editingRecipe, getTotalProperties, onRemove }) {
 
 function AddFoods({ handleAddFoodsToRecipe, getTotalProperties }) {
 
-    const {items: foods} = useSelector((state) => state.foods);
-    const {pageConfig, handlePageChange, handleItemsPerPageChange, paginate} = usePagination();
-    const {search, searchConfig, handleSearchChange} = useSearching({});
-    const [selectedProperty, setSelectedProperty] = useState("name");
-    const [foodQuantities, setFoodQuantities] = useState({});
+    const { items: foods } = useSelector((state) => state.foods);
+    const { pageConfig, handlePageChange, handleItemsPerPageChange, paginate } = usePagination();
+    const { search, searchConfig, handleSearchChange } = useSearching({});
+    const [ selectedProperty, setSelectedProperty ] = useState("name");
+    const [ foodQuantities, setFoodQuantities ] = useState({});
+
+    const handleSelectedPropertyChange = (e) => {
+
+        const { value } = e.target;
+        setSelectedProperty(value);
+        handleSearchChange({ [value]: "" });
+        handlePageChange(1);
+    }
 
     const handleInputChange = (e) => {
-        const {value} = e.target;
+
+        const { value } = e.target;
         handleSearchChange({
             [selectedProperty]: value
         });
@@ -237,6 +246,7 @@ function AddFoods({ handleAddFoodsToRecipe, getTotalProperties }) {
     };
 
     const handleQuantityChange = (foodId, quantity) => {
+
         setFoodQuantities({...foodQuantities, [foodId]: quantity});
     };
 
@@ -261,6 +271,7 @@ function AddFoods({ handleAddFoodsToRecipe, getTotalProperties }) {
     };
 
     const addFoodsToRecipe = () => {
+
         handleAddFoodsToRecipe(foodQuantities);
         setFoodQuantities({});
     }
@@ -268,7 +279,7 @@ function AddFoods({ handleAddFoodsToRecipe, getTotalProperties }) {
     return (
         <div>
             <div className="add-foods-header">
-                <select onChange={(e) => setSelectedProperty(e.target.value)} value={selectedProperty}>
+                <select onChange={handleSelectedPropertyChange} value={selectedProperty}>
                     <option value="name">Name</option>
                     <option value="type">Type</option>
                     <option value="carbs">Carbs</option>
