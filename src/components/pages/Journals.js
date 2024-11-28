@@ -1,18 +1,18 @@
 import {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday } from 'date-fns';
+import { fetchJournal, fetchJournals } from '../../features/journalsSlice';
 import ReactModal from 'react-modal';
-import {fetchJournal, fetchJournals} from '../../features/journalsSlice';
-import {format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday} from 'date-fns';
 import Loading from '../misc/Loading';
 import Journal from '../modal/Journal';
-import useModals from "../../hooks/useModals";
+import useDynamicModals from "../../hooks/useDynamicModals";
 
 function Journals() {
 
     const dispatch = useDispatch();
     const { items: journals, loading } = useSelector(state => state.journals);
     const [ currentDate, setCurrentDate ] = useState(new Date());
-    const { modalConfig, setModalConfig } = useModals();
+    const { modals, openModal, closeModal } = useDynamicModals();
 
     useEffect(() => {
         const year = format(currentDate, 'yyyy');
@@ -31,18 +31,12 @@ function Journals() {
             month: month,
             day: day
         }));
-        setModalConfig({
-            ...modalConfig,
-            isItemModalOpen: true
-        });
+        openModal("editJournal");
     };
 
     const closeJournalModal = () => {
 
-        setModalConfig({
-            ...modalConfig,
-            isItemModalOpen: false
-        });
+        closeModal("editJournal");
     };
 
     return (
@@ -58,7 +52,7 @@ function Journals() {
                         handleDayClick={openJournalModal}
                     />
                     <ReactModal
-                        isOpen={modalConfig.isItemModalOpen}
+                        isOpen={modals.editJournal?.isOpen}
                         onRequestClose={closeJournalModal}
                         //remove or move to css file
                         style={{

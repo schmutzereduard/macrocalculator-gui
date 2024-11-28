@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { fetchFoods, fetchFoodTypes, fetchFood, deleteFood, addNewFood } from '../../features/foodsSlice';
 import ReactModal from 'react-modal';
-import {fetchFoods, fetchFoodTypes, fetchFood, deleteFood, addNewFood} from '../../features/foodsSlice';
 import Food from '../modal/Food';
 import ConfirmDelete from '../modal/ConfirmDelete';
 import Pagination from '../misc/Pagination';
@@ -10,13 +10,13 @@ import Loading from '../misc/Loading';
 import useSorting from "../../hooks/useSorting";
 import usePagination from "../../hooks/usePagination";
 import useSearching from "../../hooks/useSearching";
-import useModals from "../../hooks/useModals";
+import useDynamicModals from "../../hooks/useDynamicModals";
 
 function Foods() {
 
     const dispatch = useDispatch();
     const { items: foods, selectedItem: food, loading } = useSelector((state) => state.foods);
-    const { modalConfig, setModalConfig } = useModals();
+    const { modals, openModal, closeModal } = useDynamicModals();
     const { sortConfig, handleSortChange, sort } = useSorting();
     const { pageConfig, handlePageChange, handleItemsPerPageChange, paginate } = usePagination();
     const { searchConfig, search, handleSearchChange } = useSearching();
@@ -32,43 +32,22 @@ function Foods() {
 
     const openFoodModal = () => {
 
-        setModalConfig({
-            ...modalConfig,
-            isItemModalOpen: true
-        });
+        openModal("editFood");
     };
 
     const closeFoodModal = () => {
 
-        setModalConfig({
-            ...modalConfig,
-            isItemModalOpen: false
-        });
+        closeModal("editFood");
     };
 
     const openDeleteFoodModal = (foodId, foodName) => {
 
-        setModalConfig({
-            ...modalConfig,
-            isDeleteItemModalOpen: true,
-            item: {
-                id: foodId,
-                name: foodName
-            }
-        });
-
+        openModal("deleteFood", { id: foodId, name: foodName });
     };
 
     const closeDeleteFoodModal = () => {
 
-        setModalConfig({
-            ...modalConfig,
-            isDeleteItemModalOpen: false,
-            item: {
-                id: null,
-                name: null
-            }
-        });
+        closeModal("deleteFood");
     };
 
     const handleDelete = (id) => {
@@ -117,7 +96,7 @@ function Foods() {
                         onPageChange={handlePageChange}
                     />
                     <ReactModal
-                        isOpen={modalConfig.isItemModalOpen}
+                        isOpen={modals.editFood?.isOpen}
                         onRequestClose={closeFoodModal}
                     >
                         <Food
@@ -126,12 +105,12 @@ function Foods() {
                         />
                     </ReactModal>
                     <ReactModal
-                        isOpen={modalConfig.isDeleteItemModalOpen}
+                        isOpen={modals.deleteFood?.isOpen}
                         onRequestClose={closeDeleteFoodModal}
                     >
                         <ConfirmDelete
-                            name={modalConfig.item.name}
-                            onConfirm={() => handleDelete(modalConfig.item.id)}
+                            name={modals.deleteFood?.name}
+                            onConfirm={() => handleDelete(modals.deleteFood?.id)}
                             onCancel={closeDeleteFoodModal}
                         />
                     </ReactModal>

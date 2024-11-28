@@ -1,22 +1,22 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchRecipes, fetchRecipe, deleteRecipe, addNewRecipe } from '../../features/recipesSlice';
 import ReactModal from 'react-modal';
-import {useDispatch, useSelector} from 'react-redux';
-import {fetchRecipes, fetchRecipe, deleteRecipe, addNewRecipe} from '../../features/recipesSlice';
 import Recipe from '../modal/Recipe';
 import ConfirmDelete from '../modal/ConfirmDelete';
 import Pagination from '../misc/Pagination';
 import Loading from '../misc/Loading';
 import PerPage from '../misc/PerPage';
-import useModals from "../../hooks/useModals";
 import useSorting from "../../hooks/useSorting";
 import usePagination from "../../hooks/usePagination";
 import useSearching from "../../hooks/useSearching";
+import useDynamicModals from "../../hooks/useDynamicModals";
 
 function Recipes() {
 
     const dispatch = useDispatch();
     const { items: recipes, selectedItem: recipe, loading } = useSelector(state => state.recipes);
-    const { modalConfig, setModalConfig } = useModals();
+    const { modals, openModal, closeModal } = useDynamicModals();
     const { sortConfig, handleSortChange, sort } = useSorting();
     const { pageConfig, handlePageChange, handleItemsPerPageChange, paginate } = usePagination();
     const { searchConfig, search, handleSearchChange } = useSearching();
@@ -31,42 +31,22 @@ function Recipes() {
 
     const openRecipeModal = () => {
 
-        setModalConfig({
-            ...modalConfig,
-            isItemModalOpen: true
-        });
+        openModal("editRecipe");
     };
 
     const closeRecipeModal = () => {
 
-        setModalConfig({
-            ...modalConfig,
-            isItemModalOpen: false
-        });
+        closeModal("editRecipe");
     };
 
     const openDeleteRecipeModal = (recipeId, recipeName) => {
 
-        setModalConfig({
-            ...modalConfig,
-            isDeleteItemModalOpen: true,
-            item: {
-                id: recipeId,
-                name: recipeName
-            }
-        });
+        openModal("deleteRecipe", { id: recipeId, name: recipeName });
     };
 
     const closeDeleteRecipeModal = () => {
 
-        setModalConfig({
-            ...modalConfig,
-            isDeleteItemModalOpen: false,
-            item: {
-                id: null,
-                name: null
-            }
-        });
+        closeModal("deleteRecipe");
     };
 
     const handleEdit = (recipeId) => {
@@ -114,7 +94,7 @@ function Recipes() {
                         totalPages={Math.ceil(sortedRecipes.length / pageConfig.itemsPerPage)}
                         onPageChange={handlePageChange}/>
                     <ReactModal
-                        isOpen={modalConfig.isItemModalOpen}
+                        isOpen={modals.editRecipe?.isOpen}
                         onRequestClose={closeRecipeModal}
                     >
                         <Recipe
@@ -123,12 +103,12 @@ function Recipes() {
                         />
                     </ReactModal>
                     <ReactModal
-                        isOpen={modalConfig.isDeleteItemModalOpen}
+                        isOpen={modals.deleteRecipe?.isOpen}
                         onRequestClose={closeDeleteRecipeModal}
                     >
                         <ConfirmDelete
-                            name={modalConfig.item.name}
-                            onConfirm={() => handleDelete(modalConfig.item.id)}
+                            name={modals.deleteRecipe?.name}
+                            onConfirm={() => handleDelete(modals.deleteRecipe?.id)}
                             onCancel={closeDeleteRecipeModal}
                         />
                     </ReactModal>
@@ -200,7 +180,7 @@ function SearchRecipes({ searchBy, setSearchBy, searchConfig, handlePageChange, 
     );
 }
 
-function RecipesTable({recipes, sortConfig, handlePageChange, handleSortChange, onEdit, onDelete}) {
+function RecipesTable({ recipes, sortConfig, handlePageChange, handleSortChange, onEdit, onDelete }) {
 
     const handleHeaderClick = (value) => {
 

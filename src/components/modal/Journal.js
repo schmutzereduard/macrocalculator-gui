@@ -1,12 +1,12 @@
-import {createContext, useContext, useEffect, useState} from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import ReactModal from 'react-modal';
 import { addJournal, updateJournal, deleteJournal, fetchInsulinTypes } from '../../features/journalsSlice';
+import ReactModal from 'react-modal';
+import { fetchFoods } from '../../features/foodsSlice';
+import { fetchRecipes } from "../../features/recipesSlice";
 import ConfirmDelete from '../modal/ConfirmDelete';
 import SaveChanges from '../modal/SaveChanges';
 import Loading from '../misc/Loading';
-import { fetchFoods } from '../../features/foodsSlice';
-import { fetchRecipes } from "../../features/recipesSlice";
 import useDynamicModals from "../../hooks/useDynamicModals";
 
 const JournalContext = createContext(null);

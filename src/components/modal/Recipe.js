@@ -1,7 +1,7 @@
-import {useState, useEffect} from "react";
-import {useDispatch, useSelector} from "react-redux";
-import {addRecipe, updateRecipe} from "../../features/recipesSlice";
-import {fetchFoods} from "../../features/foodsSlice";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { addRecipe, updateRecipe } from "../../features/recipesSlice";
+import { fetchFoods } from "../../features/foodsSlice";
 import ReactModal from "react-modal";
 import SaveChanges from "./SaveChanges";
 import ConfirmDelete from "./ConfirmDelete";
@@ -9,13 +9,13 @@ import Loading from "../misc/Loading";
 import PerPage from "../misc/PerPage";
 import useSearching from "../../hooks/useSearching";
 import usePagination from "../../hooks/usePagination";
-import useModals from "../../hooks/useModals";
+import useDynamicModals from "../../hooks/useDynamicModals";
 
 function Recipe({ recipe, onClose }) {
+
     const dispatch = useDispatch();
     const { items: foods } = useSelector((state) => state.foods);
-    const { modalConfig, setModalConfig } = useModals();
-
+    const { modals, openModal, closeModal } = useDynamicModals();
     const [ editingRecipe, setEditingRecipe ] = useState(null);
     const [ alert, setAlert ] = useState("");
 
@@ -50,14 +50,7 @@ function Recipe({ recipe, onClose }) {
 
     const onExit = () => {
         
-        setModalConfig({
-            ...modalConfig,
-            isSaveItemModalOpen: false,
-            item: {
-                id: null,
-                name: null
-            }
-        })
+        closeModal("saveChanges");
         onClose();
     };
 
@@ -73,60 +66,32 @@ function Recipe({ recipe, onClose }) {
     const handleClose = () => {
         
         if (recipeChanged() && recipeValid()) {
-            setModalConfig({
-                ...modalConfig,
-                isSaveItemModalOpen: true,
-                item: {
-                    id: null,
-                    name: null
-                }
-            });
+            openModal("saveChanges");
         } else {
             onExit();
         }
     };
 
-    const openRemoveFoodModal = (foodId, foodName) => {
-        
-        setModalConfig({
-            ...modalConfig,
-            isDeleteItemModalOpen: true,
-            item: {
-                id: foodId,
-                name: foodName
-            }
-        })
+    const openDeleteFoodModal = (foodId, foodName) => {
+
+        openModal("deleteFood", { id: foodId, name: foodName });
     };
 
-    const closeRemoveFoodModal = () => {
+    const closeDeleteFoodModal = () => {
         
-        setModalConfig({
-            ...modalConfig,
-            isDeleteItemModalOpen: false,
-            item: {
-                id: null,
-                name: null
-            }
-        })
+        closeModal("deleteFood");
     };
 
-    const handleRemoveFood = () => {
+    const handleDeleteFood = () => {
         
         setEditingRecipe((prev) => ({
             ...prev,
-            recipeFoods: prev.recipeFoods.filter((rf) => rf.food.id !== modalConfig.item.id),
+            recipeFoods: prev.recipeFoods.filter((rf) => rf.food.id !== modals.deleteFood?.id),
         }));
-        setModalConfig({
-            ...modalConfig,
-            isDeleteItemModalOpen: false,
-            item: {
-                id: null,
-                name: null
-            }
-        })
+        closeModal("deleteFood");
     };
 
-    const handleAddFoodsToRecipe = (foodQuantities) => {
+    const handleAddFoods = (foodQuantities) => {
         
         const newRecipeFoods = Object.keys(foodQuantities)
             .map((foodId) => ({
@@ -187,10 +152,10 @@ function Recipe({ recipe, onClose }) {
                     <RecipeFoods 
                         editingRecipe={editingRecipe}
                         getTotalProperties={getTotalProperties}
-                        onRemove={openRemoveFoodModal}
+                        onRemove={openDeleteFoodModal}
                     />
                     <AddFoods
-                        handleAddFoodsToRecipe={handleAddFoodsToRecipe}
+                        handleAddFoodsToRecipe={handleAddFoods}
                         getTotalProperties={getTotalProperties}
                     />
 
@@ -212,7 +177,7 @@ function Recipe({ recipe, onClose }) {
                     </div>
 
                     <ReactModal
-                        isOpen={modalConfig.isSaveItemModalOpen}
+                        isOpen={modals.saveChanges?.isOpen}
                         onRequestClose={onExit}>
                         <SaveChanges
                             onSave={onSave}
@@ -221,12 +186,12 @@ function Recipe({ recipe, onClose }) {
                     </ReactModal>
 
                     <ReactModal
-                        isOpen={modalConfig.isDeleteItemModalOpen}
-                        onRequestClose={closeRemoveFoodModal}>
+                        isOpen={modals.deleteFood?.isOpen}
+                        onRequestClose={closeDeleteFoodModal}>
                         <ConfirmDelete
-                            name={`${modalConfig.item.name} from ${editingRecipe.name}`}
-                            onConfirm={handleRemoveFood}
-                            onCancel={closeRemoveFoodModal}
+                            name={`${modals.deleteFood?.name} from ${editingRecipe.name}`}
+                            onConfirm={handleDeleteFood}
+                            onCancel={closeDeleteFoodModal}
                         />
                     </ReactModal>
                 </div>

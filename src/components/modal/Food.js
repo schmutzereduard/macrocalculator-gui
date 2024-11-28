@@ -1,17 +1,16 @@
-import {useEffect, useState} from "react";
-import {useDispatch, useSelector} from "react-redux";
-import {addFood, updateFood} from "../../features/foodsSlice";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { addFood, updateFood } from "../../features/foodsSlice";
 import ReactModal from "react-modal";
 import SaveChanges from "./SaveChanges";
 import Loading from "../misc/Loading";
-import useModals from "../../hooks/useModals";
+import useDynamicModals from "../../hooks/useDynamicModals";
 
 function Food({ food, onClose }) {
 
     const dispatch = useDispatch();
     const { itemTypes: foodTypes } = useSelector((state) => state.foods);
-    const { modalConfig, setModalConfig } = useModals();
-
+    const { modals, openModal, closeModal } = useDynamicModals();
     const [ editingFood, setEditingFood ] = useState(null);
     const [ alert, setAlert ] = useState("");
 
@@ -52,10 +51,7 @@ function Food({ food, onClose }) {
 
     const onExit = () => {
 
-        setModalConfig({
-            ...modalConfig,
-            isSaveItemModalOpen: false
-        })
+        closeModal("saveChanges");
         onClose();
     };
 
@@ -71,10 +67,7 @@ function Food({ food, onClose }) {
     const handleClose = () => {
 
         if (foodChanged() && foodValid()) {
-            setModalConfig({
-                ...modalConfig,
-                isSaveItemModalOpen: true
-            });
+            openModal("saveChanges");
         } else {
             onExit();
         }
@@ -180,7 +173,7 @@ function Food({ food, onClose }) {
                     </div>
 
                     <ReactModal
-                        isOpen={modalConfig.isSaveItemModalOpen}
+                        isOpen={modals.saveChanges?.isOpen}
                         onRequestClose={onExit}>
                         <SaveChanges
                             onSave={onSave}
