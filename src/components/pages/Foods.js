@@ -133,7 +133,7 @@ function FoodsHeader({ pageConfig, searchConfig, handleAdd, handleItemsPerPageCh
                 handlePageChange={handlePageChange}
                 handleSearchChange={handleSearchChange}
             />
-            <button onClick={handleAdd}>Add Food</button>
+            <button onClick={handleAdd}>New</button>
         </div>
     );
 }

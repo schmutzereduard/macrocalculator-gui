@@ -171,11 +171,11 @@ function SearchRecipes({ searchBy, setSearchBy, searchConfig, handlePageChange, 
             </select>
             <input
                 type="text"
-                placeholder="Search for recipes or enter a new recipe name..."
+                placeholder="Search for recipes..."
                 value={searchConfig[searchBy] || ""}
                 onChange={handleInputChange}
             />
-            <button onClick={() => onAddRecipe(searchConfig.name)}>Add Recipe</button>
+            <button onClick={() => onAddRecipe(searchConfig.name)}>New</button>
         </div>
     );
 }

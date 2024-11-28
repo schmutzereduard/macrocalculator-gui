@@ -109,6 +109,7 @@ function Journal({ onClose }) {
                             rows="4"
                             placeholder="Notes"
                         />
+                        <h3>Add a new entry</h3>
                         <JournalContext.Provider
                             value={{
                                 editingJournal,
@@ -200,7 +201,6 @@ function EntriesHeader() {
 
     return (
         <div className="header">
-
             <input
                 name="time"
                 value={newEntry.time}
