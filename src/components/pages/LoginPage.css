@@ -1,0 +1,84 @@
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 50px); /* Adjust based on the height of your navbar */
+    background-color: #222; /* Match the dark theme of your app */
+}
+
+.login-form {
+    background-color: #333;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    color: #fff;
+}
+
+.login-form h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #fff;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"] {
+    width: 95%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    background-color: #222;
+    color: #fff;
+}
+
+.form-group input[type="text"]::placeholder,
+.form-group input[type="password"]::placeholder {
+    color: #aaa;
+}
+
+.login-button, .register-button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.login-button {
+    background-color: #007bff;
+    color: white;
+    transition: background-color 0.3s;
+}
+
+.login-button:hover {
+    background-color: #0056b3;
+}
+
+.register-button {
+    background-color: #6c757d;
+    color: white;
+    transition: background-color 0.3s;
+}
+
+.register-button:hover {
+    background-color: #5a6268;
+}
+
+.error-message {
+    color: #ff4d4d;
+    font-size: 14px;
+    margin-bottom: 15px;
+    text-align: left;
+}

@@ -157,7 +157,7 @@ th {
     margin-bottom: 10px;
 }
 
-add-food-form input, .add-food-form select, .add-food-form button {
+.add-food-form input, .add-food-form select, .add-food-form button {
     margin-right: 10px;
     height: 43.4px; /* Ensure inputs and select elements have the same height */
     padding: 10px;
@@ -269,4 +269,3 @@ th.description, td.description {
     background-color: gray;
     cursor: not-allowed;
 }
-
