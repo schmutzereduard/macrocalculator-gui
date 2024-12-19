@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import AuthApi from "../../api/AuthApi";
 import "./LoginPage.css";
-import {useNavigate} from "react-router-dom"; // Assuming App.css contains the shared styles
+import {useNavigate} from "react-router-dom";
+import {fetchProfile} from "../../features/profileSlice";
 
 function LoginPage() {
 
@@ -17,12 +18,14 @@ function LoginPage() {
         event.preventDefault();
 
         try {
-            const response = await AuthApi.authenticate(loginRequest);
+            const response = await AuthApi.login(loginRequest);
             const data = response.data;
-            const token = data.token;
-            localStorage.setItem("authToken", token);
+            sessionStorage.setItem("authToken", data.token);
+
+            fetchProfile();
             navigate("/home");
         } catch (error) {
+            console.log(error);
             setError(error.response?.data || "Login failed. Please try again.");
         }
     };

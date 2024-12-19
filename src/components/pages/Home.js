@@ -1,14 +1,21 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import Navbar from "../app/Navbar";
+import { useDispatch } from "react-redux";
 
-const Home = () => {
-    
-  return (
-    <div>
-        <Navbar/>
-        <h1>Home Page</h1>
-    </div>
-  );
-};
+function Home() {
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+
+    }, []);
+
+    return (
+        <div>
+            <Navbar/>
+            <h1>Home Page</h1>
+        </div>
+    );
+}
 
 export default Home;

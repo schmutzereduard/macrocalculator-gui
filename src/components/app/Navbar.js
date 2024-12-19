@@ -7,6 +7,7 @@ const Navbar = () => {
         <div className="navbar">
             <h2>Macro Calculator</h2>
             <div className="nav-buttons">
+                <Link to="/profile" className="nav-button">Profile</Link>
                 <Link to="/foods" className="nav-button">Foods</Link>
                 <Link to="/recipes" className="nav-button">Recipes</Link>
                 <Link to="/journals" className="nav-button">Journals</Link>
