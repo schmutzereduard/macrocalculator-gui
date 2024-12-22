@@ -2,7 +2,7 @@ import axios from "axios";
 import axiosRetry from "axios-retry";
 import {SessionStorageManager} from "../utils/SessionStorageManager";
 
-export function createAxiosInstance(baseURL, additionalParams) {
+export function createAxiosInstance(baseURL) {
 
     const instance = axios.create({
         baseURL: baseURL,
