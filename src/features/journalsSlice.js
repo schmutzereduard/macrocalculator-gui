@@ -5,40 +5,40 @@ import MacroCalculatorApi from "../api/MacroCalculatorApi";
 
 export const fetchJournals = createAsyncThunk(
   "journals/fetchJournals",
-  async ({ year, month }) => {
-    const response = await MacroCalculatorApi.getMonthJournals(year, month);
+  async ({ year, month }, profileId) => {
+    const response = await MacroCalculatorApi.getMonthJournals(year, month, profileId);
     return response.data;
   }
 );
 
 export const fetchJournal = createAsyncThunk(
   "journals/fetchJournal",
-  async ({ year, month, day }) => {
-    const response = await MacroCalculatorApi.getDayJournal(year, month, day);
+  async ({ year, month, day }, profileId) => {
+    const response = await MacroCalculatorApi.getDayJournal(year, month, day, profileId);
     return response.data;
   }
 );
 
 export const addJournal = createAsyncThunk(
   "journals/addJournal",
-  async (journal) => {
-    const response = await MacroCalculatorApi.addJournal(journal);
+  async (journal, profileId) => {
+    const response = await MacroCalculatorApi.addJournal(journal, profileId);
     return response.data;
   }
 );
 
 export const updateJournal = createAsyncThunk(
   "journals/updateJournal",
-  async (journal) => {
-    const response = await MacroCalculatorApi.updateJournal(journal);
+  async (journal, profileId) => {
+    const response = await MacroCalculatorApi.updateJournal(journal, profileId);
     return response.data;
   }
 );
 
 export const deleteJournal = createAsyncThunk(
   "journals/deleteJournal",
-  async (id) => {
-    await MacroCalculatorApi.deleteJournal(id);
+  async (id, profileId) => {
+    await MacroCalculatorApi.deleteJournal(id, profileId);
     return id;
   }
 );

@@ -1,12 +1,15 @@
 import React, { useState } from "react";
-import AuthApi from "../../api/AuthApi";
 import "./LoginPage.css";
 import {useNavigate} from "react-router-dom";
 import {fetchProfile} from "../../features/profileSlice";
+import { useDispatch } from "react-redux";
+import { login } from "../../features/authSlice";
+import { SessionStorageManager } from "../../utils/SessionStorageManager";
 
 function LoginPage() {
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [ loginRequest, setLoginRequest ] = useState({
         username: "",
         password: ""
@@ -18,11 +21,14 @@ function LoginPage() {
         event.preventDefault();
 
         try {
-            const response = await AuthApi.login(loginRequest);
-            const data = response.data;
-            sessionStorage.setItem("authToken", data.token);
+            const loginInfo = await dispatch(login(loginRequest));
+            SessionStorageManager.saveUserInfo(loginInfo.payload);
 
-            fetchProfile();
+            const profileInfo = await dispatch(fetchProfile());
+            SessionStorageManager.saveUserInfo({
+                profileId: profileInfo.payload.id
+            });
+
             navigate("/home");
         } catch (error) {
             console.log(error);

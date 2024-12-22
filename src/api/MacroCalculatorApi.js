@@ -3,7 +3,7 @@ import instance from '../axios/request-axios';
 class MacroCalculatorApi {
 
     static getFoods() {
-        return instance.get('/foods?profileId=3');
+        return instance.get(`/foods`);
     }
 
     static getFood(id) {
@@ -11,11 +11,11 @@ class MacroCalculatorApi {
     }
 
     static addFood(food) {
-        return instance.post('/foods', food);
+        return instance.post(`/foods`, food);
     }
 
     static updateFood(food) {
-        return instance.put('/foods', food);
+        return instance.put(`/foods`, food);
     }
 
     static deleteFood(id) {
@@ -26,8 +26,8 @@ class MacroCalculatorApi {
         return instance.get('/food-types');
     }
 
-    static getAllRecipes() {
-        return instance.get('/recipes');
+    static getRecipes() {
+        return instance.get(`/recipes`);
     }
 
     static getRecipe(id) {
@@ -47,7 +47,7 @@ class MacroCalculatorApi {
     }
 
     static getJournals() {
-        return instance.get('/journals');
+        return instance.get(`/journals?`);
     }
 
 
@@ -55,7 +55,7 @@ class MacroCalculatorApi {
         return instance.get(`/journals/month?date=${year}-${month}`);
     }    
 
-    static getDayJournal(year,month, day) {
+    static getDayJournal(year, month, day) {
         return instance.get(`/journals/day?date=${year}-${month}-${day}`);
     }    
 

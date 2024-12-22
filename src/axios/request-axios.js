@@ -1,21 +1,21 @@
-import axios from "axios";
-import axiosRetry from 'axios-retry';
+import { createAxiosInstance } from "./axios-instance";
+import { SessionStorageManager } from "../utils/SessionStorageManager";
 
-const instance = axios.create({
-    baseURL: "http://localhost:8080",
-    timeout: "30000"
-});
+const instance = createAxiosInstance(window.env.BACK_END_URL);
 
-axiosRetry(instance, { retries: 3 });
+instance.interceptors.request.use(
+    (config) => {
 
-instance.interceptors.request.use(config => {
-    const token = sessionStorage.getItem('authToken');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-}, error => {
-    return Promise.reject(error);
-});
+        const userInfo = SessionStorageManager.retrieveUserInfo();
+        if (userInfo?.profileId) {
+            const url = new URL(config.url, config.baseURL);
+            url.searchParams.append("profileId", userInfo.profileId);
+            config.url = url.pathname + url.search;
+        }
+
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
 
 export default instance;

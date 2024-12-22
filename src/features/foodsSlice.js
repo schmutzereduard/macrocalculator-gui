@@ -3,8 +3,8 @@ import MacroCalculatorApi from "../api/MacroCalculatorApi";
 
 export const fetchFoods = createAsyncThunk(
     "foods/fetchFoods",
-    async () => {
-        const response = await MacroCalculatorApi.getFoods();
+    async (profileId) => {
+        const response = await MacroCalculatorApi.getFoods(profileId);
         return response.data;
     }
 );
@@ -19,33 +19,33 @@ export const fetchFoodTypes = createAsyncThunk(
 
 export const fetchFood = createAsyncThunk(
     "foods/fetchFood",
-    async (id) => {
-        const response = await MacroCalculatorApi.getFood(id);
+    async ({ foodId, profileId }) => {
+        const response = await MacroCalculatorApi.getFood(foodId, profileId);
         return response.data;
     }
 );
 
 export const addFood = createAsyncThunk(
     "foods/addFood",
-    async (food) => {
-        const response = await MacroCalculatorApi.addFood(food);
+    async ({ food, profileId }) => {
+        const response = await MacroCalculatorApi.addFood(food, profileId);
         return response.data;
     }
 );
 
 export const updateFood = createAsyncThunk(
     "foods/updateFood",
-    async (food) => {
-        const response = await MacroCalculatorApi.updateFood(food);
+    async ({ food, profileId }) => {
+        const response = await MacroCalculatorApi.updateFood(food, profileId);
         return response.data;
     }
 );
 
 export const deleteFood = createAsyncThunk(
     "foods/deleteFood",
-    async (id) => {
-        await MacroCalculatorApi.deleteFood(id);
-        return id
+    async ({ foodId, profileId }) => {
+        await MacroCalculatorApi.deleteFood(foodId, profileId);
+        return foodId;
     }
 );
 

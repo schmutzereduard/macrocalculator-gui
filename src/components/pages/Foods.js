@@ -1,241 +1,251 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchFoods, fetchFoodTypes, fetchFood, deleteFood, addNewFood } from '../../features/foodsSlice';
-import ReactModal from 'react-modal';
-import Food from '../modal/Food';
-import ConfirmDelete from '../modal/ConfirmDelete';
-import Pagination from '../misc/Pagination';
-import PerPage from '../misc/PerPage';
-import Loading from '../misc/Loading';
-import useSorting from "../../hooks/useSorting";
-import usePagination from "../../hooks/usePagination";
-import useSearching from "../../hooks/useSearching";
-import useModals from "../../hooks/useModals";
+    import React, { useEffect } from 'react';
+    import { useDispatch, useSelector } from 'react-redux';
+    import { fetchFoods, fetchFoodTypes, fetchFood, deleteFood, addNewFood } from '../../features/foodsSlice';
+    import ReactModal from 'react-modal';
+    import Food from '../modal/Food';
+    import ConfirmDelete from '../modal/ConfirmDelete';
+    import Pagination from '../misc/Pagination';
+    import PerPage from '../misc/PerPage';
+    import Loading from '../misc/Loading';
+    import useSorting from "../../hooks/useSorting";
+    import usePagination from "../../hooks/usePagination";
+    import useSearching from "../../hooks/useSearching";
+    import useModals from "../../hooks/useModals";
 
-function Foods() {
+    function Foods() {
 
-    const dispatch = useDispatch();
-    const { items: foods, selectedItem: food, loading } = useSelector((state) => state.foods);
-    const { modals, openModal, closeModal } = useModals();
-    const { sortConfig, handleSortChange, sort } = useSorting();
-    const { pageConfig, handlePageChange, handleItemsPerPageChange, paginate } = usePagination();
-    const { searchConfig, search, handleSearchChange } = useSearching();
+        const dispatch = useDispatch();
+        const { item: profile, loading: profileLoading } = useSelector((state) => state.profile);
+        const { items: foods, selectedItem: food, loading: foodsLoading } = useSelector((state) => state.foods);
+        const { modals, openModal, closeModal } = useModals();
+        const { sortConfig, handleSortChange, sort } = useSorting();
+        const { pageConfig, handlePageChange, handleItemsPerPageChange, paginate } = usePagination();
+        const { searchConfig, search, handleSearchChange } = useSearching();
 
-    useEffect(() => {
-        dispatch(fetchFoods());
-        dispatch(fetchFoodTypes());
-    }, [dispatch]);
 
-    const filteredFoods = search(foods);
-    const sortedFoods = sort(filteredFoods);
-    const paginatedFoods = paginate(sortedFoods);
+        useEffect(() => {
+            if (profile) {
+                dispatch(fetchFoods(profile.id));
+                dispatch(fetchFoodTypes());
+            }
+        }, [dispatch, profile]);
 
-    const openFoodModal = () => {
+        const filteredFoods = search(foods);
+        const sortedFoods = sort(filteredFoods);
+        const paginatedFoods = paginate(sortedFoods);
 
-        openModal("editFood");
-    };
+        const openFoodModal = () => {
 
-    const closeFoodModal = () => {
+            openModal("editFood");
+        };
 
-        closeModal("editFood");
-    };
+        const closeFoodModal = () => {
 
-    const openDeleteFoodModal = (foodId, foodName) => {
+            closeModal("editFood");
+        };
 
-        openModal("deleteFood", { id: foodId, name: foodName });
-    };
+        const openDeleteFoodModal = (foodId, foodName) => {
 
-    const closeDeleteFoodModal = () => {
+            openModal("deleteFood", { id: foodId, name: foodName });
+        };
 
-        closeModal("deleteFood");
-    };
+        const closeDeleteFoodModal = () => {
 
-    const handleDelete = (id) => {
+            closeModal("deleteFood");
+        };
 
-        dispatch(deleteFood(id));
-        closeDeleteFoodModal();
-    };
+        const handleDelete = (id) => {
 
-    const handleAdd = () => {
+            dispatch(deleteFood({
+                foodId: id,
+                profileId: profile?.id
+            }));
+            closeDeleteFoodModal();
+        };
 
-        dispatch(addNewFood());
-        openFoodModal();
-    };
+        const handleAdd = () => {
 
-    const handleEdit = (foodId) => {
+            dispatch(addNewFood());
+            openFoodModal();
+        };
 
-        dispatch(fetchFood(foodId));
-        openFoodModal();
-    };
+        const handleEdit = (foodId) => {
 
-    return (
-        <div>
-            {loading ? (
-                <Loading />
-            ) : (
-                <div>
-                    <FoodsHeader
-                        pageConfig={pageConfig}
-                        searchConfig={searchConfig}
-                        handleAdd={handleAdd}
-                        handleItemsPerPageChange={handleItemsPerPageChange}
-                        handlePageChange={handlePageChange}
-                        handleSearchChange={handleSearchChange}
-                    />
-                    <FoodsTable
-                        foods={paginatedFoods}
-                        sortConfig={sortConfig}
-                        handlePageChange={handlePageChange}
-                        handleSortChange={handleSortChange}
-                        onEdit={handleEdit}
-                        onDelete={openDeleteFoodModal}
-                    />
-                    <Pagination
-                        currentPage={pageConfig.currentPage}
-                        totalPages={Math.ceil(sortedFoods.length / pageConfig.itemsPerPage)}
-                        onPageChange={handlePageChange}
-                    />
-                    <ReactModal
-                        isOpen={modals.editFood?.isOpen}
-                        onRequestClose={closeFoodModal}
-                    >
-                        <Food
-                            food={food}
-                            onClose={closeFoodModal}
+            dispatch(fetchFood({
+                foodId: foodId,
+                profileId: profile?.id
+            }));
+            openFoodModal();
+        };
+
+        return (
+            <div>
+                {foodsLoading || profileLoading ? (
+                    <Loading />
+                ) : (
+                    <div>
+                        <FoodsHeader
+                            pageConfig={pageConfig}
+                            searchConfig={searchConfig}
+                            handleAdd={handleAdd}
+                            handleItemsPerPageChange={handleItemsPerPageChange}
+                            handlePageChange={handlePageChange}
+                            handleSearchChange={handleSearchChange}
                         />
-                    </ReactModal>
-                    <ReactModal
-                        isOpen={modals.deleteFood?.isOpen}
-                        onRequestClose={closeDeleteFoodModal}
-                    >
-                        <ConfirmDelete
-                            name={modals.deleteFood?.name}
-                            onConfirm={() => handleDelete(modals.deleteFood?.id)}
-                            onCancel={closeDeleteFoodModal}
+                        <FoodsTable
+                            foods={paginatedFoods}
+                            sortConfig={sortConfig}
+                            handlePageChange={handlePageChange}
+                            handleSortChange={handleSortChange}
+                            onEdit={handleEdit}
+                            onDelete={openDeleteFoodModal}
                         />
-                    </ReactModal>
-                </div>
-            )}
-        </div>
-    );
-}
+                        <Pagination
+                            currentPage={pageConfig.currentPage}
+                            totalPages={Math.ceil(sortedFoods.length / pageConfig.itemsPerPage)}
+                            onPageChange={handlePageChange}
+                        />
+                        <ReactModal
+                            isOpen={modals.editFood?.isOpen}
+                            onRequestClose={closeFoodModal}
+                        >
+                            <Food
+                                food={food}
+                                onClose={closeFoodModal}
+                            />
+                        </ReactModal>
+                        <ReactModal
+                            isOpen={modals.deleteFood?.isOpen}
+                            onRequestClose={closeDeleteFoodModal}
+                        >
+                            <ConfirmDelete
+                                name={modals.deleteFood?.name}
+                                onConfirm={() => handleDelete(modals.deleteFood?.id)}
+                                onCancel={closeDeleteFoodModal}
+                            />
+                        </ReactModal>
+                    </div>
+                )}
+            </div>
+        );
+    }
 
-function FoodsHeader({ pageConfig, searchConfig, handleAdd, handleItemsPerPageChange, handlePageChange, handleSearchChange }) {
+    function FoodsHeader({ pageConfig, searchConfig, handleAdd, handleItemsPerPageChange, handlePageChange, handleSearchChange }) {
 
-    return (
-        <div className='header'>
-            <PerPage
-                itemsPerPage={pageConfig.itemsPerPage}
-                onChange={handleItemsPerPageChange}
-            />
-            <SearchFoods
-                searchConfig={searchConfig}
-                handlePageChange={handlePageChange}
-                handleSearchChange={handleSearchChange}
-            />
-            <button onClick={handleAdd}>New</button>
-        </div>
-    );
-}
+        return (
+            <div className='header'>
+                <PerPage
+                    itemsPerPage={pageConfig.itemsPerPage}
+                    onChange={handleItemsPerPageChange}
+                />
+                <SearchFoods
+                    searchConfig={searchConfig}
+                    handlePageChange={handlePageChange}
+                    handleSearchChange={handleSearchChange}
+                />
+                <button onClick={handleAdd}>New</button>
+            </div>
+        );
+    }
 
-function SearchFoods({ searchConfig, handlePageChange, handleSearchChange }) {
+    function SearchFoods({ searchConfig, handlePageChange, handleSearchChange }) {
 
-    const { itemTypes: foodTypes } = useSelector((state) => state.foods);
+        const { itemTypes: foodTypes } = useSelector((state) => state.foods);
 
-    const handleInputChange = (e) => {
+        const handleInputChange = (e) => {
 
-        const {name, value} = e.target;
-        handleSearchChange({...searchConfig, [name]: value});
-        handlePageChange(1);
-    };
+            const {name, value} = e.target;
+            handleSearchChange({...searchConfig, [name]: value});
+            handlePageChange(1);
+        };
 
-    return (
-        <div className="add-food-form">
-            <input
-                type="text"
-                placeholder="Name"
-                name="name"
-                value={searchConfig.name}
-                onChange={handleInputChange}
-            />
-            <input
-                type="text"
-                placeholder="Carbs"
-                name="carbs"
-                value={searchConfig.carbs}
-                onChange={handleInputChange}
-            />
-            <input
-                type="text"
-                placeholder="Calories"
-                name="calories"
-                value={searchConfig.calories}
-                onChange={handleInputChange}
-            />
-            <select
-                name="type"
-                value={searchConfig.type}
-                onChange={handleInputChange}
-            >
-                <option value="">Any</option>
-                {foodTypes && foodTypes.map((type) => (
-                    <option key={type} value={type}>
-                        {type}
-                    </option>
-                ))}
-            </select>
-            <input
-                type="text"
-                placeholder="Comments"
-                name="comments"
-                value={searchConfig.comments}
-                onChange={handleInputChange}
-            />
-        </div>
-    );
-}
+        return (
+            <div className="add-food-form">
+                <input
+                    type="text"
+                    placeholder="Name"
+                    name="name"
+                    value={searchConfig.name}
+                    onChange={handleInputChange}
+                />
+                <input
+                    type="text"
+                    placeholder="Carbs"
+                    name="carbs"
+                    value={searchConfig.carbs}
+                    onChange={handleInputChange}
+                />
+                <input
+                    type="text"
+                    placeholder="Calories"
+                    name="calories"
+                    value={searchConfig.calories}
+                    onChange={handleInputChange}
+                />
+                <select
+                    name="type"
+                    value={searchConfig.type}
+                    onChange={handleInputChange}
+                >
+                    <option value="">Any</option>
+                    {foodTypes && foodTypes.map((type) => (
+                        <option key={type} value={type}>
+                            {type}
+                        </option>
+                    ))}
+                </select>
+                <input
+                    type="text"
+                    placeholder="Comments"
+                    name="comments"
+                    value={searchConfig.comments}
+                    onChange={handleInputChange}
+                />
+            </div>
+        );
+    }
 
-function FoodsTable({ foods, sortConfig, handlePageChange, handleSortChange, onEdit, onDelete }) {
+    function FoodsTable({ foods, sortConfig, handlePageChange, handleSortChange, onEdit, onDelete }) {
 
-    const handleHeaderClick = (value) => {
+        const handleHeaderClick = (value) => {
 
-        handleSortChange(value);
-        handlePageChange(1);
-    };
+            handleSortChange(value);
+            handlePageChange(1);
+        };
 
-    return (
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th onClick={() => handleHeaderClick('carbs')}>
-                        Carbs {sortConfig.key === 'carbs' ? sortConfig.icon : ''}
-                    </th>
-                    <th onClick={() => handleHeaderClick('calories')}>
-                        Calories {sortConfig.key === 'calories' ? sortConfig.icon : ''}
-                    </th>
-                    <th>Type</th>
-                    <th>Comments</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {foods.map((food) => (
-                    <tr key={food.id}>
-                        <td>{food.name}</td>
-                        <td>{food.carbs}</td>
-                        <td>{food.calories}</td>
-                        <td>{food.type}</td>
-                        <td>{food.comments}</td>
-                        <td>
-                            <button onClick={() => onEdit(food.id)}>Edit</button>
-                            <button onClick={() => onDelete(food.id, food.name)}>Delete</button>
-                        </td>
+        return (
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th onClick={() => handleHeaderClick('carbs')}>
+                            Carbs {sortConfig.key === 'carbs' ? sortConfig.icon : ''}
+                        </th>
+                        <th onClick={() => handleHeaderClick('calories')}>
+                            Calories {sortConfig.key === 'calories' ? sortConfig.icon : ''}
+                        </th>
+                        <th>Type</th>
+                        <th>Comments</th>
+                        <th>Actions</th>
                     </tr>
-                ))}
-            </tbody>
-        </table>
-    );
-}
+                </thead>
+                <tbody>
+                    {foods.map((food) => (
+                        <tr key={food.id}>
+                            <td>{food.name}</td>
+                            <td>{food.carbs}</td>
+                            <td>{food.calories}</td>
+                            <td>{food.type}</td>
+                            <td>{food.comments}</td>
+                            <td>
+                                <button onClick={() => onEdit(food.id)}>Edit</button>
+                                <button onClick={() => onDelete(food.id, food.name)}>Delete</button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        );
+    }
 
-export default Foods;
+    export default Foods;

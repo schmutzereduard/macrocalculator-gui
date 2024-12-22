@@ -9,6 +9,7 @@ import useModals from "../../hooks/useModals";
 function Food({ food, onClose }) {
 
     const dispatch = useDispatch();
+    const { item: profile } = useSelector((state) => state.profile);
     const { itemTypes: foodTypes } = useSelector((state) => state.foods);
     const { modals, openModal, closeModal } = useModals();
     const [ editingFood, setEditingFood ] = useState(null);
@@ -42,9 +43,15 @@ function Food({ food, onClose }) {
     const onSave = () => {
 
         if (!editingFood.id) {
-            dispatch(addFood(editingFood));
+            dispatch(addFood({
+                food: editingFood,
+                profileId: profile?.id
+            }));
         } else {
-            dispatch(updateFood(editingFood));
+            dispatch(updateFood({
+                food: editingFood,
+                profileId: profile?.id
+            }));
         }
         onClose();
     };
