@@ -15,7 +15,6 @@
     function Foods() {
 
         const dispatch = useDispatch();
-        const { item: profile, loading: profileLoading } = useSelector((state) => state.profile);
         const { items: foods, selectedItem: food, loading: foodsLoading } = useSelector((state) => state.foods);
         const { modals, openModal, closeModal } = useModals();
         const { sortConfig, handleSortChange, sort } = useSorting();
@@ -24,11 +23,9 @@
 
 
         useEffect(() => {
-            if (profile) {
-                dispatch(fetchFoods(profile.id));
-                dispatch(fetchFoodTypes());
-            }
-        }, [dispatch, profile]);
+            dispatch(fetchFoods());
+            dispatch(fetchFoodTypes());
+        }, [dispatch]);
 
         const filteredFoods = search(foods);
         const sortedFoods = sort(filteredFoods);
@@ -56,10 +53,7 @@
 
         const handleDelete = (id) => {
 
-            dispatch(deleteFood({
-                foodId: id,
-                profileId: profile?.id
-            }));
+            dispatch(deleteFood(id));
             closeDeleteFoodModal();
         };
 
@@ -71,16 +65,13 @@
 
         const handleEdit = (foodId) => {
 
-            dispatch(fetchFood({
-                foodId: foodId,
-                profileId: profile?.id
-            }));
+            dispatch(fetchFood(foodId));
             openFoodModal();
         };
 
         return (
             <div>
-                {foodsLoading || profileLoading ? (
+                {foodsLoading ? (
                     <Loading />
                 ) : (
                     <div>

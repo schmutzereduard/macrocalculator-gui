@@ -12,8 +12,6 @@ export class SessionStorageManager {
 
     static saveUserInfo(info) {
 
-        console.log("saveUserInfo: " + JSON.stringify(info));
-
         const stored = sessionStorage.getItem("userInfo");
         if (stored) {
             const userInfo = JSON.parse(stored);

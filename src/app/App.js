@@ -9,24 +9,27 @@ import Foods from '../components/pages/Foods';
 import Recipes from '../components/pages/Recipes';
 import Journals from '../components/pages/Journals';
 import ProtectedRoute from "../components/app/ProtectedRoute";
+import Sidebar from "../components/app/Sidebar";
 import ErrorBoundary from "../error/ErrorBoundary";
 import './App.css';
+import {SessionStorageManager} from "../utils/SessionStorageManager";
 
 function App() {
 
     const dispatch = useDispatch();
-    const token = sessionStorage.getItem("authToken");
+    const userInfo = SessionStorageManager.retrieveUserInfo();
 
     useEffect(() => {
-        if (token) {
+        if (userInfo?.token) {
             dispatch(fetchProfile());
         }
-    }, [dispatch, token]);
+    }, [dispatch, userInfo]);
 
     return (
         <Router>
-            <div className="App">
+            <div className="page-content">
                 <ErrorBoundary>
+                    {userInfo && <Sidebar />}
                     <Routes>
                         <Route path='/' element={<LoginPage />} />
                         <Route

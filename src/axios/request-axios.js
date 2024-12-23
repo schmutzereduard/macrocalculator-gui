@@ -9,8 +9,10 @@ instance.interceptors.request.use(
         const userInfo = SessionStorageManager.retrieveUserInfo();
         if (userInfo?.profileId) {
             const url = new URL(config.url, config.baseURL);
-            url.searchParams.append("profileId", userInfo.profileId);
-            config.url = url.pathname + url.search;
+            if (!window.env.COMMON_ENDPOINTS.some(value => url.pathname.endsWith(value))) {
+                url.searchParams.append("profileId", userInfo.profileId);
+                config.url = url.pathname + url.search;
+            }
         }
 
         return config;
