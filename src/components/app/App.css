@@ -1,0 +1,217 @@
+* {
+    box-sizing: border-box;
+}
+
+.page-content {
+    margin-left: 100px; /* Match the width of the sidebar */
+    padding: 20px; /* Optional padding for inner spacing */
+}
+
+/*!* General styles *!*/
+/*button {*/
+/*    padding: 5px 10px;*/
+/*    font-size: 14px;*/
+/*    margin: 5px;*/
+/*    cursor: pointer;*/
+/*}*/
+
+/*button:hover {*/
+/*    background-color: #ddd;*/
+/*}*/
+
+/*button:disabled {*/
+/*    background-color: gray;*/
+/*    cursor: not-allowed;*/
+/*}*/
+
+/*!*input[type="text"], input[type="number"], select, textarea {*!*/
+/*!*    padding: 10px;*!*/
+/*!*    font-size: 16px;*!*/
+/*!*    margin-bottom: 10px;*!*/
+/*!*}*!*/
+
+/*textarea {*/
+/*    resize: none;*/
+/*}*/
+
+/*table {*/
+/*    width: 100%;*/
+/*    border-collapse: collapse;*/
+/*    margin-bottom: 20px;*/
+/*}*/
+
+/*table, th, td {*/
+/*    border: 1px solid #ddd;*/
+/*}*/
+
+/*th, td {*/
+/*    padding: 8px;*/
+/*    text-align: left;*/
+/*    cursor: pointer;  !* Add cursor pointer for sortable columns *!*/
+/*}*/
+
+/*th {*/
+/*    background-color: #f2f2f2;*/
+/*}*/
+
+/*.modal-content {*/
+/*    padding: 20px;*/
+/*}*/
+
+/*!* Header styles *!*/
+/*.header {*/
+/*    display: flex;*/
+/*    justify-content: space-between;*/
+/*    margin-bottom: 20px;*/
+/*    width: 100%;*/
+/*}*/
+
+/*.header input {*/
+/*    flex-grow: 1;*/
+/*    padding: 10px;*/
+/*    font-size: 16px;*/
+/*    margin-right: 10px;*/
+/*}*/
+
+/*.header button {*/
+/*    height: 43.4px;*/
+/*    padding: 10px 20px;*/
+/*    font-size: 16px;*/
+/*    background-color: white;*/
+/*    color: white;*/
+/*    border: none;*/
+/*    border-radius: 5px;*/
+/*    cursor: pointer;*/
+/*}*/
+
+/*.header select {*/
+/*    display: inline-flex;*/
+/*    height: 43.4px;*/
+/*    padding: 10px;*/
+/*    font-size: 16px;*/
+/*    margin-left: 10px;*/
+/*    border-radius: 5px;*/
+/*}*/
+
+/*.header button:hover {*/
+/*    background-color: red;*/
+/*}*/
+
+/*!* Food and Recipe styles *!*/
+/*.list {*/
+/*    display: flex;*/
+/*    flex-wrap: wrap;*/
+/*    justify-content: center;*/
+/*    gap: 10px; !* Adjust the gap as needed *!*/
+/*    list-style-type: none;*/
+/*    padding: 0;*/
+/*}*/
+
+/*.list-item {*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    text-align: center;*/
+/*    align-items: center;*/
+/*    padding: 10px;*/
+/*    border: 1px solid #ccc;*/
+/*    border-radius: 5px;*/
+/*    background-color: #f9f9f9;*/
+/*}*/
+
+/*.add-food-form, .add-recipe-form, .add-journal-entry-form {*/
+/*    display: flex;*/
+/*    flex-grow: 2; !* Add flexibility to the form *!*/
+/*    margin-right: 20px; !* Adjust right margin for spacing *!*/
+
+/*}*/
+
+/*.add-foods-header {*/
+/*    display: flex;*/
+/*    justify-content: space-between;*/
+/*    align-items: center;*/
+/*    margin-bottom: 10px;*/
+/*}*/
+
+/*.add-food-form input, .add-food-form select, .add-food-form button {*/
+/*    margin-right: 10px;*/
+/*    height: 43.4px; !* Ensure inputs and select elements have the same height *!*/
+/*    padding: 10px;*/
+/*    font-size: 16px;*/
+/*}*/
+
+/*!* Modal form styles *!*/
+/*.modal-form {*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*}*/
+
+/*.modal-form label {*/
+/*    margin-bottom: 10px;*/
+/*}*/
+
+/*!* Table column widths *!*/
+/*th, td {*/
+/*    width: 20%;*/
+/*}*/
+
+/*th.description, td.description {*/
+/*    width: 40%;*/
+/*}*/
+
+/*!* Modal buttons *!*/
+/*.modal-buttons {*/
+/*    display: flex;*/
+/*    justify-content: space-between;*/
+/*    gap: 10px;*/
+/*    margin-top: 20px;*/
+/*}*/
+
+/*!* Adjusting modal sizes *!*/
+/*.ReactModal__Content {*/
+/*    max-width: 600px;*/
+/*    margin: auto;*/
+/*}*/
+
+/*!* Journalner styles *!*/
+/*.header {*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    margin-bottom: 20px;*/
+/*}*/
+
+/*.header select {*/
+/*    margin: 0 10px;*/
+/*    padding: 5px;*/
+/*    font-size: 16px;*/
+/*}*/
+
+/*.calendar {*/
+/*    display: grid;*/
+/*    grid-template-columns: repeat(7, 1fr);*/
+/*    gap: 10px;*/
+/*}*/
+
+/*.day {*/
+/*    padding: 10px;*/
+/*    border: 1px solid #ddd;*/
+/*    text-align: center;*/
+/*    cursor: pointer;*/
+/*}*/
+
+/*.day.disabled {*/
+/*    background-color: #f0f0f0;*/
+/*    cursor: not-allowed;*/
+/*}*/
+
+/*.day.today {*/
+/*    background-color: #ffeb3b;*/
+/*}*/
+
+/*.day.journal-available {*/
+/*    background-color: #a5d6a7;*/
+/*}*/
+
+/*.button:disabled {*/
+/*    background-color: gray;*/
+/*    cursor: not-allowed;*/
+/*}*/

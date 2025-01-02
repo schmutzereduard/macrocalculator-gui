@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import "./LoginPage.css";
 import {useNavigate} from "react-router-dom";
-import {fetchProfile} from "../../features/profileSlice";
+import {fetchProfile} from "../../store/profileSlice";
 import { useDispatch } from "react-redux";
-import { login } from "../../features/authSlice";
+import { login } from "../../store/authSlice";
 import { SessionStorageManager } from "../../utils/SessionStorageManager";
 
 function LoginPage() {

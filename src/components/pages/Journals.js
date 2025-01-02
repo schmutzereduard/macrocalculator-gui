@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday } from 'date-fns';
-import { fetchJournal, fetchJournals } from '../../features/journalsSlice';
+import { fetchJournal, fetchJournals } from '../../store/journalsSlice';
 import ReactModal from 'react-modal';
 import Loading from '../misc/Loading';
 import Journal from '../modal/Journal';

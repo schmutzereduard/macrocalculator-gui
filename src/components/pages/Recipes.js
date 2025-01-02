@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchRecipes, fetchRecipe, deleteRecipe, addNewRecipe } from '../../features/recipesSlice';
+import { fetchRecipes, fetchRecipe, deleteRecipe, addNewRecipe } from '../../store/recipesSlice';
 import ReactModal from 'react-modal';
 import Recipe from '../modal/Recipe';
 import ConfirmDelete from '../modal/ConfirmDelete';

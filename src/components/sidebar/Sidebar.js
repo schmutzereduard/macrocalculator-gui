@@ -1,12 +1,23 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Sidebar.css';
+import { SessionStorageManager } from "../../utils/SessionStorageManager";
+import {useDispatch} from "react-redux";
+import { logout } from "../../store/authSlice";
 
 const Sidebar = () => {
+
+    const dispatch = useDispatch();;
     const [menuOpen, setMenuOpen] = useState(false);
 
     const toggleMenu = () => {
         setMenuOpen(!menuOpen);
+    };
+
+    const handleLogout = () => {
+        SessionStorageManager.removeUserInfo();
+        dispatch(logout());
+        toggleMenu();
     };
 
     return (
@@ -26,6 +37,7 @@ const Sidebar = () => {
                     <Link to="/foods" className="nav-button" onClick={toggleMenu}>Foods</Link>
                     <Link to="/recipes" className="nav-button" onClick={toggleMenu}>Recipes</Link>
                     <Link to="/journals" className="nav-button" onClick={toggleMenu}>Journals</Link>
+                    <Link to="/" className="nav-button" onClick={handleLogout}>Logout</Link>
                 </div>
             </div>
 

@@ -1,0 +1,74 @@
+.foods-header * {
+    box-sizing: border-box;
+}
+
+/* Normalize styles for all elements */
+.foods-header select,
+.foods-header input,
+.foods-header button {
+    height: 42px; /* Ensure all elements have the same height */
+    padding: 0 10px; /* Add consistent padding */
+    margin: 0; /* Remove any default margins */
+    font-size: 16px; /* Match the font size */
+    line-height: 1; /* Normalize line-height */
+    border: none; /* Ensure borders are consistent */
+    border-radius: 5px; /* Optional: add rounding */
+    vertical-align: middle; /* Align elements vertically */
+}
+
+.foods-header {
+    display: flex;
+    /*flex-direction: column; !* Stack items vertically *!*/
+    justify-content: center; /* Center items vertically */
+    align-items: center; /* Center items horizontally */
+    gap: 20px; /* Add spacing between the elements */
+    height: 100px; /* Optional: Adjust the height for proper centering */
+    margin: 0 auto; /* Center the header horizontally in the container */
+}
+
+.search-bar {
+    background-color: black;
+    color: white;
+    width: 300px;
+}
+
+.filter-button {
+    height: 42px;
+    background-color: black;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.filter-button:hover {
+    background-color: red;
+}
+
+body {
+    background-color: grey; /* Dark grey */
+    color: white; /* Ensure text remains readable */
+    margin: 0; /* Remove default margins */
+    font-family: Arial, sans-serif; /* Optional font for better readability */
+}
+
+.food-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Center-align the cards */
+    gap: 20px; /* Add space between the cards */
+    padding: 20px; /* Add padding around the entire list */
+}
+
+@media (max-width: 768px) {
+    .food-list {
+        flex-direction: column; /* Stack cards vertically on small screens */
+        align-items: center;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1200px) {
+    .food-list {
+        justify-content: space-evenly; /* Even spacing for medium screens */
+    }
+}

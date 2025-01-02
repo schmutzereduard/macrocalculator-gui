@@ -23,4 +23,11 @@ export class SessionStorageManager {
             sessionStorage.setItem("userInfo", JSON.stringify(info));
         }
     }
+
+    static removeUserInfo() {
+        const stored = sessionStorage.getItem("userInfo");
+        if (stored) {
+            sessionStorage.removeItem("userInfo");
+        }
+    }
 }

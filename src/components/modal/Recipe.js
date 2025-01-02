@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addRecipe, updateRecipe } from "../../features/recipesSlice";
-import { fetchFoods } from "../../features/foodsSlice";
+import { addRecipe, updateRecipe } from "../../store/recipesSlice";
+import { fetchFoods } from "../../store/foodsSlice";
 import ReactModal from "react-modal";
 import SaveChanges from "./SaveChanges";
 import ConfirmDelete from "./ConfirmDelete";

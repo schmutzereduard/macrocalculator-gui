@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addJournal, updateJournal, deleteJournal, fetchInsulinTypes } from '../../features/journalsSlice';
+import { addJournal, updateJournal, deleteJournal, fetchInsulinTypes } from '../../store/journalsSlice';
 import ReactModal from 'react-modal';
-import { fetchFoods } from '../../features/foodsSlice';
-import { fetchRecipes } from "../../features/recipesSlice";
+import { fetchFoods } from '../../store/foodsSlice';
+import { fetchRecipes } from "../../store/recipesSlice";
 import ConfirmDelete from '../modal/ConfirmDelete';
 import SaveChanges from '../modal/SaveChanges';
 import Loading from '../misc/Loading';

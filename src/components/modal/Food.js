@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addFood, updateFood } from "../../features/foodsSlice";
+import { addFood, updateFood } from "../../store/foodsSlice";
 import ReactModal from "react-modal";
 import SaveChanges from "./SaveChanges";
 import Loading from "../misc/Loading";

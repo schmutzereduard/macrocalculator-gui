@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { fetchProfile } from "../../features/profileSlice";
+import { fetchProfile } from "../../store/profileSlice";
 
 function Profile() {
 

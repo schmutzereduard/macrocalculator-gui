@@ -1,35 +1,34 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { fetchProfile } from "../features/profileSlice";
-import { useDispatch } from "react-redux";
-import LoginPage from '../components/pages/LoginPage';
-import Home from '../components/pages/Home';
-import Profile from "../components/pages/Profile";
-import Foods from '../components/pages/Foods';
-import Recipes from '../components/pages/Recipes';
-import Journals from '../components/pages/Journals';
-import ProtectedRoute from "../components/app/ProtectedRoute";
-import Sidebar from "../components/app/Sidebar";
-import ErrorBoundary from "../error/ErrorBoundary";
+import { fetchProfile } from "../../store/profileSlice";
+import {useDispatch, useSelector} from "react-redux";
+import LoginPage from '../pages/LoginPage';
+import Home from '../pages/Home';
+import Profile from "../pages/Profile";
+import Foods from '../pages/Foods';
+import Recipes from '../pages/Recipes';
+import Journals from '../pages/Journals';
+import ProtectedRoute from "./ProtectedRoute";
+import Sidebar from "../sidebar/Sidebar";
+import ErrorBoundary from "../../error/ErrorBoundary";
 import './App.css';
-import {SessionStorageManager} from "../utils/SessionStorageManager";
 
 function App() {
 
     const dispatch = useDispatch();
-    const userInfo = SessionStorageManager.retrieveUserInfo();
+    const { item: token } = useSelector(state => state.auth);
 
     useEffect(() => {
-        if (userInfo?.token) {
+        if (token) {
             dispatch(fetchProfile());
         }
-    }, [dispatch, userInfo]);
+    }, [dispatch, token]);
 
     return (
         <Router>
             <div className="page-content">
                 <ErrorBoundary>
-                    {userInfo && <Sidebar />}
+                    {token && <Sidebar />}
                     <Routes>
                         <Route path='/' element={<LoginPage />} />
                         <Route
