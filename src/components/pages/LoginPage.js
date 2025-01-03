@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {useDispatch, useSelector} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../store/authSlice";
 import "./LoginPage.css";
 
@@ -8,6 +8,7 @@ function LoginPage() {
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const [ remember, setRemember ] = useState(false);
     const { error } = useSelector(state => state.auth);
     const [ loginRequest, setLoginRequest ] = useState({
         username: "",
@@ -18,7 +19,7 @@ function LoginPage() {
         event.preventDefault();
 
         try {
-            await dispatch(login(loginRequest));
+            await dispatch(login({ loginRequest, remember }));
             navigate("/");
         } catch (error) {
         }
@@ -62,6 +63,14 @@ function LoginPage() {
                         onChange={handleInputChange}
                         required
                     />
+                </div>
+                <div className="form-group">
+                    <input
+                        type="checkbox"
+                        name="remember"
+                        onChange={() => setRemember(!remember)}
+                    />
+                    <label>Remember me</label>
                 </div>
                 <button type="submit" className="login-button">Log in</button>
                 <button type="button" className="register-button" onClick={handleRegister}>Register</button>

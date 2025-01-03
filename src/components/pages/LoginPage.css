@@ -14,11 +14,12 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     width: 100%;
     max-width: 400px;
-    text-align: center;
+    text-align: right;
     color: #fff;
 }
 
 .login-form h2 {
+    margin-top: 0;
     margin-bottom: 20px;
     font-size: 24px;
     color: #fff;
@@ -31,7 +32,7 @@
 
 .form-group input[type="text"],
 .form-group input[type="password"] {
-    width: 95%;
+    width: 100%;
     padding: 10px;
     font-size: 16px;
     border: 1px solid #555;
@@ -54,26 +55,14 @@
     border-radius: 4px;
     cursor: pointer;
     margin-bottom: 10px;
-}
-
-.login-button {
-    background-color: #007bff;
+    background-color: #444;
     color: white;
     transition: background-color 0.3s;
 }
 
-.login-button:hover {
-    background-color: #0056b3;
-}
-
-.register-button {
-    background-color: #6c757d;
-    color: white;
-    transition: background-color 0.3s;
-}
-
-.register-button:hover {
-    background-color: #5a6268;
+.login-button:hover,
+.register-button:hover{
+    background-color: red;
 }
 
 .error-message {

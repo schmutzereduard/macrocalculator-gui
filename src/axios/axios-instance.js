@@ -1,6 +1,6 @@
 import axios from "axios";
 import axiosRetry from "axios-retry";
-import {SessionStorageManager} from "../utils/SessionStorageManager";
+import { StorageManager } from "../utils/StorageManager";
 
 export function createAxiosInstance(baseURL) {
 
@@ -11,9 +11,9 @@ export function createAxiosInstance(baseURL) {
 
     instance.interceptors.request.use(
         (config) => {
-            const userInfo = SessionStorageManager.retrieveUserInfo();
-            if (userInfo?.token) {
-                config.headers.Authorization = `Bearer ${userInfo.token}`;
+            const token = StorageManager.retrieve("token")?.token;
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
             }
 
             return config;
