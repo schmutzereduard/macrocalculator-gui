@@ -1,38 +1,26 @@
 import React, { useState } from "react";
-import "./LoginPage.css";
-import {useNavigate} from "react-router-dom";
-import {fetchProfile} from "../../store/profileSlice";
-import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import {useDispatch, useSelector} from "react-redux";
 import { login } from "../../store/authSlice";
-import { SessionStorageManager } from "../../utils/SessionStorageManager";
+import "./LoginPage.css";
 
 function LoginPage() {
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { error } = useSelector(state => state.auth);
     const [ loginRequest, setLoginRequest ] = useState({
         username: "",
         password: ""
     });
-    const [ error, setError ] = useState("");
 
     const handleLogin = async (event) => {
-
         event.preventDefault();
 
         try {
-            const loginInfo = await dispatch(login(loginRequest));
-            SessionStorageManager.saveUserInfo(loginInfo.payload);
-
-            const profileInfo = await dispatch(fetchProfile());
-            SessionStorageManager.saveUserInfo({
-                profileId: profileInfo.payload.id
-            });
-
-            navigate("/home");
+            await dispatch(login(loginRequest));
+            navigate("/");
         } catch (error) {
-            console.log(error);
-            setError(error.response?.data || "Login failed. Please try again.");
         }
     };
 

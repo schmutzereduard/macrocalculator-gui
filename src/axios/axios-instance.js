@@ -23,6 +23,18 @@ export function createAxiosInstance(baseURL) {
         }
     );
 
+    instance.interceptors.response.use(
+        (response) => {
+            return response;
+        },
+        (error) => {
+            if (error.response && error.response.data) {
+                error.message = error.response.data; // Attach response body to the error message
+            }
+            return Promise.reject(error);
+        }
+    );
+
     axiosRetry(instance, { retries: window.env.AXIOS_RETRIES });
 
     return instance;

@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
+import { useDispatch } from "react-redux";
 import { Link } from 'react-router-dom';
-import './Sidebar.css';
-import { SessionStorageManager } from "../../utils/SessionStorageManager";
-import {useDispatch} from "react-redux";
 import { logout } from "../../store/authSlice";
+import './Sidebar.css';
 
 const Sidebar = () => {
 
-    const dispatch = useDispatch();;
+    const dispatch = useDispatch();
     const [menuOpen, setMenuOpen] = useState(false);
 
     const toggleMenu = () => {
@@ -15,7 +14,6 @@ const Sidebar = () => {
     };
 
     const handleLogout = () => {
-        SessionStorageManager.removeUserInfo();
         dispatch(logout());
         toggleMenu();
     };

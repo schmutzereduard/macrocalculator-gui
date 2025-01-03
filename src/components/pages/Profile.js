@@ -1,11 +1,11 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { fetchProfile } from "../../store/profileSlice";
+import { fetchProfile } from "../../store/authSlice";
 
 function Profile() {
 
     const dispatch = useDispatch();
-    const { item: profile, loading, error } = useSelector((state) => state.profile);
+    const { profile, loading, error } = useSelector((state) => state.auth);
 
     useEffect(() => {
         dispatch(fetchProfile());

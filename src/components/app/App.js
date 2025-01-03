@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { fetchProfile } from "../../store/profileSlice";
-import {useDispatch, useSelector} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProfile, refreshToken } from "../../store/authSlice";
 import LoginPage from '../pages/LoginPage';
 import Home from '../pages/Home';
 import Profile from "../pages/Profile";
@@ -16,10 +16,12 @@ import './App.css';
 function App() {
 
     const dispatch = useDispatch();
-    const { item: token } = useSelector(state => state.auth);
+    const { token } = useSelector((state) => state.auth);
 
     useEffect(() => {
-        if (token) {
+        if (!token) {
+            dispatch(refreshToken());
+        } else {
             dispatch(fetchProfile());
         }
     }, [dispatch, token]);
@@ -30,19 +32,19 @@ function App() {
                 <ErrorBoundary>
                     {token && <Sidebar />}
                     <Routes>
-                        <Route path='/' element={<LoginPage />} />
+                        <Route path='/login' element={<LoginPage />} />
+                        <Route
+                            path='/'
+                            element={
+                                <ProtectedRoute>
+                                    <Home />
+                                </ProtectedRoute>
+                            } />
                         <Route
                             path='/profile'
                             element={
                                 <ProtectedRoute>
                                     <Profile />
-                                </ProtectedRoute>
-                            } />
-                        <Route
-                            path='/home'
-                            element={
-                                <ProtectedRoute>
-                                    <Home />
                                 </ProtectedRoute>
                             } />
                         <Route
