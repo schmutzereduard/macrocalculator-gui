@@ -1,24 +1,21 @@
     import React, { useEffect } from 'react';
     import { useDispatch, useSelector } from 'react-redux';
-    import { fetchFoods, fetchFoodTypes, fetchFood, deleteFood, addNewFood } from '../../store/foodsSlice';
+    import { fetchFoods, fetchFoodTypes } from '../../store/foodsSlice';
     import ReactModal from 'react-modal';
-    import Food from '../modal/Food';
-    import ConfirmDelete from '../modal/ConfirmDelete';
     import Pagination from '../misc/Pagination';
     import PerPage from '../misc/PerPage';
     import Loading from '../misc/Loading';
-    import useSorting from "../../hooks/useSorting";
     import usePagination from "../../hooks/usePagination";
     import useSearching from "../../hooks/useSearching";
     import useModals from "../../hooks/useModals";
-    import FoodCard from "../model/FoodCard";
+    import FoodCard from "../cards/FoodCard";
     import FoodFilter from "../modal/FoodFilter";
     import "./Foods.css";
 
     function Foods() {
 
         const dispatch = useDispatch();
-        const { items: foods, selectedItem: food, loading: foodsLoading } = useSelector((state) => state.foods);
+        const { items: foods, loading } = useSelector((state) => state.foods);
         const { modals, openModal, closeModal } = useModals();
         const { pageConfig, handlePageChange, handleItemsPerPageChange, paginate } = usePagination();
         const { searchConfig, search, handleSearchChange } = useSearching();
@@ -31,33 +28,9 @@
         const filteredFoods = search(foods);
         const paginatedFoods = paginate(filteredFoods);
 
-        const openDeleteFoodModal = (foodId, foodName) => {
-
-            openModal("deleteFood", { id: foodId, name: foodName });
-        };
-
-
-        const handleDelete = (id) => {
-
-            dispatch(deleteFood(id));
-            closeModal("deleteFood");
-        };
-
-        const handleAdd = () => {
-
-            dispatch(addNewFood());
-            openModal("editFood");
-        };
-
-        const handleEdit = (foodId) => {
-
-            dispatch(fetchFood(foodId));
-            openModal("editFood");
-        };
-
         return (
             <div>
-                {foodsLoading ? (
+                {loading ? (
                     <Loading />
                 ) : (
                     <div>
@@ -76,27 +49,7 @@
                         />
                         <FoodsList
                             foods={paginatedFoods}
-                            handleEdit={handleEdit}
                         />
-                        <ReactModal
-                            isOpen={modals.editFood?.isOpen}
-                            onRequestClose={() => closeModal("editFood")}
-                        >
-                            <Food
-                                food={food}
-                                onClose={() => closeModal("editFood")}
-                            />
-                        </ReactModal>
-                        <ReactModal
-                            isOpen={modals.deleteFood?.isOpen}
-                            onRequestClose={() => closeModal("deleteFood")}
-                        >
-                            <ConfirmDelete
-                                name={modals.deleteFood?.name}
-                                onConfirm={() => handleDelete(modals.deleteFood?.id)}
-                                onCancel={() => closeModal("deleteFood")}
-                            />
-                        </ReactModal>
 
                         <ReactModal
                             isOpen={modals.filterFood?.isOpen}
@@ -168,7 +121,7 @@
         );
     }
 
-    function FoodsList({ foods, handleEdit }) {
+    function FoodsList({ foods, handleEdit}) {
 
         return (
             <div className="food-list">
