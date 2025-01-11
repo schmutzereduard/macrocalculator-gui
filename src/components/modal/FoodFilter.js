@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import "./FoodFilter.css";
 
-function FoodFilter({ searchConfig, handleSearchChange, handlePageChange, totalItems }) {
+function FoodFilter({ searchConfig, handleSearchChange, handlePageChange, totalItems, onClose }) {
 
     const { itemTypes: foodTypes } = useSelector(state => state.foods);
 
@@ -22,7 +22,7 @@ function FoodFilter({ searchConfig, handleSearchChange, handlePageChange, totalI
             <div className="filter-modal-content">
                 <div className="filter-modal-header">
                     <button className="clear-button" onClick={handleClear}>Clear</button>
-                    <h2 className="title"> Filter Foods </h2>
+                    <h2 className="title" onClick={onClose}> Filter Foods </h2>
                 </div>
                 <input
                     type="text"

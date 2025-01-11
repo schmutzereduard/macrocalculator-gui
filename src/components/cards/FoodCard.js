@@ -3,33 +3,65 @@ import { useDispatch, useSelector } from "react-redux";
 import { deleteFood, fetchFoodTypes, updateFood } from "../../store/foodsSlice";
 import "./FoodCard.css";
 
-const buttonsState = {
-    green: "edit",
-    red: "delete"
-};
-
-function buttonsReducer(state, action) {
-
-    switch (action.type) {
-        case "edit":
-            return {green: "save", red: "cancel"};
-        case "save":
-            return {green: "edit", red: "delete"};
-        case "delete":
-            return {green: "confirm", red: "cancel"};
-        case "confirm":
-        case "cancel":
-        default:
-            return {green: "edit", red: "delete"};
-    }
-}
-
 const FoodCard = ({ food }) => {
 
-    const [state, dispatch] = useReducer(buttonsReducer, buttonsState);
     const [editableFood, setEditableFood] = useState({ ...food });
+    const [alertMessage, setAlertMessage] = useState("");
+    const foodChanged = () => {
+
+        for (let key in editableFood) {
+            if (editableFood[key] !== food[key]) return true;
+        }
+        return false;
+    };
+    const foodValid = () => {
+
+        if (editableFood.name === ""){
+            setAlertMessage("Name is required");
+            return false;
+        }
+
+        setAlertMessage("")
+        return true;
+    };
     const { itemTypes: foodTypes } = useSelector(state => state.foods);
     const generalDispatch = useDispatch();
+
+    const buttonsState = {
+        green: "edit",
+        red: "delete",
+    };
+    const buttonsReducer = (state, action) => {
+
+        switch (action.type) {
+            case "edit":
+                return {green: "save", red: "cancel"};
+            case "save": {
+                if (foodChanged()) {
+                    if (foodValid()) {
+                        generalDispatch(updateFood(editableFood));
+                    } else {
+                        return {...state};
+                    }
+                }
+                return {green: "edit", red: "delete"};
+            }
+            case "delete":
+                return {green: "confirm", red: "cancel"};
+            case "confirm": {
+                generalDispatch(deleteFood(editableFood.id));
+                return {green: "edit", red: "delete"};
+            }
+            case "cancel": {
+                setAlertMessage("");
+                setEditableFood({...food});
+                return {green: "edit", red: "delete"};
+            }
+            default:
+                return {green: "edit", red: "delete"};
+        }
+    };
+    const [state, dispatch] = useReducer(buttonsReducer, buttonsState);
 
     useEffect(() => {
         if (foodTypes.length === 0) {
@@ -40,20 +72,6 @@ const FoodCard = ({ food }) => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setEditableFood((prev) => ({ ...prev, [name]: value }));
-    };
-
-    const handleButtonClick = (event) => {
-        const { name } = event.target;
-
-        if (name === "save") {
-            generalDispatch(updateFood(editableFood));
-        }
-
-        if (name === "confirm") {
-            generalDispatch(deleteFood(editableFood.id));
-        }
-
-        dispatch({ type: name });
     };
 
     const computeButtonName = (name) => {
@@ -71,18 +89,19 @@ const FoodCard = ({ food }) => {
         <div className="food-card">
             <button
                 name={state.green}
-                onClick={handleButtonClick}
+                onClick={(event) => dispatch({ type: event.target.name })}
                 className="slide-button edit-button"
             >
                 {computeButtonName(state.green)}
             </button>
             <button
-                onClick={handleButtonClick}
+                onClick={(event) => dispatch({ type: event.target.name })}
                 name={state.red}
                 className="slide-button delete-button"
             >
                 {computeButtonName(state.red)}
             </button>
+            {alertMessage && <div className={"alert-message"}>{alertMessage}</div>}
             <div className="food-card-header">
                 {state.green === "save" ? (
                     <input
@@ -99,16 +118,16 @@ const FoodCard = ({ food }) => {
             <div className="food-card-body">
                 {state.green === "save" ? (
                     <>
-                    {food.quantity ? (
-                        <input
-                            type="number"
-                            name="quantity"
-                            value={editableFood.quantity}
-                            onChange={handleInputChange}
-                            className="editable-input"
-                        />) : (
-                        <p>100g</p>
-                    )}
+                        {food.quantity ? (
+                            <input
+                                type="number"
+                                name="quantity"
+                                value={editableFood.quantity}
+                                onChange={handleInputChange}
+                                className="editable-input"
+                            />) : (
+                            <p>100g</p>
+                        )}
                         <select
                             name="type"
                             defaultValue={food.type}

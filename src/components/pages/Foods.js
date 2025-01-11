@@ -47,19 +47,15 @@
                             totalPages={Math.ceil(filteredFoods.length / pageConfig.itemsPerPage)}
                             onPageChange={handlePageChange}
                         />
-                        <FoodsList
-                            foods={paginatedFoods}
-                        />
+                        <FoodsList foods={paginatedFoods} />
 
-                        <ReactModal
-                            isOpen={modals.filterFood?.isOpen}
-                            onRequestClose={() => closeModal("filterFood")}
-                        >
+                        <ReactModal isOpen={modals.filterFood?.isOpen}>
                             <FoodFilter
                                 searchConfig={searchConfig}
                                 handleSearchChange={handleSearchChange}
                                 handlePageChange={handlePageChange}
                                 totalItems={filteredFoods.length}
+                                onClose={() => closeModal("filterFood")}
                             />
                         </ReactModal>
                     </div>

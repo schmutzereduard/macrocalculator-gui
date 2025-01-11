@@ -1,5 +1,7 @@
 .food-card {
+    position: relative;
     width: 250px; /* Fixed width for consistent size */
+    height: 195px;
     border: 2px solid white;
     padding: 10px;
     background-color: black;
@@ -77,8 +79,7 @@
     text-align: center;
 }
 
-/* Sliding buttons (base) */
-.slide-button {
+.slide-button{
     position: absolute;
     top: 10%;
     bottom: 10%; /* Make the button vertically aligned */
@@ -100,19 +101,21 @@
     justify-content: center;
 }
 
-/* Edit button on the left */
 .edit-button {
-    left: 0; /* Start at the left edge of the card */
+    left: 0;
     background-color: green;
 }
 
-/* Delete button on the right */
 .delete-button {
-    right: 0; /* Start at the right edge of the card */
+    right: 0;
     background-color: red;
 }
 
-/* Hover effect: Slide buttons outward */
+.food-card:hover .slide-alert {
+    transform: translateY(-40px);
+    opacity: 1;
+}
+
 .food-card:hover .edit-button {
     transform: translateX(-40px); /* Slide outward to the left */
     opacity: 1; /* Make visible */
@@ -121,6 +124,27 @@
 .food-card:hover .delete-button {
     transform: translateX(40px); /* Slide outward to the right */
     opacity: 1; /* Make visible */
+}
+
+.alert-message {
+    background-color: blueviolet;
+    color: white;
+    width: 200px;
+    height: 30px;
+    border: solid 2px white;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.8em;
+    font-weight: bold;
+    padding: 5px;
+
+    position: absolute;
+    bottom: 100%; /* Place it directly above the card */
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Adjust for centering */
+    margin-bottom: 10px; /* Add some spacing below the card */
 }
 
 @media (max-width: 768px) {

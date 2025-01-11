@@ -1,6 +1,11 @@
 .title {
     margin: 0; /* Remove extra top/bottom margin */
     font-size: 1.5em; /* Keep the same font size */
+    border: 2px solid white;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: green;
+    cursor: pointer;
 }
 
 .filter-modal {
@@ -53,7 +58,7 @@
     cursor: pointer;
     border: none;
     border-radius: 5px;
-    background-color: #555; /* Match button style */
+    background-color: red; /* Match button style */
     color: white;
     transition: background-color 0.2s;
     font-size: 0.9em; /* Adjust font size for better scaling */
