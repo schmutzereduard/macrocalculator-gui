@@ -1,0 +1,34 @@
+.empty-food-card {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    align-items: center; /* Vertically center */
+    width: 250px;
+    height: 195px;
+    border: 2px solid white;
+    padding: 10px;
+    background-color: black;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Add shadow for better aesthetics */
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Add hover effects */
+    cursor: pointer;
+}
+
+.plus-icon {
+    font-size: 50px;
+    color: white;
+    text-shadow: 0 4px 10px rgba(255, 255, 255, 0.8);
+    transition: transform 0.2s ease-in-out;
+}
+
+.empty-food-card:hover {
+    transform: scale(1.05); /* Slightly enlarge on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); /* Enhance shadow on hover */
+}
+
+.empty-food-card:hover .plus-icon {
+    transform: scale(1.2); /* Slight zoom on hover */
+}

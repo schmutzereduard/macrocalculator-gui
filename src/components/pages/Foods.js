@@ -11,6 +11,7 @@
     import FoodCard from "../cards/FoodCard";
     import FoodFilter from "../modal/FoodFilter";
     import "./Foods.css";
+    import EmptyFoodCard from "../cards/EmptyFoodCard";
 
     function Foods() {
 
@@ -121,6 +122,7 @@
 
         return (
             <div className="food-list">
+                <EmptyFoodCard />
                 {foods.map((food) => (
                     <FoodCard
                         key={food.id}
