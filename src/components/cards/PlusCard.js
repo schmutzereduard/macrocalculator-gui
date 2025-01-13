@@ -1,13 +1,13 @@
 import { VscAdd } from 'react-icons/vsc'; // Font Awesome React Icons
-import "./EmptyFoodCard.css";
+import "./PlusCard.css";
 
-function EmptyFoodCard() {
+function PlusCard({onClick}) {
 
     return (
-        <div className="empty-food-card">
+        <div onClick={onClick} className="plus-card">
             <VscAdd className="plus-icon" />
         </div>
     );
 }
 
-export default EmptyFoodCard;
+export default PlusCard;

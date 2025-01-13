@@ -1,9 +1,9 @@
 import React, { useEffect, useReducer, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteFood, fetchFoodTypes, updateFood } from "../../store/foodsSlice";
+import { deleteFood, fetchFoodTypes, updateFood, addFood } from "../../store/foodsSlice";
 import "./FoodCard.css";
 
-const FoodCard = ({ food }) => {
+function FoodCard({ food, onCancel }) {
 
     const [editableFood, setEditableFood] = useState({ ...food });
     const [alertMessage, setAlertMessage] = useState("");
@@ -21,6 +21,11 @@ const FoodCard = ({ food }) => {
             return false;
         }
 
+        if (editableFood.type === null || editableFood.type === "SELECT TYPE") {
+            setAlertMessage("Type is required");
+            return false;
+        }
+
         setAlertMessage("")
         return true;
     };
@@ -28,8 +33,8 @@ const FoodCard = ({ food }) => {
     const generalDispatch = useDispatch();
 
     const buttonsState = {
-        green: "edit",
-        red: "delete",
+        green: onCancel !== null ? "save" : "edit",
+        red: onCancel !== null ? "cancel" : "delete",
     };
     const buttonsReducer = (state, action) => {
 
@@ -37,9 +42,12 @@ const FoodCard = ({ food }) => {
             case "edit":
                 return {green: "save", red: "cancel"};
             case "save": {
-                if (foodChanged()) {
+                if (foodChanged() || food.id === null) {
                     if (foodValid()) {
-                        generalDispatch(updateFood(editableFood));
+                        if (food.id === null)
+                            generalDispatch(addFood(editableFood));
+                        else
+                            generalDispatch(updateFood(editableFood));
                     } else {
                         return {...state};
                     }
@@ -55,6 +63,8 @@ const FoodCard = ({ food }) => {
             case "cancel": {
                 setAlertMessage("");
                 setEditableFood({...food});
+                if (onCancel)
+                    onCancel();
                 return {green: "edit", red: "delete"};
             }
             default:
@@ -130,10 +140,11 @@ const FoodCard = ({ food }) => {
                         )}
                         <select
                             name="type"
-                            defaultValue={food.type}
+                            defaultValue={food.type == null ? "SELECT TYPE" : food.type}
                             className="editable-select"
                             onChange={handleInputChange}
                         >
+                            <option>SELECT TYPE</option>
                             {foodTypes.map((type) => (
                                 <option key={type} value={type}>
                                     {type}
@@ -202,6 +213,6 @@ const FoodCard = ({ food }) => {
             </div>
         </div>
     );
-};
+}
 
 export default FoodCard;

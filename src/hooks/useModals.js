@@ -29,7 +29,17 @@ function useModals() {
         });
     };
 
-    return { modals, openModal, closeModal, resetModal };
+    return {
+        modals,
+        openModal,
+        closeModal,
+        resetModal,
+        modalControls: {
+            openModal,
+            closeModal,
+            resetModal,
+        }
+    };
 }
 
 export default useModals;

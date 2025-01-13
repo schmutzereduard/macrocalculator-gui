@@ -26,6 +26,7 @@
     border: 2px solid white;
     padding: 5px;
     border-radius: 4px;
+    height: 45px;
 }
 
 .food-card-header .editable-input {
