@@ -1,0 +1,14 @@
+body {
+    background-color: grey; /* Dark grey */
+    color: white; /* Ensure text remains readable */
+    margin: 0; /* Remove default margins */
+    font-family: Arial, sans-serif; /* Optional font for better readability */
+}
+
+.recipes-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Center-align the cards */
+    gap: 20px; /* Add space between the cards */
+    padding: 20px; /* Add padding around the entire list */
+}

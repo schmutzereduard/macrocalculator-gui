@@ -6,7 +6,7 @@ import Pagination from '../misc/Pagination';
 import PerPage from '../misc/PerPage';
 import Loading from '../misc/Loading';
 import usePagination from "../../hooks/usePagination";
-import useSearching from "../../hooks/useSearching";
+import useFiltering from "../../hooks/useFiltering";
 import useModals from "../../hooks/useModals";
 import FoodFilter from "../modal/FoodFilter";
 import PlusCard from "../cards/PlusCard";
@@ -19,24 +19,24 @@ function Foods() {
     const {items: foods, loading} = useSelector((state) => state.foods);
     const {modals, modalControls} = useModals();
     const {pageConfig, handlePageChange, handleItemsPerPageChange, paginate} = usePagination();
-    const {searchConfig, search, handleSearchChange} = useSearching();
+    const {filterConfig, filter, handleFilterChange} = useFiltering();
 
     useEffect(() => {
         dispatch(fetchFoods());
         dispatch(fetchFoodTypes());
     }, [dispatch]);
 
-    const filteredFoods = search(foods);
+    const filteredFoods = filter(foods);
     const paginatedFoods = paginate(filteredFoods);
 
-    return (loading ? (<Loading/>)
-            :
-            (
+    return (loading ? (
+                <Loading/>
+            ) : (
                 <div className={"foods-page"}>
                     <FoodsHeader
-                        searchConfig={searchConfig}
+                        filterConfig={filterConfig}
                         pageConfig={pageConfig}
-                        handleSearchChange={handleSearchChange}
+                        handleFilterChange={handleFilterChange}
                         handlePageChange={handlePageChange}
                         handleItemsPerPageChange={handleItemsPerPageChange}
                         modalControls={modalControls}
@@ -48,13 +48,13 @@ function Foods() {
                     />
                     <FoodsList foods={paginatedFoods}/>
 
-                    <ReactModal isOpen={modals.filterFood?.isOpen}>
+                    <ReactModal isOpen={modals.filterFoods?.isOpen}>
                         <FoodFilter
-                            searchConfig={searchConfig}
-                            handleSearchChange={handleSearchChange}
+                            filterConfig={filterConfig}
+                            handleFilterChange={handleFilterChange}
                             handlePageChange={handlePageChange}
                             totalItems={filteredFoods.length}
-                            onClose={() => modalControls.closeModal("filterFood")}
+                            onClose={() => modalControls.closeModal("filterFoods")}
                         />
                     </ReactModal>
                 </div>
@@ -63,13 +63,20 @@ function Foods() {
 }
 
 function FoodsHeader({
-                         searchConfig,
+                         filterConfig,
                          pageConfig,
-                         handleSearchChange,
+                         handleFilterChange,
                          handlePageChange,
                          handleItemsPerPageChange,
                          modalControls
                      }) {
+
+    const handleSearch = (e) => {
+
+        const {name, value} = e.target;
+        handleFilterChange({...filterConfig, [name]: value});
+        handlePageChange(1);
+    };
 
     return (
         <div className="foods-header">
@@ -77,43 +84,16 @@ function FoodsHeader({
                 itemsPerPage={pageConfig.itemsPerPage}
                 onChange={handleItemsPerPageChange}
             />
-            <SearchBar
-                searchConfig={searchConfig}
-                handleSearchChange={handleSearchChange}
-                handlePageChange={handlePageChange}
+            <input
+                className="search-bar"
+                type="text"
+                placeholder="Search a food by name..."
+                name="name"
+                value={filterConfig.name || ""}
+                onChange={handleSearch}
             />
-            <FilterButton onClick={() => modalControls.openModal("filterFood")}/>
-        </div>
-    );
-}
-
-function SearchBar({searchConfig, handleSearchChange, handlePageChange}) {
-
-    const handleInputChange = (e) => {
-
-        const {name, value} = e.target;
-        handleSearchChange({...searchConfig, [name]: value});
-        handlePageChange(1);
-    };
-
-    return (
-        <input
-            className="search-bar"
-            type="text"
-            placeholder="Search a food by name..."
-            name="name"
-            value={searchConfig.name || ""}
-            onChange={handleInputChange}
-        />
-    );
-}
-
-function FilterButton({onClick}) {
-
-    return (
-        <div>
             <button
-                onClick={onClick}
+                onClick={() => modalControls.openModal("filterFoods")}
                 className="filter-button"
             >
                 Filter
@@ -121,7 +101,6 @@ function FilterButton({onClick}) {
         </div>
     );
 }
-
 function FoodsList({foods}) {
 
     const [adding, setAdding] = useState(false);

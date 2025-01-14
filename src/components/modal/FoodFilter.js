@@ -2,19 +2,19 @@ import React from "react";
 import { useSelector } from "react-redux";
 import "./FoodFilter.css";
 
-function FoodFilter({ searchConfig, handleSearchChange, handlePageChange, totalItems, onClose }) {
+function FoodFilter({ filterConfig, handleFilterChange, handlePageChange, totalItems, onClose }) {
 
     const { itemTypes: foodTypes } = useSelector(state => state.foods);
 
     const handleInputChange = (e) => {
 
         const { name, value } = e.target;
-        handleSearchChange({ ...searchConfig, [name]: value });
+        handleFilterChange({ ...filterConfig, [name]: value });
         handlePageChange(1);
     };
 
     const handleClear = () => {
-        handleSearchChange({});
+        handleFilterChange({});
     };
 
     return (
@@ -28,19 +28,19 @@ function FoodFilter({ searchConfig, handleSearchChange, handlePageChange, totalI
                     type="text"
                     placeholder="Carbs"
                     name="carbs"
-                    value={searchConfig.carbs || ""}
+                    value={filterConfig.carbs || ""}
                     onChange={handleInputChange}
                 />
                 <input
                     type="text"
                     placeholder="Calories"
                     name="calories"
-                    value={searchConfig.calories || ""}
+                    value={filterConfig.calories || ""}
                     onChange={handleInputChange}
                 />
                 <select
                     name="type"
-                    value={searchConfig.type || ""}
+                    value={filterConfig.type || ""}
                     onChange={handleInputChange}
                 >
                     <option value="">Any</option>
@@ -54,7 +54,7 @@ function FoodFilter({ searchConfig, handleSearchChange, handlePageChange, totalI
                     type="text"
                     placeholder="Comments"
                     name="comments"
-                    value={searchConfig.comments || ""}
+                    value={filterConfig.comments || ""}
                     onChange={handleInputChange}
                 />
                 <label className="matches">Matches: {totalItems}</label>

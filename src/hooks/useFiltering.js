@@ -1,8 +1,8 @@
 import { useState } from "react";
 
-function useSearching() {
+function useFiltering() {
 
-    const [searchConfig, setSearchConfig] = useState({});
+    const [filterConfig, setFilterConfig] = useState({});
 
     const parseCondition = (condition, value) => {
         if (!condition) return true;
@@ -15,8 +15,8 @@ function useSearching() {
 
     const applyFilters = (item) => {
 
-        return Object.keys(searchConfig).every(key => {
-            const filterValue = searchConfig[key];
+        return Object.keys(filterConfig).every(key => {
+            const filterValue = filterConfig[key];
             if (!filterValue) return true;
 
             if (["name", "type"].includes(key)) {
@@ -32,13 +32,13 @@ function useSearching() {
         });
     };
 
-    const search = (items) => items.filter(applyFilters);
+    const filter = (items) => items.filter(applyFilters);
 
-    const handleSearchChange = (config) => {
-        setSearchConfig({ ...config });
+    const handleFilterChange = (config) => {
+        setFilterConfig({ ...config });
     };
 
-    return { search, searchConfig, handleSearchChange };
+    return { filter, filterConfig, handleFilterChange };
 }
 
-export default useSearching;
+export default useFiltering;

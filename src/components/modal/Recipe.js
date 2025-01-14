@@ -7,7 +7,7 @@ import SaveChanges from "./SaveChanges";
 import ConfirmDelete from "./ConfirmDelete";
 import Loading from "../misc/Loading";
 import PerPage from "../misc/PerPage";
-import useSearching from "../../hooks/useSearching";
+import useFiltering from "../../hooks/useFiltering";
 import usePagination from "../../hooks/usePagination";
 import useModals from "../../hooks/useModals";
 
@@ -224,7 +224,7 @@ function AddFoods({ handleAddFoodsToRecipe, getTotalProperties }) {
 
     const { items: foods } = useSelector((state) => state.foods);
     const { pageConfig, handlePageChange, handleItemsPerPageChange, paginate } = usePagination();
-    const { search, searchConfig, handleSearchChange } = useSearching({});
+    const { search, searchConfig, handleSearchChange } = useFiltering({});
     const [ selectedProperty, setSelectedProperty ] = useState("name");
     const [ foodQuantities, setFoodQuantities ] = useState({});
 

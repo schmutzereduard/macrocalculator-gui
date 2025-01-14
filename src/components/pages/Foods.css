@@ -2,7 +2,6 @@
     box-sizing: border-box;
 }
 
-/* Normalize styles for all elements */
 .foods-header select,
 .foods-header input,
 .foods-header button {
