@@ -19,7 +19,7 @@ function useFiltering() {
             const filterValue = filterConfig[key];
             if (!filterValue) return true;
 
-            if (["name", "type"].includes(key)) {
+            if (["name", "type", "comments", "description"].includes(key)) {
                 return item[key].toLowerCase().includes(filterValue.toLowerCase());
             } else if (["carbs", "calories", "totalCalories", "totalCarbs"].includes(key)) {
                 return parseCondition(filterValue, item[key]);

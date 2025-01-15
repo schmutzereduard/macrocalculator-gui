@@ -10,6 +10,10 @@ import useModals from "../../hooks/useModals";
 import RecipeCard from "../cards/RecipeCard";
 import "./Recipes.css";
 import PlusCard from "../cards/PlusCard";
+import FoodFilter from "../modal/FoodFilter";
+import ReactModal from "react-modal";
+import RecipeFilter from "../modal/RecipeFilter";
+import {fetchFoodTypes} from "../../store/foodsSlice";
 
 function Recipes() {
 
@@ -21,6 +25,7 @@ function Recipes() {
 
     useEffect(() => {
         dispatch(fetchRecipes());
+        dispatch(fetchFoodTypes());
     }, [dispatch]);
 
     const filteredRecipes = filter(recipes);
@@ -46,6 +51,16 @@ function Recipes() {
                         onPageChange={handlePageChange}
                     />
                     <RecipesList recipes={paginatedRecipes} />
+
+                    <ReactModal isOpen={modals.filterRecipes?.isOpen}>
+                        <RecipeFilter
+                            filterConfig={filterConfig}
+                            handleFilterChange={handleFilterChange}
+                            handlePageChange={handlePageChange}
+                            totalItems={filteredRecipes.length}
+                            onClose={() => modalControls.closeModal("filterRecipes")}
+                        />
+                    </ReactModal>
                 </div>
             )}
         </div>

@@ -10,6 +10,7 @@ import PerPage from "../misc/PerPage";
 import useFiltering from "../../hooks/useFiltering";
 import usePagination from "../../hooks/usePagination";
 import useModals from "../../hooks/useModals";
+import "./Recipe.css";
 
 function Recipe({ recipe, onClose }) {
 
@@ -224,7 +225,7 @@ function AddFoods({ handleAddFoodsToRecipe, getTotalProperties }) {
 
     const { items: foods } = useSelector((state) => state.foods);
     const { pageConfig, handlePageChange, handleItemsPerPageChange, paginate } = usePagination();
-    const { search, searchConfig, handleSearchChange } = useFiltering({});
+    const { filter, filterConfig, handleFilterChange } = useFiltering({});
     const [ selectedProperty, setSelectedProperty ] = useState("name");
     const [ foodQuantities, setFoodQuantities ] = useState({});
 
@@ -232,14 +233,14 @@ function AddFoods({ handleAddFoodsToRecipe, getTotalProperties }) {
 
         const { value } = e.target;
         setSelectedProperty(value);
-        handleSearchChange({ [value]: "" });
+        handleFilterChange({ [value]: "" });
         handlePageChange(1);
     }
 
     const handleInputChange = (e) => {
 
         const { value } = e.target;
-        handleSearchChange({
+        handleFilterChange({
             [selectedProperty]: value
         });
         handlePageChange(1);
@@ -250,7 +251,7 @@ function AddFoods({ handleAddFoodsToRecipe, getTotalProperties }) {
         setFoodQuantities({...foodQuantities, [foodId]: quantity});
     };
 
-    const filteredFoods = search(foods);
+    const filteredFoods = filter(foods);
     const paginatedFoods = paginate(filteredFoods);
 
     const renderPagination = () => {
@@ -288,7 +289,7 @@ function AddFoods({ handleAddFoodsToRecipe, getTotalProperties }) {
                 <input
                     type="text"
                     placeholder="Search for foods..."
-                    value={searchConfig[selectedProperty]}
+                    value={filterConfig[selectedProperty]}
                     onChange={handleInputChange}
                 />
 

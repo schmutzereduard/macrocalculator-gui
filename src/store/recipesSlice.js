@@ -3,40 +3,40 @@ import MacroCalculatorApi from "../api/MacroCalculatorApi";
 
 export const fetchRecipes = createAsyncThunk(
   "recipes/fetchRecipes",
-  async (profileId) => {
-    const response = await MacroCalculatorApi.getRecipes(profileId);
+  async () => {
+    const response = await MacroCalculatorApi.getRecipes();
     return response.data;
   }
 );
 
 export const fetchRecipe = createAsyncThunk(
   "recipes/fetchRecipe",
-  async (id, profileId) => {
-    const response = await MacroCalculatorApi.getRecipe(id, profileId);
+  async (id) => {
+    const response = await MacroCalculatorApi.getRecipe(id);
     return response.data;
   }
 );
 
 export const addRecipe = createAsyncThunk(
   "recipes/addRecipe",
-  async (recipe, profileId) => {
-    const response = await MacroCalculatorApi.addRecipe(recipe, profileId);
+  async (recipe) => {
+    const response = await MacroCalculatorApi.addRecipe(recipe);
     return response.data;
   }
 );
 
 export const updateRecipe = createAsyncThunk(
   "recipes/updateRecipe",
-  async (recipe, profileId) => {
-    const response = await MacroCalculatorApi.updateRecipe(recipe, profileId);
+  async (recipe) => {
+    const response = await MacroCalculatorApi.updateRecipe(recipe);
     return response.data;
   }
 );
 
 export const deleteRecipe = createAsyncThunk(
   "recipes/deleteRecipe",
-  async (id, profileId) => {
-    await MacroCalculatorApi.deleteRecipe(id, profileId);
+  async (id) => {
+    await MacroCalculatorApi.deleteRecipe(id);
     return id;
   }
 );

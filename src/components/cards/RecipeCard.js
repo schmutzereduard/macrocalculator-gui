@@ -1,8 +1,14 @@
 import React, { useReducer } from "react";
 import "./RecipeCard.css";
+import {useDispatch} from "react-redux";
+import {deleteRecipe} from "../../store/recipesSlice";
+import useModals from "../../hooks/useModals";
+import ReactModal from "react-modal";
+import Recipe from "../modal/Recipe";
 
 function RecipeCard({ recipe }) {
 
+    const { modals, modalControls } = useModals();
     const buttonsState = {
         green: "edit",
         red: "delete"
@@ -10,22 +16,24 @@ function RecipeCard({ recipe }) {
     const buttonsReducer = (state, action) => {
 
         switch (action.type) {
-            case "edit":
-                return {green: "save", red: "cancel"};
-            case "save":
+            case "edit": {
+                modalControls.openModal("editRecipe");
                 return {green: "edit", red: "delete"};
+            }
             case "delete":
                 return {green: "confirm", red: "cancel"};
-            case "confirm":
+            case "confirm": {
+                generalDispatch(deleteRecipe(recipe.id));
                 return {green: "edit", red: "delete"};
+            }
             case "cancel":
                 return {green: "edit", red: "delete"};
             default:
                 return {green: "edit", red: "delete"};
         }
     };
+    const generalDispatch = useDispatch();
     const [state, dispatch] = useReducer(buttonsReducer, buttonsState);
-
     const computeButtonName = (name) => {
         return name
             .split("")
@@ -70,6 +78,15 @@ function RecipeCard({ recipe }) {
                     <span>{recipe.totalCalories} kcal</span>
                 </div>
             </div>
+            <ReactModal
+                isOpen={modals.editRecipe?.isOpen}
+                onClose={() => {modalControls.closeModal("editRecipe")}}
+            >
+                   <Recipe
+                       recipe={recipe}
+                       onClose={() => {modalControls.closeModal("editRecipe")}}
+                   />
+            </ReactModal>
         </div>
     );
 }
