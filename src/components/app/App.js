@@ -12,6 +12,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import Sidebar from "../sidebar/Sidebar";
 import ErrorBoundary from "../../error/ErrorBoundary";
 import './App.css';
+import Recipe from "../pages/Recipe";
 
 function App() {
 
@@ -61,6 +62,14 @@ function App() {
                                     <Recipes />
                                 </ProtectedRoute>
                             } />
+                        <Route
+                            path="/recipe/:id"
+                            element={
+                                <ProtectedRoute>
+                                    <Recipe />
+                                </ProtectedRoute>
+                            }
+                            />
                         <Route
                             path="/journals"
                             element={

@@ -1,0 +1,85 @@
+.food-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Center-align the cards */
+    gap: 20px; /* Add space between the cards */
+    padding: 20px; /* Add padding around the entire list */
+}
+
+.recipe-name {
+    background-color: black;
+    color: white;
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 10px;
+    border: 2px solid white;
+    padding: 5px;
+    border-radius: 8px;
+    height: 45px;
+    text-align: center;
+}
+
+.stats-bar {
+    display: flex;
+    padding: 10px;
+    justify-content: space-between;
+    align-items: center;
+    background-color: black;
+    border-radius: 8px;
+    border: 2px solid white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Add shadow for better aesthetics */
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Add hover effects */
+}
+
+.stats-bar .stats{
+    display: flex;
+    gap: 20px;
+    font-size: large;
+    font-weight: bold;
+}
+
+.stats-bar:hover {
+    transform: scale(1.05); /* Slightly enlarge on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); /* Enhance shadow on hover */
+}
+
+.stats-bar .controls {
+    display: flex;
+    gap: 20px;
+}
+
+.back {
+    margin: 0; /* Remove extra top/bottom margin */
+    font-size: 1.5em; /* Keep the same font size */
+    border: 2px solid white;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: red;
+    color: white;
+    cursor: pointer;
+}
+
+.save {
+    margin: 0; /* Remove extra top/bottom margin */
+    margin-right: 10px;
+    font-size: 1.5em; /* Keep the same font size */
+    border: 2px solid white;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: green;
+    color: white;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .food-list {
+        flex-direction: column; /* Stack cards vertically on small screens */
+        align-items: center;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1200px) {
+    .food-list {
+        justify-content: space-evenly; /* Even spacing for medium screens */
+    }
+}

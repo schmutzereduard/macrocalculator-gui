@@ -2,13 +2,12 @@ import React, { useReducer } from "react";
 import "./RecipeCard.css";
 import {useDispatch} from "react-redux";
 import {deleteRecipe} from "../../store/recipesSlice";
-import useModals from "../../hooks/useModals";
-import ReactModal from "react-modal";
-import Recipe from "../modal/Recipe";
+import {useNavigate} from "react-router-dom";
 
 function RecipeCard({ recipe }) {
 
-    const { modals, modalControls } = useModals();
+    const navigate = useNavigate();
+
     const buttonsState = {
         green: "edit",
         red: "delete"
@@ -17,7 +16,8 @@ function RecipeCard({ recipe }) {
 
         switch (action.type) {
             case "edit": {
-                modalControls.openModal("editRecipe");
+                console.log("navigating...");
+                navigate(`/recipe/${recipe.id}`);
                 return {green: "edit", red: "delete"};
             }
             case "delete":
@@ -78,15 +78,6 @@ function RecipeCard({ recipe }) {
                     <span>{recipe.totalCalories} kcal</span>
                 </div>
             </div>
-            <ReactModal
-                isOpen={modals.editRecipe?.isOpen}
-                onClose={() => {modalControls.closeModal("editRecipe")}}
-            >
-                   <Recipe
-                       recipe={recipe}
-                       onClose={() => {modalControls.closeModal("editRecipe")}}
-                   />
-            </ReactModal>
         </div>
     );
 }
