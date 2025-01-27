@@ -1,0 +1,127 @@
+.food-card {
+    position: relative;
+    width: 250px; /* Fixed width for consistent size */
+    height: 195px;
+    border: 2px solid white;
+    padding: 10px;
+    background-color: black;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Add shadow for better aesthetics */
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Add hover effects */
+}
+
+.food-card:hover {
+    transform: scale(1.05); /* Slightly enlarge on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); /* Enhance shadow on hover */
+}
+
+.food-card-header {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    border: 2px solid white;
+    padding: 5px;
+    border-radius: 4px;
+    height: 45px;
+}
+
+.food-card-header .editable-input {
+    background: black;
+    color: white;
+    font-size: 1em;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+    border: none;
+}
+
+.food-card-body p {
+    margin: 5px 0;
+    font-size: 0.9em;
+}
+
+.food-card-body .editable-input {
+    background: black;
+    color:white;
+    border: none;
+    width: 20%;
+    text-align: right;
+    font-size: 0.9em;
+    margin-right: 5px;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+}
+
+.food-card-footer {
+    margin-top: 10px;
+    border-top: 2px solid white;
+    padding-top: 10px;
+    font-size: 0.85em;
+}
+
+.macro-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0;
+}
+
+.macro-row span {
+    flex: 1;
+    text-align: center;
+}
+
+.slide-button{
+    position: absolute;
+    top: 10%;
+    bottom: 10%; /* Make the button vertically aligned */
+    width: 30px;
+    line-height: 20px;
+    text-align: center;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: white;
+    background-color: green;
+    border-radius: 8px; /* Rounded corners */
+    border: solid 2px white;
+    cursor: pointer;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0; /* Hidden initially */
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-button {
+    left: 0;
+    background-color: green;
+}
+
+.delete-button {
+    right: 0;
+    background-color: red;
+}
+
+.food-card:hover .edit-button {
+    transform: translateX(-40px); /* Slide outward to the left */
+    opacity: 1; /* Make visible */
+}
+
+.food-card:hover .delete-button {
+    transform: translateX(40px); /* Slide outward to the right */
+    opacity: 1; /* Make visible */
+}
+
+@media (max-width: 768px) {
+
+    .food-card {
+        width: 90%; /* Use most of the screen width */
+    }
+}

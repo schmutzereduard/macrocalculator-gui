@@ -1,28 +1,9 @@
-import React, { useReducer, useState } from "react";
+import React, { useState } from "react";
 import "./RecipeFoodCard.css";
 
-function RecipeFoodCard({ quantity, food }) {
-
-    const [editableQuantity, setEditableQuantity] = useState(quantity);
-
-    const buttonsState = {
-        green: "",
-        red: "delete",
-    };
-    const buttonsReducer = (state, action) => {
-
-        switch (action.type) {
-            case "delete":
-                return {green: "confirm", red: "cancel"};
-            case "confirm":
-                return {green: "", red: "delete"};
-            case "cancel":
-                return {green: "", red: "delete"};
-            default:
-                return {green: "", red: "delete"};
-        }
-    };
-    const [state, dispatch] = useReducer(buttonsReducer, buttonsState);
+function KitchenFoodCard({ food, onAdd }) {
+    
+    const [editableQuantity, setEditableQuantity] = useState("0");
 
     const computeButtonName = (name) => {
         return name
@@ -41,20 +22,14 @@ function RecipeFoodCard({ quantity, food }) {
 
     return food && (
         <div className="recipe food-card">
-            {state.green && <button
-                name={state.green}
-                onClick={(event) => dispatch({ type: event.target.name })}
+            {editableQuantity >= 1 && <button
+                name="add"
+                value={editableQuantity}
+                onClick={(event) => onAdd(editableQuantity, food)}
                 className="slide-button edit-button"
             >
-                {computeButtonName(state.green)}
+                {computeButtonName("add")}
             </button>}
-            <button
-                onClick={(event) => dispatch({ type: event.target.name })}
-                name={state.red}
-                className="slide-button delete-button"
-            >
-                {computeButtonName(state.red)}
-            </button>
             <div className="recipe food-card-header">
                 {food.name}
             </div>
@@ -62,9 +37,9 @@ function RecipeFoodCard({ quantity, food }) {
                 <input
                     type="number"
                     name="quantity"
-                    defaultValue={100}
+                    defaultValue={0}
                     value={editableQuantity}
-                    onChange={(e) => setEditableQuantity(e.target.value)}
+                    onChange={(event) => setEditableQuantity(event.target.value)}
                     className="editable-input"
                 />g
                 <p>{food.type}</p>
@@ -83,4 +58,4 @@ function RecipeFoodCard({ quantity, food }) {
     );
 }
 
-export default RecipeFoodCard;
+export default KitchenFoodCard;
