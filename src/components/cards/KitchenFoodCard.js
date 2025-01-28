@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 import "./RecipeFoodCard.css";
 
-function KitchenFoodCard({ food, onAdd }) {
+function KitchenFoodCard({ food, quantity, onAdd, setFoodQuantity }) {
     
-    const [editableQuantity, setEditableQuantity] = useState("0");
+    const [editableQuantity, setEditableQuantity] = useState(quantity);
 
     const computeButtonName = (name) => {
         return name
@@ -19,6 +19,13 @@ function KitchenFoodCard({ food, onAdd }) {
     const computeMacro = (value) => {
         return editableQuantity / 100 * value;
     };
+
+    const handleQuantityChange = (quantity) => {
+        setFoodQuantity({
+            [food.id]: quantity
+        });
+        setEditableQuantity(quantity);
+    }
 
     return food && (
         <div className="recipe food-card">
@@ -39,7 +46,7 @@ function KitchenFoodCard({ food, onAdd }) {
                     name="quantity"
                     defaultValue={0}
                     value={editableQuantity}
-                    onChange={(event) => setEditableQuantity(event.target.value)}
+                    onChange={(event) => handleQuantityChange(event.target.value)}
                     className="editable-input"
                 />g
                 <p>{food.type}</p>

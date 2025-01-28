@@ -19,7 +19,6 @@ function Recipe() {
     const dispatch = useDispatch();
     const { id } = useParams();
     const { loading, selectedItem: recipe } = useSelector(state => state.recipes);
-    const { loading: foodsLoading, items: foods } = useSelector(state => state.foods);
     const { modals, modalControls } = useModals();
 
     useEffect(() => {
@@ -69,28 +68,72 @@ function Recipe() {
             </div>
             <Kitchen
                 editableRecipe={editableRecipe}
-                foods={foods}
             />
 
         </div>
     );
 }
 
-function Kitchen ({ editableRecipe, foods }) {
+function Kitchen ({ editableRecipe }) {
 
+    const [foodsToQuantity, setFoodsToQuantity] = useState({});
+    const { loading: foodsLoading, items: foods } = useSelector(state => state.foods);
     const { pageConfig, handlePageChange, handleItemsPerPageChange, paginate } = usePagination();
     const { filterConfig, handleFilterChange, filter } = useFiltering();
 
-    const mapFoodsToName = () => {
+    const existingRecipeFoods = () => {
         return editableRecipe.recipeFoods.map(recipeFood => recipeFood.food.name);
     };
 
-    const newFoods = foods.filter(food => !mapFoodsToName().includes(food.name));
+    const newFoods = foods.filter(food => !existingRecipeFoods().includes(food.name));
     const filteredFoods = filter(newFoods);
     const paginatedFoods = paginate(filteredFoods);
 
-    return (
-        <div className="kitchen">
+    const setFoodQuantity = (food) => {
+        setFoodsToQuantity((prev) => ({
+            ...prev,
+            ...food
+        }));
+    };
+
+    const [stats, setStats] = useState({
+        carbs: 0,
+        protein: 0,
+        calories: 0,
+        fat: 0,
+        weight: 0,
+    });
+
+    useEffect(() => {
+        const calculateStats = () => {
+            const newStats = {
+                carbs: 0,
+                protein: 0,
+                calories: 0,
+                fat: 0,
+                weight: 0,
+            };
+
+            for (let foodId in foodsToQuantity) {
+                const foodQuantity = foodsToQuantity[foodId];
+                if (foodQuantity > 0) {
+                    const food = foods.find(food => food.id === parseInt(foodId));
+                    newStats.weight += parseInt(foodQuantity);
+                    newStats.carbs += (foodQuantity / 100) * food.carbs;
+                    // newStats.protein += foodQuantity / 100 * food.protein;
+                    newStats.calories += (foodQuantity / 100) * food.calories;
+                    // newStats.fat += foodQuantity / 100 * food.fat;
+                }
+            }
+
+            setStats(newStats);
+        };
+
+        calculateStats();
+    }, [foodsToQuantity, foods]);
+
+    return (foodsLoading ? <Loading />
+        : (<div className="kitchen">
             <div className="kitchen stats-bar">
                 <FoodsHeader
                     filterConfig={filterConfig}
@@ -99,16 +142,17 @@ function Kitchen ({ editableRecipe, foods }) {
                     handlePageChange={handlePageChange}
                     handleItemsPerPageChange={handleItemsPerPageChange}
                 />
-                <div className="stats">
-                    <p>{editableRecipe.totalCarbs} carbs</p>
+                <div className="stats"
+                >
+                    <p>{stats.carbs} carbs</p>
                     <p> | </p>
-                    <p>{0} protein</p>
+                    <p>{stats.protein} protein</p>
                     <p> | </p>
-                    <p>{0} fat</p>
+                    <p>{stats.fat} fat</p>
                     <p> | </p>
-                    <p>{editableRecipe.totalCalories} kcal</p>
+                    <p>{stats.calories} kcal</p>
                     <p> | </p>
-                    <p>{editableRecipe.totalWeight} g</p>
+                    <p>{stats.weight} g</p>
                 </div>
                 <Pagination
                     currentPage={pageConfig.currentPage}
@@ -121,11 +165,14 @@ function Kitchen ({ editableRecipe, foods }) {
                     paginatedFoods
                         .map((food) => (
                     <KitchenFoodCard
+                        key={food.id}
                         food={food}
+                        setFoodQuantity={setFoodQuantity}
+                        quantity={foodsToQuantity[food.id] || 0}
                     />
                 ))}
             </div>
-        </div>
+        </div>)
     );
 }
 
