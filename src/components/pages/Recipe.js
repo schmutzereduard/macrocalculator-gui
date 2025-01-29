@@ -1,20 +1,25 @@
-import {useParams} from "react-router-dom";
-import {useDispatch, useSelector} from "react-redux";
 import React, {useEffect, useState} from "react";
-import {fetchRecipe} from "../../store/recipesSlice";
+import {useDispatch, useSelector} from "react-redux";
+import {useNavigate, useParams} from "react-router-dom";
+import useModals from "../../hooks/useModals";
+import useFiltering from "../../hooks/useFiltering";
+import {addRecipe, fetchRecipe, updateRecipe} from "../../store/recipesSlice";
+import {fetchFoods} from "../../store/foodsSlice";
 import Loading from "../misc/Loading";
 import RecipeFoodCard from "../cards/RecipeFoodCard";
-import "./Recipe.css";
+import KitchenFoodCard from "../cards/KitchenFoodCard";
 import usePagination from "../../hooks/usePagination";
 import Pagination from "../misc/Pagination";
-import {fetchFoods} from "../../store/foodsSlice";
 import PerPage from "../misc/PerPage";
-import useFiltering from "../../hooks/useFiltering";
-import useModals from "../../hooks/useModals";
-import KitchenFoodCard from "../cards/KitchenFoodCard";
+import "./Recipe.css";
+import {setElement} from "react-modal/lib/helpers/ariaAppHider";
+import FoodFilter from "../modal/FoodFilter";
+import ReactModal from "react-modal";
+import SaveChanges from "../modal/SaveChanges";
 
 function Recipe() {
 
+    const navigate = useNavigate();
     const [editableRecipe, setEditableRecipe] = useState(null);
     const dispatch = useDispatch();
     const { id } = useParams();
@@ -35,6 +40,108 @@ function Recipe() {
         }
     }, [recipe]);
 
+    const [stats, setStats] = useState({
+        carbs: 0,
+        protein: 0,
+        calories: 0,
+        fat: 0,
+        weight: 0,
+    });
+
+    useEffect(() => {
+        if (editableRecipe != null) {
+            const newStats = {
+                carbs: 0,
+                protein: 0,
+                calories: 0,
+                fat: 0,
+                weight: 0,
+            };
+
+            editableRecipe.recipeFoods.forEach(recipeFood => {
+                const quantity = recipeFood.quantity;
+                const food = recipeFood.food;
+                newStats.weight += parseInt(quantity);
+                newStats.carbs += (quantity / 100) * food.carbs;
+                // newStats.protein += foodQuantity / 100 * food.protein;
+                newStats.calories += (quantity / 100) * food.calories;
+                // newStats.fat += foodQuantity / 100 * food.fat;
+            });
+
+            setStats(newStats);
+        }
+    }, [editableRecipe]);
+
+    const recipeValid = () => {
+
+        return editableRecipe
+            && editableRecipe.name;
+    };
+
+    const recipeChanged = () => {
+
+        for (let key in editableRecipe) {
+            if (editableRecipe[key] !== recipe[key]) return true;
+        }
+        return false;
+    };
+
+    const handleAddFood = (quantity, food) => {
+        const newFood = {
+            quantity: quantity,
+            food: food,
+        }
+        const recipeFoods = [
+            ...editableRecipe.recipeFoods,
+            newFood
+        ]
+
+        setEditableRecipe({
+            ...editableRecipe,
+            recipeFoods: recipeFoods
+        });
+    };
+
+    const handleDeleteFood = (foodId) => {
+        const recipeFoods = editableRecipe.recipeFoods.filter(recipeFood => recipeFood.food.id !== foodId);
+        setEditableRecipe({
+            ...editableRecipe,
+            recipeFoods: recipeFoods
+        });
+    };
+
+    const handleSave = () => {
+
+        if (recipeChanged()) {
+            onSave();
+        }
+    };
+
+    const handleBack = () => {
+
+        if (recipeChanged() && recipeValid()) {
+            modalControls.openModal("saveChanges");
+        } else {
+            onExit();
+        }
+    };
+
+    const onSave = () => {
+
+        if (!recipe.id){
+            dispatch(addRecipe(editableRecipe));
+        } else {
+            dispatch(updateRecipe(editableRecipe));
+        }
+        navigate("/recipes");
+    };
+
+    const onExit = () => {
+
+        modalControls.closeModal("saveChanges");
+        navigate("/recipes");
+    };
+
 
     return loading ? (
                 <Loading />
@@ -43,19 +150,19 @@ function Recipe() {
             <div className="recipe stats-bar">
                 <input className="recipe-name" value={editableRecipe.name} />
                 <div className="stats">
-                    <p>{editableRecipe.totalCarbs} carbs</p>
+                    <p>{stats.carbs} carbs</p>
                     <p> | </p>
-                    <p>{0} protein</p>
+                    <p>{stats.protein} protein</p>
                     <p> | </p>
-                    <p>{0} fat</p>
+                    <p>{stats.fat} fat</p>
                     <p> | </p>
-                    <p>{editableRecipe.totalCalories} kcal</p>
+                    <p>{stats.calories} kcal</p>
                     <p> | </p>
-                    <p>{editableRecipe.totalWeight} g</p>
+                    <p>{stats.weight} g</p>
                 </div>
                 <div className="controls">
-                    <button className="back">Back</button>
-                    <button className="save">Save</button>
+                    <button onClick={handleBack} className="back">Back</button>
+                    <button onClick={handleSave} className="save">Save</button>
                 </div>
             </div>
             <div className="recipe food-list">
@@ -63,18 +170,41 @@ function Recipe() {
                     <RecipeFoodCard
                         quantity={recipeFood.quantity}
                         food={recipeFood.food}
+                        onDelete={handleDeleteFood}
                     />
                 ))}
             </div>
             <Kitchen
                 editableRecipe={editableRecipe}
+                onAddFood={handleAddFood}
             />
-
+            <ReactModal
+                isOpen={modals.saveChanges?.isOpen}
+                onRequestClose={onExit}
+                style={{
+                    overlay: {
+                        backgroundColor: "transparent" // Remove grey background
+                    },
+                    content: {
+                        background: "none", // Ensures no default modal styles
+                        border: "none", // Removes any unwanted modal border
+                        inset: "unset", // Prevents ReactModal from forcing a layout
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center"
+                    }
+                }}
+            >
+                <SaveChanges
+                    onSave={onSave}
+                    onExit={onExit}
+                />
+            </ReactModal>
         </div>
     );
 }
 
-function Kitchen ({ editableRecipe }) {
+function Kitchen ({ editableRecipe, onAddFood }) {
 
     const [foodsToQuantity, setFoodsToQuantity] = useState({});
     const { loading: foodsLoading, items: foods } = useSelector(state => state.foods);
@@ -132,6 +262,15 @@ function Kitchen ({ editableRecipe }) {
         calculateStats();
     }, [foodsToQuantity, foods]);
 
+    const onAdd = (quantity, food) => {
+        setFoodsToQuantity((prev) => {
+            const newFoodsToQuantity = { ...prev };
+            delete newFoodsToQuantity[food.id]; // Remove the food by ID
+            return newFoodsToQuantity;
+        });
+      onAddFood(quantity, food);
+    };
+
     return (foodsLoading ? <Loading />
         : (<div className="kitchen">
             <div className="kitchen stats-bar">
@@ -141,6 +280,7 @@ function Kitchen ({ editableRecipe }) {
                     handleFilterChange={handleFilterChange}
                     handlePageChange={handlePageChange}
                     handleItemsPerPageChange={handleItemsPerPageChange}
+                    filteredFoods={filteredFoods}
                 />
                 <div className="stats"
                 >
@@ -169,6 +309,7 @@ function Kitchen ({ editableRecipe }) {
                         food={food}
                         setFoodQuantity={setFoodQuantity}
                         quantity={foodsToQuantity[food.id] || 0}
+                        onAdd={onAdd}
                     />
                 ))}
             </div>
@@ -181,7 +322,7 @@ function FoodsHeader({
                          pageConfig,
                          handleFilterChange,
                          handlePageChange,
-                         handleItemsPerPageChange
+                         handleItemsPerPageChange, filteredFoods
                      }) {
 
     const { modals, modalControls } = useModals();
@@ -213,6 +354,16 @@ function FoodsHeader({
             >
                 Filter
             </button>
+
+            <ReactModal isOpen={modals.filterFoods?.isOpen}>
+                <FoodFilter
+                    filterConfig={filterConfig}
+                    handleFilterChange={handleFilterChange}
+                    handlePageChange={handlePageChange}
+                    totalItems={filteredFoods.length}
+                    onClose={() => modalControls.closeModal("filterFoods")}
+                />
+            </ReactModal>
         </div>
     );
 }

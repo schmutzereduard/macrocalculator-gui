@@ -1,14 +1,14 @@
-function SaveChanges({ onSave, onExit }) {
+import "./SaveChanges.css";
 
+function SaveChanges({ onSave, onExit }) {
     return (
-        <div>
-            <h2>Save Changes</h2>
-            <p>You have unsaved changes. Do you want to save them and exit?</p>
+        <div className="save-modal">
+            <h2 className="modal-title">Save Changes</h2>
+            <p className="modal-text">You have unsaved changes</p>
+            <p className="modal-text">Do you want to save them and exit?</p>
             <div className="modal-buttons">
-                <div>
-                    <button onClick={onSave}>Save</button>
-                    <button onClick={onExit}>Exit</button>
-                </div>
+                <button className="save" onClick={onSave}>Save</button>
+                <button className="exit" onClick={onExit}>Exit</button>
             </div>
         </div>
     );

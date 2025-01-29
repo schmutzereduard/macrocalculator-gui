@@ -1,7 +1,7 @@
 import React, { useReducer, useState } from "react";
 import "./RecipeFoodCard.css";
 
-function RecipeFoodCard({ quantity, food }) {
+function RecipeFoodCard({ quantity, food, onDelete }) {
 
     const [editableQuantity, setEditableQuantity] = useState(quantity);
 
@@ -14,8 +14,10 @@ function RecipeFoodCard({ quantity, food }) {
         switch (action.type) {
             case "delete":
                 return {green: "confirm", red: "cancel"};
-            case "confirm":
+            case "confirm": {
+                onDelete(food.id);
                 return {green: "", red: "delete"};
+            }
             case "cancel":
                 return {green: "", red: "delete"};
             default:
