@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchRecipes } from '../../store/recipesSlice';
+import {fetchRecipes} from '../../store/recipesSlice';
 import Pagination from '../misc/Pagination';
 import Loading from '../misc/Loading';
 import PerPage from '../misc/PerPage';
@@ -12,6 +12,7 @@ import "./Recipes.css";
 import PlusCard from "../cards/PlusCard";
 import ReactModal from "react-modal";
 import RecipeFilter from "../modal/RecipeFilter";
+import {useNavigate} from "react-router-dom";
 
 function Recipes() {
 
@@ -42,7 +43,7 @@ function Recipes() {
                     />
                     <Pagination
                         currentPage={pageConfig.currentPage}
-                        totalPages={Math.ceil(recipes.length / pageConfig.itemsPerPage)}
+                        totalPages={Math.ceil(filteredRecipes.length / pageConfig.itemsPerPage)}
                         onPageChange={handlePageChange}
                     />
                     <RecipesList recipes={paginatedRecipes} />
@@ -102,9 +103,11 @@ function RecipesHeader({
 
 function RecipesList({ recipes }) {
 
+    const navigate = useNavigate();
+
     return (
         <div className="recipes-list">
-            <PlusCard onClick={null} />
+            <PlusCard onClick={() => navigate("/recipe/0")} />
             {recipes.map((recipe) => (
                 <RecipeCard
                     key={recipe.id}

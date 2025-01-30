@@ -44,20 +44,20 @@
     font-size: 0.9em;
 }
 
-.food-card-body .editable-input {
-    background: black;
-    color:white;
-    border: none;
-    width: 20%;
-    text-align: right;
-    font-size: 0.9em;
-    margin-right: 5px;
-}
+    .food-card-body .editable-input {
+        background: black;
+        color:white;
+        border: none;
+        width: 20%;
+        text-align: right;
+        font-size: 0.9em;
+        margin-right: 5px;
+    }
 
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-}
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+    }
 
 .food-card-footer {
     margin-top: 10px;

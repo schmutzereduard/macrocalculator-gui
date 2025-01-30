@@ -20,6 +20,7 @@
 }
 
 .stats-bar {
+    overflow: auto;
     width: 95%;
     display: flex;
     padding: 10px;

@@ -3,7 +3,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
 import useModals from "../../hooks/useModals";
 import useFiltering from "../../hooks/useFiltering";
-import {addRecipe, fetchRecipe, updateRecipe} from "../../store/recipesSlice";
+import {addNewRecipe, addRecipe, fetchRecipe, updateRecipe} from "../../store/recipesSlice";
 import {fetchFoods} from "../../store/foodsSlice";
 import Loading from "../misc/Loading";
 import RecipeFoodCard from "../cards/RecipeFoodCard";
@@ -12,7 +12,6 @@ import usePagination from "../../hooks/usePagination";
 import Pagination from "../misc/Pagination";
 import PerPage from "../misc/PerPage";
 import "./Recipe.css";
-import {setElement} from "react-modal/lib/helpers/ariaAppHider";
 import FoodFilter from "../modal/FoodFilter";
 import ReactModal from "react-modal";
 import SaveChanges from "../modal/SaveChanges";
@@ -27,10 +26,12 @@ function Recipe() {
     const { modals, modalControls } = useModals();
 
     useEffect(() => {
-        if (id) {
+        if (id !== "0") {
             dispatch(fetchRecipe(id));
-            dispatch(fetchFoods());
+        } else if (id === "0") {
+            dispatch(addNewRecipe());
         }
+        dispatch(fetchFoods());
     }, [dispatch, id]);
 
 
@@ -126,12 +127,12 @@ function Recipe() {
         }
     };
 
-    const onSave = () => {
+    const onSave = async () => {
 
         if (!recipe.id){
-            dispatch(addRecipe(editableRecipe));
+            await dispatch(addRecipe(editableRecipe));
         } else {
-            dispatch(updateRecipe(editableRecipe));
+            await dispatch(updateRecipe(editableRecipe));
         }
         navigate("/recipes");
     };
@@ -148,7 +149,12 @@ function Recipe() {
             ) : ( editableRecipe &&
         <div>
             <div className="recipe stats-bar">
-                <input className="recipe-name" value={editableRecipe.name} />
+                <input
+                    name="name"
+                    className="recipe-name"
+                    value={editableRecipe.name}
+                    onChange={(e) => setEditableRecipe((prev) => ({...prev, [e.target.name]: e.target.value}))}
+                />
                 <div className="stats">
                     <p>{stats.carbs} carbs</p>
                     <p> | </p>
