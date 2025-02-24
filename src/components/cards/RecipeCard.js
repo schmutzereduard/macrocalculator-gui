@@ -16,7 +16,6 @@ function RecipeCard({ recipe }) {
 
         switch (action.type) {
             case "edit": {
-                console.log("navigating...");
                 navigate(`/recipe/${recipe.id}`);
                 return {green: "edit", red: "delete"};
             }

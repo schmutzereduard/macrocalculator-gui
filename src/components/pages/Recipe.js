@@ -4,7 +4,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import useModals from "../../hooks/useModals";
 import useFiltering from "../../hooks/useFiltering";
 import {addNewRecipe, addRecipe, fetchRecipe, updateRecipe} from "../../store/recipesSlice";
-import {fetchFoods} from "../../store/foodsSlice";
+import {fetchFoods, fetchFoodTypes} from "../../store/foodsSlice";
 import Loading from "../misc/Loading";
 import RecipeFoodCard from "../cards/RecipeFoodCard";
 import KitchenFoodCard from "../cards/KitchenFoodCard";
@@ -32,6 +32,7 @@ function Recipe() {
             dispatch(addNewRecipe());
         }
         dispatch(fetchFoods());
+        dispatch(fetchFoodTypes());
     }, [dispatch, id]);
 
 
@@ -111,6 +112,21 @@ function Recipe() {
         });
     };
 
+    const handleEditFood = (quantity, food) => {
+        setEditableRecipe((prevState) => {
+            const oldFood = prevState.recipeFoods.find(recipeFood => recipeFood.food.id === food.id);
+            const newFood = {
+                ...oldFood,
+                quantity: quantity,
+            }
+            const updatedFoods = prevState.recipeFoods.map(recipeFood => recipeFood.food.id === oldFood.food.id ? newFood: recipeFood);
+            return {
+                ...prevState,
+                recipeFoods: updatedFoods
+            };
+        });
+    };
+
     const handleSave = () => {
 
         if (recipeChanged()) {
@@ -175,6 +191,7 @@ function Recipe() {
                 {editableRecipe.recipeFoods.map((recipeFood) => (
                     <RecipeFoodCard
                         quantity={recipeFood.quantity}
+                        onQuantityUpdate={handleEditFood}
                         food={recipeFood.food}
                         onDelete={handleDeleteFood}
                     />

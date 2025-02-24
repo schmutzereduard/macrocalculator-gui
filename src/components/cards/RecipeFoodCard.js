@@ -1,7 +1,7 @@
 import React, { useReducer, useState } from "react";
 import "./RecipeFoodCard.css";
 
-function RecipeFoodCard({ quantity, food, onDelete }) {
+function RecipeFoodCard({ food, quantity, onQuantityUpdate, onDelete }) {
 
     const [editableQuantity, setEditableQuantity] = useState(quantity);
 
@@ -41,6 +41,12 @@ function RecipeFoodCard({ quantity, food, onDelete }) {
         return editableQuantity / 100 * value;
     };
 
+    const handleQuantityUpdate = (event) => {
+        const newQuantity = event.target.value;
+        setEditableQuantity(newQuantity);
+        onQuantityUpdate(newQuantity, food);
+    }
+
     return food && (
         <div className="recipe food-card">
             {state.green && <button
@@ -66,7 +72,7 @@ function RecipeFoodCard({ quantity, food, onDelete }) {
                     name="quantity"
                     defaultValue={100}
                     value={editableQuantity}
-                    onChange={(e) => setEditableQuantity(e.target.value)}
+                    onChange={handleQuantityUpdate}
                     className="editable-input"
                 />g
                 <p>{food.type}</p>
